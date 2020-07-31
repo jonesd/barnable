@@ -23,10 +23,10 @@ class EconomicQuantityNetwork(name: String) {
         linksMap[Pair(from.name, to.name)] = link
         return link
     }
-    fun addQuantity(name: String): EconomicQuantity {
+    fun addQuantity(name: String, actor: Actor): EconomicQuantity {
         val added = directedGraph.addVertex(name)
         require(added)
-        val quantity = EconomicQuantity(name)
+        val quantity = EconomicQuantity(name, actor)
         quantities.add(quantity)
         quantitiesMap[name] = quantity
         return quantity
@@ -87,15 +87,21 @@ fun transformQuantityValue(value: QuantityValue, sign: LinkSign): QuantityValue 
     }
 }
 
-class EconomicQuantity(val name: String) {
+class Actor(val name: String) {
     override fun toString(): String {
-        return "EconomicQuantity($name)"
+        return "$name"
+    }
+}
+
+class EconomicQuantity(val name: String, val actor: Actor) {
+    override fun toString(): String {
+        return "$name by $actor"
     }
 }
 
 class EconomicQuantityValue(val quantity: EconomicQuantity, val value: QuantityValue) {
     override fun toString(): String {
-        return "$quantity=$value"
+        return "$value $quantity"
     }
 }
 
