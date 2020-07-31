@@ -10,7 +10,10 @@ class EconomicQuantityNetwork(name: String) {
     val linksMap = mutableMapOf<Pair<String,String>, QuantityLink>()
 
     var directedGraph: Graph<String, DefaultEdge> = DefaultDirectedGraph<String, DefaultEdge>(DefaultEdge::class.java)
-    //var g: Graph<String, DefaultEdge> = SimpleGraph<String, DefaultEdge>(DefaultEdge::class.java)
+
+    fun findQuantity(name: String): EconomicQuantity {
+        return quantities.find { it.name == name } ?: throw IllegalArgumentException("Not found: $name")
+    }
 
     fun addLink(from: EconomicQuantity, to: EconomicQuantity, sign: LinkSign): QuantityLink {
         require(from != to)
@@ -28,19 +31,37 @@ class EconomicQuantityNetwork(name: String) {
         quantitiesMap.put(name, quantity)
         return quantity
     }
-    fun run(source: EconomicQuantity, result: EconomicQuantity, value: QuantityValue): QuantityValue {
+
+    fun causalChainValue(sourceValue: QuantityValue, source: EconomicQuantity, result: EconomicQuantity): QuantityValue {
+        val path = causalChain(sourceValue, source, result)
+        return path.last().value
+    }
+
+    fun causalChain(sourceValue: QuantityValue, source: EconomicQuantity, result: EconomicQuantity): List<EconomicQuantityValue> {
         val path = shortestPath(source, result)
-        return calculateValue(value, path)
+        return calculatePathValues(sourceValue, path)
     }
 
-    fun calculateValue(startingValue: QuantityValue, path: List<QuantityLink>): QuantityValue {
-        return path.fold(startingValue) { currentValue, link -> transformQuantityValue(currentValue, link.sign) }
+    fun calculatePathValues(startingValue: QuantityValue, path: List<EconomicQuantity>): List<EconomicQuantityValue>  {
+        var currentValue = startingValue
+        val linkValues = mapPathToLinks(path).map() {
+            currentValue = transformQuantityValue(currentValue, it.sign)
+            EconomicQuantityValue(it.to, currentValue)}
+        return listOf(EconomicQuantityValue(path[0], startingValue)) + linkValues
     }
 
-    fun shortestPath(source: EconomicQuantity, result: EconomicQuantity): List<QuantityLink> {
+    private fun mapPathToLinks(path: List<EconomicQuantity>): List<QuantityLink> {
+        return path.windowed(2).map { linksMap[Pair(it[0].name, it[1].name)] }.filterNotNull()
+    }
+
+    private fun shortestPath(source: EconomicQuantity, result: EconomicQuantity): List<EconomicQuantity> {
+        val pathNames = shortestPath(source.name, result.name)
+        return pathNames.map { quantitiesMap[it] }.filterNotNull()
+    }
+
+    private fun shortestPath(sourceName: String, destinationName: String): List<String> {
         val dijkstraShortestPath = DijkstraShortestPath(directedGraph)
-        var shortestPath: List<String> = dijkstraShortestPath.getPath(source.name, result.name).getVertexList()
-        return shortestPath.windowed(2).map { linksMap[Pair(it[0], it[1])] }.filterNotNull()
+        return dijkstraShortestPath.getPath(sourceName, destinationName).vertexList
     }
 }
 
@@ -67,9 +88,20 @@ fun transformQuantityValue(value: QuantityValue, sign: LinkSign): QuantityValue 
 }
 
 class EconomicQuantity(val name: String) {
+    override fun toString(): String {
+        return "EconomicQuantity($name)"
+    }
+}
 
+class EconomicQuantityValue(val quantity: EconomicQuantity, val value: QuantityValue) {
+    override fun toString(): String {
+        return "$quantity=$value"
+    }
 }
 
 class QuantityLink(val from: EconomicQuantity, val to: EconomicQuantity, val sign: LinkSign) {
-    
+    override fun toString(): String {
+        val signMarker = if (sign == LinkSign.Positive) '+' else '-'
+        return "${from.name} .${signMarker}.> ${to.name}"
+    }
 }

@@ -24,3 +24,4 @@ Inevitably those American manufacturers would produce more expensive products.
 They would lose sales. Then those manufactures would demand protection against foreign competition.""".trimIndent(),
     "Lance Morrow",
     "U.S.")
+
