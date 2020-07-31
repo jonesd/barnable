@@ -1,3 +1,1 @@
-class Belief(name: String) {
-
-}
+class Belief(name: String)

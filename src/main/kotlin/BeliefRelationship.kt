@@ -1,5 +1,4 @@
-class BeliefRelationship(from: Belief, to: Belief, relationship: BeliefRelationship) {
-}
+class BeliefRelationship(from: Belief, to: Belief, relationship: RelationshipBind)
 
 enum class RelationshipBind(val code: String) {
     Achievement("a"),

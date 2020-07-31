@@ -5,7 +5,7 @@ class EconomicQuantityNetworkTest {
     @Test
     fun `can add quantity to network`() {
         val network = EconomicQuantityNetwork("test")
-        val eq1 = network.addQuantity("eq1");
+        val eq1 = network.addQuantity("eq1")
         assertTrue(network.quantities.contains(eq1)) { "should be able to add quantities to network" }
     }
 

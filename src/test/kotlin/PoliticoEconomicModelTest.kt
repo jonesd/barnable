@@ -1,13 +1,13 @@
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
-public class PoliticoEconomicModelTest {
+class PoliticoEconomicModelTest {
     @Test
     fun `casual chain for low price on p2`() {
         val network = buildTradeRelationshipModel()
         val priceOfP2 = network.findQuantity("Price of P2")
         val earnings = network.findQuantity("Earnings")
-        assertEquals(QuantityValue.Low, network.causalChainValue(QuantityValue.Low, priceOfP2, earnings));
+        assertEquals(QuantityValue.Low, network.causalChainValue(QuantityValue.Low, priceOfP2, earnings))
     }
 
     @Test
@@ -17,7 +17,7 @@ public class PoliticoEconomicModelTest {
         val earnings = network.findQuantity("Earnings")
         val path = network.causalChain(QuantityValue.Low, priceOfP2, earnings)
         print(path)
-        assertEquals(QuantityValue.Low, path.last().value);
+        assertEquals(QuantityValue.Low, path.last().value)
     }
 
     @Test
@@ -27,6 +27,6 @@ public class PoliticoEconomicModelTest {
         val earnings = network.findQuantity("Earnings")
         val path = network.causalChain(QuantityValue.Low, priceOfP2, earnings)
         print(path)
-        assertEquals(QuantityValue.High, path.last().value);
+        assertEquals(QuantityValue.High, path.last().value)
     }
 }
