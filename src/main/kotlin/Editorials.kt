@@ -1,4 +1,5 @@
-class Editorial(content: String, writer: String, country: String)
+class Editorial(val content: String, val writer: String, val country: String) {
+}
 
 val ED_JOBS = Editorial("""
 Recent protectionist measures by the Reagan administration have disappointed us. 
