@@ -1,9 +1,10 @@
 class TextModelBuilder(val content: String) {
     val nlp = EditorialNLP(content)
 
-    fun buildModel(): List<TextSentence> {
+    fun buildModel(): TextModel {
         val sentencesText = nlp.detectSentences()
-        return sentencesText.map { generateSentenceMappings(it) }
+        val sentences = sentencesText.map { generateSentenceMappings(it) }
+        return TextModel(content, sentences)
     }
 
     private fun generateSentenceMappings(sentence: String): TextSentence {
@@ -21,6 +22,11 @@ class TextSentence(val text: String, val elements: List<WordElement>) {
 
 }
 
-class WordElement(val token: String, val tag: String, val lemma: String, val chunk: String)
+class WordElement(val token: String, val tag: String, val lemma: String, val chunk: String) {
+    val missingLemma = "O"
 
-class TextModel()
+    fun lemmaOrToken(): String = if (lemma == missingLemma) token else lemma
+
+}
+
+class TextModel(val content: String, val sentences: List<TextSentence>)

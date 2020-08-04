@@ -6,7 +6,7 @@ class TextModelTest {
 
     @Test
     fun `Build up sentences from source`() {
-        val sentences = TextModelBuilder(source).buildModel()
-        assertEquals(7, sentences.size)
+        val textModel = TextModelBuilder(source).buildModel()
+        assertEquals(7, textModel.sentences.size)
     }
 }
