@@ -6,7 +6,7 @@ class InDepthUnderstandingTest {
     val johnPickedUpTheBallAndPutItInTheBox = "John picked up the ball and dropped it in the box"
 
     @Test
-    fun `Execution Test`() {
+    fun `Example execution`() {
         val textModel = TextModelBuilder(johnPickedUpTheBallAndPutItInTheBox).buildModel()
         val lexicon = buildInDepthUnderstandingLexicon()
 
@@ -35,5 +35,49 @@ class InDepthUnderstandingTest {
         assertEquals("box", (actPtrans.to as PhysicalObject).name)
         val actPtransIntr = actPtrans.instr as ActPropel
         assertEquals("gravity", actPtransIntr.actor.name)
+    }
+
+    @Test
+    fun `Exercise 1 John gave Mary a book`() {
+        val textModel = TextModelBuilder("John gave Mary a book").buildModel()
+        val lexicon = buildInDepthUnderstandingLexicon()
+
+        val textProcessor = TextProcessor(textModel, lexicon)
+        textProcessor.runProcessor()
+
+        assertEquals(1, textProcessor.workingMemory.concepts.size)
+
+        val atrans = textProcessor.workingMemory.concepts[0]
+        assertEquals("ATRANS", atrans.name)
+        val actAtrans = atrans as ActAtrans
+        assertEquals("John", actAtrans.actor.firstName)
+        //FIXME should match TYPE (BOOK)
+        assertEquals("book", (actAtrans.obj as PhysicalObject).name)
+        assertEquals("Mary", actAtrans.to.firstName)
+        assertEquals("John", actAtrans.from.firstName)
+    }
+
+    @Test
+    fun `Exercise 2 Fred told Mary that John eats lobster`() {
+        val textModel = TextModelBuilder("Fred told Mary that John eats lobster").buildModel()
+        val lexicon = buildInDepthUnderstandingLexicon()
+
+        val textProcessor = TextProcessor(textModel, lexicon)
+        textProcessor.runProcessor()
+
+        assertEquals(1, textProcessor.workingMemory.concepts.size)
+
+        val mtrans = textProcessor.workingMemory.concepts[0]
+        assertEquals("MTRANS", mtrans.name)
+        val actMtrans = mtrans as ActMtrans
+        assertEquals("Fred", actMtrans.actor.firstName)
+        assertEquals("Fred", actMtrans.from.firstName)
+        assertEquals("Mary", actMtrans.to.firstName)
+        val ingest = actMtrans.obj as ActIngest
+        //FIXME this what the book has:
+        // assertEquals("Fred", ingest.actor.firstName)
+        // this seems correct:
+        assertEquals("John", ingest.actor.firstName)
+        assertTrue(ingest.obj.isKind("Lobster"))
     }
 }
