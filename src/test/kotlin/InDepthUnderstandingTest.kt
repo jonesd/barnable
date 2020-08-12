@@ -37,6 +37,8 @@ class InDepthUnderstandingTest {
         assertEquals("gravity", actPtransIntr.actor.name)
     }
 
+
+
     @Test
     fun `Exercise 1 John gave Mary a book`() {
         val textModel = TextModelBuilder("John gave Mary a book").buildModel()
@@ -55,6 +57,40 @@ class InDepthUnderstandingTest {
         assertEquals("book", (actAtrans.obj as PhysicalObject).name)
         assertEquals("Mary", actAtrans.to.firstName)
         assertEquals("John", actAtrans.from.firstName)
+    }
+
+    @Test
+    fun `Question who gave mary the book - shared working memory`() {
+        val textModel = TextModelBuilder("John gave Mary a book").buildModel()
+        val lexicon = buildInDepthUnderstandingLexicon()
+
+        val textProcessor = TextProcessor(textModel, lexicon)
+        textProcessor.runProcessor()
+
+        val questionModel = TextModelBuilder("Who gave Mary a book").buildModel()
+        val response = textProcessor.processQuestion(questionModel.sentences[0])
+
+        assertEquals("John", response)
+
+        val questionModel2 = TextModelBuilder("John gave who the book").buildModel()
+        val response2 = textProcessor.processQuestion(questionModel2.sentences[0])
+
+        assertEquals("Mary", response2)
+    }
+
+    @Test
+    fun `Question who gave mary the book - separate working memory`() {
+        val textModel = TextModelBuilder("John gave Mary a book").buildModel()
+        val lexicon = buildInDepthUnderstandingLexicon()
+
+        val textProcessor = TextProcessor(textModel, lexicon)
+        textProcessor.runProcessor()
+
+        val questionModel = TextModelBuilder("Who gave Mary a book").buildModel()
+        val questionProcessor = TextProcessor(textModel, lexicon)
+        val response = questionProcessor.processQuestion(questionModel.sentences[0])
+
+        assertEquals("something", response)
     }
 
     @Test

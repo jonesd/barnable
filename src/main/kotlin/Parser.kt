@@ -4,6 +4,8 @@ import com.google.gson.Gson
 class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
     val workingMemory = WorkingMemory()
     var agenda = Agenda()
+    var qaMode = false
+    var qaMemory = WorkingMemory()
 
     fun runProcessor(): WorkingMemory {
         textModel.sentences.forEach { processSentence(it) }
@@ -12,7 +14,7 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
 
     fun processSentence(sentence: TextSentence) {
         agenda = Agenda()
-        val context = SentenceContext(sentence, workingMemory)
+        val context = SentenceContext(sentence, workingMemory, qaMode)
         sentence.elements.forEachIndexed { index, element ->
             var word = element.token
             val wordHandler = lexicon.findWordHandler(word) ?: WordUnknown(word)
@@ -25,17 +27,62 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
         endSentence(context)
     }
 
-    private fun endSentence(context: SentenceContext) {
-        promteDefsToWorkingMemory(context)
+    fun processQuestion(sentence: TextSentence): String {
+        qaMode = true
+        qaMemory = WorkingMemory()
+        try {
+            processSentence(sentence)
+        } catch (e: NoMentionOfCharacter) {
+            return "No mention of a character named ${e.characterName}."
+        }
+
+        val acts = qaMemory.concepts.filterIsInstance<Act>()
+        if (acts.isEmpty()) {
+            return "I don't know."
+        }
+        //FIXME assume who - should be generated from demon/node?
+        val c = acts[0]
+        val closestMatch = this.findMatchingConceptFromWorking(c)
+        if (closestMatch != null) {
+            if (c is ActAtrans) {
+                if (closestMatch is ActAtrans) {
+                    if (c.actor.firstName == "who") {
+                        return closestMatch.actor.firstName
+                    } else if (c.from.firstName == "who") {
+                        return closestMatch.from.firstName
+                    } else if (c.to.firstName == "who") {
+                        return closestMatch.to.firstName
+                    }
+                }
+            }
+        }
+        return "I don't know."
     }
 
-    private fun promteDefsToWorkingMemory(context: SentenceContext) {
+     fun findMatchingConceptFromWorking(whoAct: Act): Act? {
+         println("finding best match for $whoAct")
+         workingMemory.concepts.filterIsInstance<Act>().forEach {
+             // FIXME hack....
+                 if (it.act == whoAct.act) {
+                     return it
+                 }
+         }
+         return null
+     }
+
+
+    private fun endSentence(context: SentenceContext) {
+        val memory = if (qaMode) qaMemory else workingMemory
+        promteDefsToWorkingMemory(context, memory)
+    }
+
+    private fun promteDefsToWorkingMemory(context: SentenceContext, memory: WorkingMemory) {
         val defs = context.wordContexts.mapNotNull { it.def() }
             .filter { !it.flags.contains(ParserFlags.Inside) }
             .filter { !it.flags.contains(ParserFlags.Ignore) }
         println("Sentence Result:")
         defs.forEach { println(it) }
-        workingMemory.concepts.addAll(defs)
+        memory.concepts.addAll(defs)
     }
 
     private fun runWord(index: Int, word: String, wordHandler: WordHandler, wordContext: WordContext) {
@@ -72,7 +119,7 @@ class WordContext(val wordIndex: Int, val wordElement: WordElement, val word: St
     fun isDefSet() = def() != null
 }
 
-class SentenceContext(val sentence: TextSentence, val working: WorkingMemory) {
+class SentenceContext(val sentence: TextSentence, val workingMemory: WorkingMemory, val qaMode: Boolean) {
     var currentWord: String = ""
     var nextWord: String = ""
     var previousWord: String = ""
@@ -81,7 +128,6 @@ class SentenceContext(val sentence: TextSentence, val working: WorkingMemory) {
     var mostRecentObject: Concept? = null
     var mostRecentCharacter: Human? = null
     var localCharacter: Human? = null
-    val workingMemory = working
     val wordContexts = mutableListOf<WordContext>()
 
     fun pushWord(wordContext: WordContext) {
@@ -104,11 +150,24 @@ class WorkingMemory() {
     fun addReasoningScript(script: ReasoningScript) {
         reasoningScripts.add(script)
     }
+
+    val characters = mutableMapOf<String, Human>();
+
+    fun findCharacter(firstName: String): Human? {
+        //FIXME should be fancier...
+        return characters[firstName]
+    }
+
+    fun addCharacter(human: Human) {
+        characters[human.firstName] = human
+    }
 }
 
 open class ReasoningScript(val name: String) {
 
 }
+
+class NoMentionOfCharacter(val characterName: String): Exception()
 
 class Agenda() {
 
@@ -135,7 +194,6 @@ class Lexicon() {
         return wordMappings[word.toLowerCase()]
     }
 }
-
 
 open class WordHandler(val word: String) {
     open fun build(wordContext: WordContext): List<Demon> {

@@ -1,7 +1,7 @@
 
 fun buildInDepthUnderstandingLexicon(): Lexicon {
     val lexicon = Lexicon();
-    lexicon.addMapping(WordJohn())
+    lexicon.addMapping(WordPerson(Human("John", "", Gender.Male)))
     lexicon.addMapping(WordPicked())
     lexicon.addMapping(WordIgnore("up"))
     lexicon.addMapping(WordIgnore("the"))
@@ -12,18 +12,22 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     lexicon.addMapping(WordIn())
     lexicon.addMapping(WordBox())
 
-    lexicon.addMapping(WordMary())
+    lexicon.addMapping(WordPerson(Human("Mary", "", Gender.Female)))
     lexicon.addMapping(WordGave())
     lexicon.addMapping(WordIgnore("a"))
     lexicon.addMapping(WordBook())
 
-    lexicon.addMapping(WordFred())
+    lexicon.addMapping(WordPerson(Human("Fred", "", Gender.Male)))
     lexicon.addMapping(WordTold())
     // FIXME not sure whether should ignore that - its a subordinate conjnuction and should link
     // the Mtrans from "told" to the Ingest of "eats"
     lexicon.addMapping(WordIgnore("that"))
     lexicon.addMapping(WordEats())
     lexicon.addMapping(WordLobster())
+
+    // FIXME only for QA
+    lexicon.addMapping(WordWho())
+
     return lexicon
 }
 
@@ -72,7 +76,7 @@ class ActPtrans(val actor: Human, val thing: Concept, val to: Concept, propelAct
     val instr = ActPropel(propelActor, thing)
 }
 
-class Human(val firstName: String, val lastName: String, val gender: Gender): Concept(firstName) {
+class Human(val firstName: String, val lastName: String = "", val gender: Gender): Concept(firstName) {
     init {
         kinds.add(InDepthUnderstandingConcepts.Human.name)
     }
@@ -109,18 +113,11 @@ class WordBox(): WordHandler("box") {
     }
 }
 
-class WordJohn(): WordHandler("john") {
-    override fun build(wordContext: WordContext): List<Demon> {
-        wordContext.defHolder.value = Human("John", "", Gender.Male)
-        return listOf(SaveCharacterDemon(wordContext))
-    }
-}
-
 // Exercise 1
-class WordMary(): WordHandler("mary") {
+class WordPerson(val human: Human): WordHandler(human.firstName.toLowerCase()) {
     override fun build(wordContext: WordContext): List<Demon> {
-        wordContext.defHolder.value = Human("Mary", "", Gender.Female)
-        return listOf(SaveCharacterDemon(wordContext))
+        // Fixme - not sure about the load/reuse
+        return listOf(LoadCharacterDemon(human, wordContext), SaveCharacterDemon(wordContext))
     }
 }
 
@@ -143,6 +140,25 @@ class WordLobster(): WordHandler("lobster") {
         return listOf(SaveObjectDemon(wordContext))
     }
 }
+
+class LoadCharacterDemon(val human: Human, wordContext: WordContext): Demon(wordContext) {
+    override fun run() {
+        if (!wordContext.isDefSet()) {
+            var character: Human? = wordContext.context.workingMemory.findCharacter(human.firstName)
+            if (character == null && wordContext.context.qaMode) {
+                // FIXME try and get away from the qaMode test here
+                throw NoMentionOfCharacter(human.firstName)
+            }
+            if (character == null) {
+                character = human
+                wordContext.context.workingMemory.addCharacter(human)
+            }
+            wordContext.defHolder.value = character
+            active = false
+        }
+    }
+}
+
 class SaveCharacterDemon(wordContext: WordContext): Demon(wordContext){
     override fun run() {
         val character = wordContext.def()
@@ -377,9 +393,15 @@ class WordEats(): WordHandler("eats") {
     }
 }
 
-class WordFred(): WordHandler("fred") {
+class WordWho(): WordHandler("who") {
     override fun build(wordContext: WordContext): List<Demon> {
-        wordContext.defHolder.value = Human("Fred", "", Gender.Male)
-        return listOf(SaveCharacterDemon(wordContext))
+        return listOf(WhoDemon(wordContext));
+    }
+}
+
+class WhoDemon(wordContext: WordContext): Demon(wordContext) {
+    override fun run() {
+        //FIXME not sure what to use for placeholder
+        wordContext.defHolder.value = Human("who", "who", Gender.Male)
     }
 }
