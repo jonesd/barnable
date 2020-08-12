@@ -234,6 +234,7 @@ open class Concept(val name: String) {
     val flags = mutableListOf<ParserFlags>()
     val kinds = mutableListOf<String>()
     var prepobj: Prep? = null
+    val modifiers = mutableMapOf<String, String>()
 
     override fun toString(): String {
         return Gson().toJson(this)
@@ -245,6 +246,14 @@ open class Concept(val name: String) {
 
     fun addFlag(flag: ParserFlags) {
         flags.add(flag)
+    }
+
+    fun addModifier(modifier: String, value: String) {
+        modifiers.put(modifier, value)
+    }
+
+    fun modifier(modifier: String): String? {
+        return modifiers[modifier]
     }
 }
 

@@ -79,21 +79,6 @@ class InDepthUnderstandingTest {
     }
 
     @Test
-    fun `Question who gave mary the book - separate working memory`() {
-        val textModel = TextModelBuilder("John gave Mary a book").buildModel()
-        val lexicon = buildInDepthUnderstandingLexicon()
-
-        val textProcessor = TextProcessor(textModel, lexicon)
-        textProcessor.runProcessor()
-
-        val questionModel = TextModelBuilder("Who gave Mary a book").buildModel()
-        val questionProcessor = TextProcessor(textModel, lexicon)
-        val response = questionProcessor.processQuestion(questionModel.sentences[0])
-
-        assertEquals("something", response)
-    }
-
-    @Test
     fun `Exercise 2 Fred told Mary that John eats lobster`() {
         val textModel = TextModelBuilder("Fred told Mary that John eats lobster").buildModel()
         val lexicon = buildInDepthUnderstandingLexicon()
@@ -115,5 +100,33 @@ class InDepthUnderstandingTest {
         // this seems correct:
         assertEquals("John", ingest.actor.firstName)
         assertTrue(ingest.obj.isKind("Lobster"))
+    }
+
+    @Test
+    fun `Colour modifier`() {
+        val textModel = TextModelBuilder("the red book").buildModel()
+        val lexicon = buildInDepthUnderstandingLexicon()
+
+        val textProcessor = TextProcessor(textModel, lexicon)
+        val workingMemory = textProcessor.runProcessor()
+
+        assertEquals(1, workingMemory.concepts.size)
+        val concept = textProcessor.workingMemory.concepts.first()
+        assertTrue(concept is PhysicalObject)
+        assertEquals("red", (concept as PhysicalObject).modifier("colour"))
+    }
+
+    @Test
+    fun `Age-Weight modifiers`() {
+        val textModel = TextModelBuilder("a thin old man").buildModel()
+        val lexicon = buildInDepthUnderstandingLexicon()
+
+        val textProcessor = TextProcessor(textModel, lexicon)
+        val workingMemory = textProcessor.runProcessor()
+
+        assertEquals(1, workingMemory.concepts.size)
+        val concept = textProcessor.workingMemory.concepts.first()
+        assertEquals("GT-NORM", concept.modifier("age"))
+        assertEquals("LT-NORM", concept.modifier("weight"))
     }
 }

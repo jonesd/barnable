@@ -25,6 +25,17 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     lexicon.addMapping(WordEats())
     lexicon.addMapping(WordLobster())
 
+    lexicon.addMapping(WordPerson(Human("", "", Gender.Female), "woman"))
+    lexicon.addMapping(WordPerson(Human("", "", Gender.Female), "man"))
+
+    // Modifiers
+    lexicon.addMapping(ModifierWord("red", "colour"))
+    lexicon.addMapping(ModifierWord("black", "colour"))
+    lexicon.addMapping(ModifierWord("fat", "weight", "GT-NORM"))
+    lexicon.addMapping(ModifierWord("thin", "weight", "LT-NORM"))
+    lexicon.addMapping(ModifierWord("old", "age", "GT-NORM"))
+    lexicon.addMapping(ModifierWord("young", "age", "LT-NORM"))
+
     // FIXME only for QA
     lexicon.addMapping(WordWho())
 
@@ -114,7 +125,7 @@ class WordBox(): WordHandler("box") {
 }
 
 // Exercise 1
-class WordPerson(val human: Human): WordHandler(human.firstName.toLowerCase()) {
+class WordPerson(val human: Human, word: String = human.firstName.toLowerCase()): WordHandler(word) {
     override fun build(wordContext: WordContext): List<Demon> {
         // Fixme - not sure about the load/reuse
         return listOf(LoadCharacterDemon(human, wordContext), SaveCharacterDemon(wordContext))
@@ -390,6 +401,36 @@ class WordEats(): WordHandler("eats") {
         }
 
         return listOf(demon, humanBefore, food)
+    }
+}
+
+class ModifierWord(word: String, val modifier: String, val value: String = word): WordHandler(word) {
+    override fun build(wordContext: WordContext): List<Demon> {
+        val demon = object : Demon(wordContext) {
+            var thing: Concept? = null
+
+            override fun run() {
+                val thingConcept = thing
+                if (thingConcept != null) {
+                    thingConcept.addModifier(modifier, value)
+                    active = false
+                }
+            }
+        }
+        //FIXME list of kinds is not complete
+        val thingDemon = ExpectDemon(matchConceptByKind(listOf(InDepthUnderstandingConcepts.Human.name, InDepthUnderstandingConcepts.PhysicalObject.name)), SearchDirection.After, wordContext) {
+            demon.thing = it
+        }
+        return listOf(demon, thingDemon)
+    }
+}
+
+class WordMan(word: String): WordHandler(word) {
+    override fun build(wordContext: WordContext): List<Demon> {
+        if (!wordContext.isDefSet()) {
+            wordContext.defHolder.value = Human("", "", Gender.Male)
+        }
+        return listOf()
     }
 }
 
