@@ -77,9 +77,11 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
     }
 
     private fun promteDefsToWorkingMemory(context: SentenceContext, memory: WorkingMemory) {
-        val defs = context.wordContexts.mapNotNull { it.def() }
-            .filter { !it.flags.contains(ParserFlags.Inside) }
-            .filter { !it.flags.contains(ParserFlags.Ignore) }
+        val defs = context.wordContexts
+            .filter { !it.defHolder.hasFlag(ParserFlags.Inside) }
+            .filter { !it.defHolder.hasFlag(ParserFlags.Ignore) }
+            .mapNotNull { it.def()}
+
         println("Sentence Result:")
         defs.forEach { println(it) }
         memory.concepts.addAll(defs)
@@ -138,8 +140,8 @@ class SentenceContext(val sentence: TextSentence, val workingMemory: WorkingMemo
         nextWord = if (currentWordIndex < sentence.elements.size - 1) sentence.elements[currentWordIndex + 1].token.toLowerCase() else ""
     }
 
-    fun defAtWordIndex(wordIndex: Int): Concept? {
-        return wordContexts[wordIndex].def()
+    fun defHolderAtWordIndex(wordIndex: Int): ConceptHolder {
+        return wordContexts[wordIndex].defHolder
     }
 }
 
@@ -228,10 +230,18 @@ class DemonComment(val test: String, val act: String)
 
 class ConceptHolder() {
     var value: Concept? = null
+    val flags = mutableListOf<ParserFlags>()
+
+    fun addFlag(flag: ParserFlags) {
+        flags.add(flag)
+    }
+
+    fun hasFlag(flag: ParserFlags): Boolean {
+        return flags.contains(flag)
+    }
 }
 
 open class Concept(val name: String) {
-    val flags = mutableListOf<ParserFlags>()
     val kinds = mutableListOf<String>()
     var prepobj: Prep? = null
     val modifiers = mutableMapOf<String, String>()
@@ -242,10 +252,6 @@ open class Concept(val name: String) {
 
     fun isKind(kind: String): Boolean {
         return kinds.contains(kind)
-    }
-
-    fun addFlag(flag: ParserFlags) {
-        flags.add(flag)
     }
 
     fun addModifier(modifier: String, value: String) {
@@ -288,7 +294,7 @@ class WordIgnore(word: String): WordHandler(word) {
 
 class IgnoreDemon(wordContext: WordContext): Demon(wordContext) {
     override fun run() {
-        wordContext.def()?.flags?.add(ParserFlags.Ignore)
+        wordContext.defHolder.addFlag(ParserFlags.Ignore)
         active = false
     }
 }
@@ -346,8 +352,8 @@ inline fun matchAlways(): (Concept?) -> Boolean {
     return { c -> true}
 }
 
-class ExpectDemon(val matcher: (Concept?) -> Boolean, val direction: SearchDirection, wordContext: WordContext, val action: (Concept) -> Unit): Demon(wordContext) {
-    var found: Concept? = null
+class ExpectDemon(val matcher: (Concept?) -> Boolean, val direction: SearchDirection, wordContext: WordContext, val action: (ConceptHolder) -> Unit): Demon(wordContext) {
+    var found: ConceptHolder? = null
 
     override fun run() {
         if (direction == SearchDirection.Before) {
@@ -360,23 +366,24 @@ class ExpectDemon(val matcher: (Concept?) -> Boolean, val direction: SearchDirec
             }
         }
         val foundConcept = found
-        if (foundConcept != null) {
+        if (foundConcept?.value != null) {
             action(foundConcept)
             println("Found concept=$foundConcept for match=$matcher")
             active = false
         }
     }
 
-    private fun updateFrom(existing: Concept?, wordContext: WordContext, index: Int): Concept? {
+    private fun updateFrom(existing: ConceptHolder?, wordContext: WordContext, index: Int): ConceptHolder? {
         if (existing != null) {
             return existing
         }
-        var value = wordContext.context.defAtWordIndex(index)
+        var defHolder = wordContext.context.defHolderAtWordIndex(index)
+        var value = defHolder.value
         if (isConjunction(value)) {
             return null
         }
         if (matcher(value)) {
-            return value
+            return defHolder
         }
         return null
     }
@@ -411,8 +418,8 @@ class FindObjectReferenceDemon(wordContext: WordContext): Demon(wordContext) {
     }
 }
 
-class PrepDemon(val matcher: (Concept?) -> Boolean, val direction: SearchDirection = SearchDirection.Before, wordContext: WordContext, val action: (Concept) -> Unit): Demon(wordContext) {
-    var found: Concept? = null
+class PrepDemon(val matcher: (Concept?) -> Boolean, val direction: SearchDirection = SearchDirection.Before, wordContext: WordContext, val action: (ConceptHolder) -> Unit): Demon(wordContext) {
+    var found: ConceptHolder? = null
 
     override fun run() {
         if (direction == SearchDirection.Before) {
@@ -425,23 +432,24 @@ class PrepDemon(val matcher: (Concept?) -> Boolean, val direction: SearchDirecti
             }
         }
         val foundConcept = found
-        if (foundConcept != null) {
+        if (foundConcept?.value != null) {
             action(foundConcept)
             println("Prep found concept=$foundConcept for match=$matcher")
             active = false
         }
     }
 
-    private fun updateFrom(existing: Concept?, wordContext: WordContext, index: Int): Concept? {
+    private fun updateFrom(existing: ConceptHolder?, wordContext: WordContext, index: Int): ConceptHolder? {
         if (existing != null) {
             return existing
         }
-        var value = wordContext.context.defAtWordIndex(index)
+        var defHolder = wordContext.context.defHolderAtWordIndex(index)
+        var value = defHolder.value
         // if (isConjunction(value)) {
         //    return null
         //}
         if (matcher(value)) {
-            return value
+            return defHolder
         }
         return null
     }
@@ -452,21 +460,22 @@ class PrepDemon(val matcher: (Concept?) -> Boolean, val direction: SearchDirecti
 }
 
 
-fun searchContext(matcher: (Concept?) -> Boolean, abortSearch: (Concept?) -> Boolean = matchNever(), direction: SearchDirection = SearchDirection.Before, wordContext: WordContext, action: (Concept) -> Unit) {
+fun searchContext(matcher: (Concept?) -> Boolean, abortSearch: (Concept?) -> Boolean = matchNever(), direction: SearchDirection = SearchDirection.Before, wordContext: WordContext, action: (ConceptHolder) -> Unit) {
     var index = wordContext.wordIndex
-    var found: Concept? = null
+    var found: ConceptHolder? = null
 
-    fun updateFrom(existing: Concept?, wordContext: WordContext, index: Int): Concept? {
-        if (existing != null) {
+    fun updateFrom(existing: ConceptHolder?, wordContext: WordContext, index: Int): ConceptHolder? {
+        if (existing?.value != null) {
             return existing
         }
-        var value = wordContext.context.defAtWordIndex(index)
+        val defHolder = wordContext.context.defHolderAtWordIndex(index)
+        var value = defHolder.value
         if (abortSearch(value)) {
             // FIXME should not search any farther in this direction
             return null
         }
         if (matcher(value)) {
-            return value
+            return defHolder
         }
         return null
     }
@@ -481,7 +490,7 @@ fun searchContext(matcher: (Concept?) -> Boolean, abortSearch: (Concept?) -> Boo
         }
     }
     val foundConcept = found
-    if (foundConcept != null) {
+    if (foundConcept?.value != null) {
         action(foundConcept)
         println("Search found concept=$foundConcept for match=$matcher")
     }
