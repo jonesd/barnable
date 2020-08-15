@@ -18,7 +18,7 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
         sentence.elements.forEachIndexed { index, element ->
             var word = element.token.toLowerCase()
             val wordHandler = lexicon.findWordHandler(word) ?: WordUnknown(word)
-            val wordContext = WordContext(index, element, word, ConceptHolder(), context)
+            val wordContext = WordContext(index, element, word, workingMemory.createDefHolder(), context)
             context.pushWord(wordContext)
 
             runWord(index, word, wordHandler, wordContext)
@@ -93,7 +93,7 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
         println("---------------------------------------")
         val wordDemons = wordHandler.build(wordContext)
         wordDemons.forEach { agenda.withDemon(index, it) }
-        println("con = ${wordContext.def()}")
+        println("con${wordContext.defHolder.instanceNumber} = ${wordContext.def()}")
     }
 
     // Run each active demon. Repeat again if any were fired
@@ -117,8 +117,17 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
 }
 
 class WordContext(val wordIndex: Int, val wordElement: WordElement, val word: String, val defHolder: ConceptHolder, val context: SentenceContext) {
+    var totalDemons = 0
+
     fun def() = defHolder.value
     fun isDefSet() = def() != null
+    fun nextDemonIndex(): Int {
+        val index = totalDemons
+        totalDemons += 1
+        return index
+    }
+
+
 }
 
 class SentenceContext(val sentence: TextSentence, val workingMemory: WorkingMemory, val qaMode: Boolean) {
@@ -146,6 +155,7 @@ class SentenceContext(val sentence: TextSentence, val workingMemory: WorkingMemo
 }
 
 class WorkingMemory() {
+    var totalConceptHolders = 0;
     val concepts = mutableListOf<Concept>()
 
     val reasoningScripts: MutableList<ReasoningScript> = mutableListOf()
@@ -169,6 +179,13 @@ class WorkingMemory() {
     fun markAsRecentCharacter(human: Human) {
         charactersRecent.remove(human)
         charactersRecent.add(0, human)
+    }
+
+    fun createDefHolder(): ConceptHolder {
+        val holder = ConceptHolder(totalConceptHolders)
+        totalConceptHolders += 1
+        return holder
+
     }
 }
 
@@ -211,6 +228,7 @@ open class WordHandler(val word: String) {
 }
 
 open class Demon(val wordContext: WordContext) {
+    val demonIndex = wordContext.nextDemonIndex()
     var active = true
     var children = mutableListOf<Demon>()
 
@@ -229,13 +247,13 @@ open class Demon(val wordContext: WordContext) {
     }
 
     override fun toString(): String {
-        return "{demon=${super.toString()}, active=$active}"
+        return "{demon${wordContext.defHolder.instanceNumber}/${demonIndex}=${super.toString()}, active=$active}"
     }
 }
 
 class DemonComment(val test: String, val act: String)
 
-class ConceptHolder() {
+class ConceptHolder(val instanceNumber: Int) {
     var value: Concept? = null
     val flags = mutableListOf<ParserFlags>()
 
