@@ -19,8 +19,8 @@ class InDepthUnderstandingTest {
         assertEquals("GRASP", grasp.name)
         val actGrasp = grasp as ActGrasp
         assertEquals("John",  actGrasp.actor.firstName)
-        assertEquals("ball", (actGrasp.obj as PhysicalObject).name)
-        val actGraspInstr = (grasp as ActGrasp).instr
+        assertEquals("ball", actGrasp.obj.name)
+        val actGraspInstr = grasp.instr
         // FIXME move structural element not present, rely on name
         assertEquals("MOVE", actGraspInstr.name)
         assertEquals("John", actGraspInstr.actor.firstName)
@@ -31,13 +31,11 @@ class InDepthUnderstandingTest {
         val actPtrans = ptrans as ActPtrans
         assertEquals("John", actPtrans.actor.firstName)
         // FIXME thing should be obj
-        assertEquals("ball", actPtrans.thing.name)
+        assertEquals("ball", actPtrans.thing?.name)
         assertEquals("box", (actPtrans.to as PhysicalObject).name)
         val actPtransIntr = actPtrans.instr as ActPropel
         assertEquals("gravity", actPtransIntr.actor.name)
     }
-
-
 
     @Test
     fun `Exercise 1 John gave Mary a book`() {
@@ -54,7 +52,7 @@ class InDepthUnderstandingTest {
         val actAtrans = atrans as ActAtrans
         assertEquals("John", actAtrans.actor.firstName)
         //FIXME should match TYPE (BOOK)
-        assertEquals("book", (actAtrans.obj as PhysicalObject).name)
+        assertEquals("book", actAtrans.obj.name)
         assertEquals("Mary", actAtrans.to.firstName)
         assertEquals("John", actAtrans.from.firstName)
     }
@@ -128,5 +126,26 @@ class InDepthUnderstandingTest {
         val concept = textProcessor.workingMemory.concepts.first()
         assertEquals("GT-NORM", concept.modifier("age"))
         assertEquals("LT-NORM", concept.modifier("weight"))
+    }
+
+    @Test
+    fun `Basic pronoun reference`() {
+        val textModel = TextModelBuilder("John went home. he kissed his wife Anne.").buildModel()
+        val lexicon = buildInDepthUnderstandingLexicon()
+
+        val textProcessor = TextProcessor(textModel, lexicon)
+        val workingMemory = textProcessor.runProcessor()
+
+        assertEquals(2, workingMemory.concepts.size)
+        val travel = textProcessor.workingMemory.concepts[0]
+        val travelPtrans =(travel as ActPtrans)
+        assertEquals("John", travelPtrans.actor.firstName)
+        assertEquals("home", travelPtrans.to?.name)
+        val kiss = textProcessor.workingMemory.concepts[1]
+        val kissAttend = kiss as ActAttend
+        assertEquals("John", kissAttend.actor.firstName)
+        assertEquals("Anne", (kissAttend.to as Human).firstName)
+
+        //FIXME more assertions
     }
 }

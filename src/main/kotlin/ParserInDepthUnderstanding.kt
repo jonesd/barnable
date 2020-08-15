@@ -36,6 +36,14 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     lexicon.addMapping(ModifierWord("old", "age", "GT-NORM"))
     lexicon.addMapping(ModifierWord("young", "age", "LT-NORM"))
 
+    // pronoun
+    lexicon.addMapping(WordPerson(Human("Anne", "", Gender.Female)))
+    lexicon.addMapping(PronounWord("he", Gender.Male))
+    lexicon.addMapping(PronounWord("He", Gender.Male))
+    lexicon.addMapping(WordHome())
+    lexicon.addMapping(WordWent())
+    lexicon.addMapping(WordKiss())
+
     // FIXME only for QA
     lexicon.addMapping(WordWho())
 
@@ -83,10 +91,8 @@ class ActIngest(val actor: Human, val obj: Concept): Act(Acts.INGEST)
 class ActMove(val actor: Human, val obj: Concept, val to: Concept): Act(Acts.MOVE)
 class ActMtrans(val actor: Human, val obj: Concept, val from: Human, val to: Human): Act(Acts.MTRANS)
 class ActPropel(val actor: Concept, val obj: Concept): Act(Acts.PROPEL)
-class ActPtrans(val actor: Human, val thing: Concept, val to: Concept, propelActor: Concept): Act(Acts.PTRANS) {
-    val instr = ActPropel(propelActor, thing)
-}
-
+class ActPtrans(val actor: Human, val thing: Concept?, val to: Concept?, val instr: Act?): Act(Acts.PTRANS)
+class ActAttend(val actor: Human, val obj: Concept?, val to: Concept?): Act(Acts.ATTEND)
 class Human(val firstName: String, val lastName: String = "", val gender: Gender): Concept(firstName) {
     init {
         kinds.add(InDepthUnderstandingConcepts.Human.name)
@@ -97,7 +103,9 @@ enum class PhysicalObjectKind() {
     Container,
     GameObject,
     Book,
-    Food
+    Food,
+    Location,
+    BodyPart
 }
 
 // FIXME how to define this? force
@@ -124,6 +132,13 @@ class WordBox(): WordHandler("box") {
     }
 }
 
+class WordHome(): WordHandler("home") {
+    override fun build(wordContext: WordContext): List<Demon> {
+        wordContext.defHolder.value = Location("Home", "home")
+        return listOf()
+    }
+}
+
 // Exercise 1
 class WordPerson(val human: Human, word: String = human.firstName.toLowerCase()): WordHandler(word) {
     override fun build(wordContext: WordContext): List<Demon> {
@@ -142,6 +157,12 @@ class WordBook(): WordHandler("book") {
 class Food(foodKind: String, name: String): PhysicalObject(PhysicalObjectKind.Food, name) {
     init {
         kinds.add(foodKind)
+    }
+}
+
+class Location(locationKind: String, name: String): PhysicalObject(PhysicalObjectKind.Location, name) {
+    init {
+        kinds.add(locationKind)
     }
 }
 
@@ -165,6 +186,7 @@ class LoadCharacterDemon(val human: Human, wordContext: WordContext): Demon(word
                 wordContext.context.workingMemory.addCharacter(human)
             }
             wordContext.defHolder.value = character
+            println("Loaded character - $character")
             active = false
         }
     }
@@ -244,7 +266,7 @@ class WordDropped(): WordHandler("dropped") {
                         actorHolder?.addFlag(ParserFlags.Inside)
                         thingHolder?.addFlag(ParserFlags.Inside)
                         toHolder?.addFlag(ParserFlags.Inside)
-                        wordContext.defHolder.value = ActPtrans(actorConcept, thingConcept, toConcept, gravity)
+                        wordContext.defHolder.value = ActPtrans(actorConcept, thingConcept, toConcept, ActPropel(gravity, thingConcept))
                         active = false
                     }
                 }
@@ -276,7 +298,7 @@ class WordIn(): WordHandler("in") {
         val addPrepObj = InsertAfterDemon(matcher, wordContext) {
             if (wordContext.isDefSet()) {
                 wordContext.defHolder.addFlag(ParserFlags.Inside)
-                it?.value?.prepobj = wordContext.defHolder.value as? Prep
+                it.value?.prepobj = wordContext.defHolder.value as? Prep
                 println("Updated with prepobj concept=${it}")
             }
         }
@@ -287,7 +309,7 @@ class WordIn(): WordHandler("in") {
 class InsertAfterDemon(val matcher: (Concept?) -> Boolean, wordContext: WordContext, val action: (ConceptHolder) -> Unit): Demon(wordContext) {
     override fun run() {
         searchContext(matcher, matchNever(), SearchDirection.After, wordContext) {
-            if (it?.value != null) {
+            if (it.value != null) {
                 active = false
                 action(it)
             }
@@ -333,6 +355,41 @@ class WordGave(): WordHandler("gave") {
     }
 }
 
+//FIXME kiss & kissed
+class WordKiss(): WordHandler("kissed") {
+    override fun build(wordContext: WordContext): List<Demon> {
+        val kiss = object : Demon(wordContext) {
+            var actorHolder: ConceptHolder? = null
+            var toHolder: ConceptHolder? = null
+
+            override fun run() {
+                if (wordContext.isDefSet()) {
+                    active = false
+                } else {
+                    val actorConcept = actorHolder?.value as? Human
+                    val toConcept = toHolder?.value as? Human
+                    if (actorConcept != null && toConcept != null) {
+                        actorHolder?.addFlag(ParserFlags.Inside)
+                        toHolder?.addFlag(ParserFlags.Inside)
+                        // FIXME better representation....
+                        val lips = PhysicalObject(PhysicalObjectKind.BodyPart, "lips")
+                        wordContext.defHolder.value = ActAttend(actorConcept, lips, toConcept)
+                        active = false
+                    }
+                }
+            }
+        }
+        val humanBefore = ExpectDemon(matchConceptByClass<Human>(), SearchDirection.Before, wordContext) {
+            kiss.actorHolder = it
+        }
+        val humanAfter = ExpectDemon(matchConceptByClass<Human>(), SearchDirection.After, wordContext) {
+            kiss.toHolder = it
+        }
+
+        return listOf(kiss, humanBefore, humanAfter)
+    }
+}
+
 class WordTold(): WordHandler("told") {
     override fun build(wordContext: WordContext): List<Demon> {
         val demon = object : Demon(wordContext) {
@@ -369,6 +426,40 @@ class WordTold(): WordHandler("told") {
         }
 
         return listOf(demon, humanBefore, actAfter, humanAfter)
+    }
+}
+
+// FIXME really GO and WENT is past
+class WordWent(): WordHandler("went") {
+    override fun build(wordContext: WordContext): List<Demon> {
+        val demon = object : Demon(wordContext) {
+            var actorHolder: ConceptHolder? = null
+            var locationHolder: ConceptHolder? = null
+
+            override fun run() {
+                if (wordContext.isDefSet()) {
+                    active = false
+                } else {
+                    val actorConcept = actorHolder?.value as? Human
+                    val locationConcept = locationHolder?.value as? PhysicalObject
+                    if (actorConcept != null && locationConcept != null) {
+                        actorHolder?.addFlag(ParserFlags.Inside)
+                        locationHolder?.addFlag(ParserFlags.Inside)
+                        wordContext.defHolder.value = ActPtrans(actorConcept, null, locationConcept, null)
+                        active = false
+                    }
+                }
+            }
+        }
+        val humanBefore = ExpectDemon(matchConceptByClass<Human>(), SearchDirection.Before, wordContext) {
+            demon.actorHolder = it
+        }
+        // FIXME should this be a LOCATION
+        val locationAfter = ExpectDemon(matchConceptByClass<PhysicalObject>(), SearchDirection.After, wordContext) {
+            demon.locationHolder = it
+        }
+
+        return listOf(demon, humanBefore, locationAfter)
     }
 }
 
@@ -429,6 +520,22 @@ class WordMan(word: String): WordHandler(word) {
     override fun build(wordContext: WordContext): List<Demon> {
         if (!wordContext.isDefSet()) {
             wordContext.defHolder.value = Human("", "", Gender.Male)
+        }
+        return listOf()
+    }
+}
+
+class PronounWord(word: String, val genderMatch: Gender): WordHandler(word) {
+    override fun build(wordContext: WordContext): List<Demon> {
+        // FIXME partial implementation - also why not use demon
+        val localHuman = wordContext.context.localCharacter
+        if (localHuman != null && localHuman.gender == genderMatch) {
+            wordContext.defHolder.value = localHuman
+        } else {
+            val mostRecentHuman = wordContext.context.mostRecentCharacter
+            if (mostRecentHuman != null && mostRecentHuman.gender == genderMatch) {
+                wordContext.defHolder.value = mostRecentHuman
+            }
         }
         return listOf()
     }
