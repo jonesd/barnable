@@ -100,7 +100,8 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
     fun runDemons(context: SentenceContext) {
         do {
             var fired = false
-            agenda.activeDemons().forEach {
+            // Use most recently recreated first
+            agenda.activeDemons().reversed().forEach {
                 println("running demon $it")
                 it.run()
                 if (!it.active) {
