@@ -130,7 +130,7 @@ class InDepthUnderstandingTest {
 
     @Test
     fun `Basic pronoun reference`() {
-        val textModel = TextModelBuilder("John went home. he kissed his wife Anne.").buildModel()
+        val textModel = TextModelBuilder("John went home. He kissed his wife Anne.").buildModel()
         val lexicon = buildInDepthUnderstandingLexicon()
 
         val textProcessor = TextProcessor(textModel, lexicon)

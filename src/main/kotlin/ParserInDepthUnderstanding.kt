@@ -39,7 +39,7 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     // pronoun
     lexicon.addMapping(WordPerson(Human("Anne", "", Gender.Female)))
     lexicon.addMapping(PronounWord("he", Gender.Male))
-    lexicon.addMapping(PronounWord("He", Gender.Male))
+    lexicon.addMapping(PronounWord("she", Gender.Female))
     lexicon.addMapping(WordHome())
     lexicon.addMapping(WordWent())
     lexicon.addMapping(WordKiss())
@@ -140,7 +140,7 @@ class WordHome(): WordHandler("home") {
 }
 
 // Exercise 1
-class WordPerson(val human: Human, word: String = human.firstName.toLowerCase()): WordHandler(word) {
+class WordPerson(val human: Human, word: String = human.firstName): WordHandler(word) {
     override fun build(wordContext: WordContext): List<Demon> {
         // Fixme - not sure about the load/reuse
         return listOf(LoadCharacterDemon(human, wordContext), SaveCharacterDemon(wordContext))
@@ -534,6 +534,12 @@ class PronounWord(word: String, val genderMatch: Gender): WordHandler(word) {
         } else {
             val mostRecentHuman = wordContext.context.mostRecentCharacter
             if (mostRecentHuman != null && mostRecentHuman.gender == genderMatch) {
+                wordContext.defHolder.value = mostRecentHuman
+            }
+        }
+        if (!wordContext.isDefSet()) {
+            val mostRecentHuman = wordContext.context.workingMemory.charactersRecent.firstOrNull { it.gender == genderMatch }
+            if (mostRecentHuman != null) {
                 wordContext.defHolder.value = mostRecentHuman
             }
         }

@@ -16,7 +16,7 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
         agenda = Agenda()
         val context = SentenceContext(sentence, workingMemory, qaMode)
         sentence.elements.forEachIndexed { index, element ->
-            var word = element.token
+            var word = element.token.toLowerCase()
             val wordHandler = lexicon.findWordHandler(word) ?: WordUnknown(word)
             val wordContext = WordContext(index, element, word, ConceptHolder(), context)
             context.pushWord(wordContext)
@@ -153,15 +153,22 @@ class WorkingMemory() {
         reasoningScripts.add(script)
     }
 
-    val characters = mutableMapOf<String, Human>();
+    val charactersRecent = mutableListOf<Human>()
+    val characters = mutableMapOf<String, Human>()
 
     fun findCharacter(firstName: String): Human? {
         //FIXME should be fancier...
-        return characters[firstName]
+        return characters[firstName.toLowerCase()]
     }
 
     fun addCharacter(human: Human) {
-        characters[human.firstName] = human
+        characters[human.firstName.toLowerCase()] = human
+        markAsRecentCharacter(human)
+    }
+
+    fun markAsRecentCharacter(human: Human) {
+        charactersRecent.remove(human)
+        charactersRecent.add(0, human)
     }
 }
 
@@ -189,7 +196,7 @@ class Lexicon() {
     val wordMappings: MutableMap<String, WordHandler> = mutableMapOf()
 
     fun addMapping(handler: WordHandler) {
-        wordMappings.put(handler.word, handler)
+        wordMappings.put(handler.word.toLowerCase(), handler)
     }
 
     fun findWordHandler(word: String): WordHandler? {
