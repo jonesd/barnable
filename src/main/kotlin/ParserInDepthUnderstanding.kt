@@ -1,7 +1,7 @@
 
 fun buildInDepthUnderstandingLexicon(): Lexicon {
     val lexicon = Lexicon();
-    lexicon.addMapping(WordPerson(Human("John", "", Gender.Male)))
+    lexicon.addMapping(WordPerson(buildHuman("John", "", Gender.Male)))
     lexicon.addMapping(WordPicked())
     lexicon.addMapping(WordIgnore("up"))
     lexicon.addMapping(WordIgnore("the"))
@@ -12,12 +12,12 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     lexicon.addMapping(WordIn())
     lexicon.addMapping(WordBox())
 
-    lexicon.addMapping(WordPerson(Human("Mary", "", Gender.Female)))
+    lexicon.addMapping(WordPerson(buildHuman("Mary", "", Gender.Female)))
     lexicon.addMapping(WordGave())
     lexicon.addMapping(WordIgnore("a"))
     lexicon.addMapping(WordBook())
 
-    lexicon.addMapping(WordPerson(Human("Fred", "", Gender.Male)))
+    lexicon.addMapping(WordPerson(buildHuman("Fred", "", Gender.Male)))
     lexicon.addMapping(WordTold())
     // FIXME not sure whether should ignore that - its a subordinate conjnuction and should link
     // the Mtrans from "told" to the Ingest of "eats"
@@ -25,8 +25,8 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     lexicon.addMapping(WordEats())
     lexicon.addMapping(WordLobster())
 
-    lexicon.addMapping(WordPerson(Human("", "", Gender.Female), "woman"))
-    lexicon.addMapping(WordPerson(Human("", "", Gender.Female), "man"))
+    lexicon.addMapping(WordPerson(buildHuman("", "", Gender.Female), "woman"))
+    lexicon.addMapping(WordPerson(buildHuman("", "", Gender.Female), "man"))
 
     // Modifiers
     lexicon.addMapping(ModifierWord("red", "colour"))
@@ -37,7 +37,7 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     lexicon.addMapping(ModifierWord("young", "age", "LT-NORM"))
 
     // pronoun
-    lexicon.addMapping(WordPerson(Human("Anne", "", Gender.Female)))
+    lexicon.addMapping(WordPerson(buildHuman("Anne", "", Gender.Female)))
     lexicon.addMapping(PronounWord("he", Gender.Male))
     lexicon.addMapping(PronounWord("she", Gender.Female))
     lexicon.addMapping(WordHome())
@@ -50,6 +50,13 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     return lexicon
 }
 
+fun buildHuman(firstName: String = "", lastName: String = "", gender: Gender? = null): Concept {
+    return Concept(InDepthUnderstandingConcepts.Human.name)
+        .with(Slot("firstName", Concept(firstName)))
+        .with(Slot("lastName", Concept(lastName)))
+            //FIXME empty concept doesn't seem helpful
+        .with(Slot("gender", Concept(gender?.name ?: "")))
+}
 enum class Gender {
     Male,
     Female,
@@ -73,33 +80,69 @@ enum class InDepthUnderstandingConcepts {
     Act,
     Human,
     PhysicalObject,
-    Setting
+    Setting,
+    Location
 }
-
-open class Act(val act: Acts): Concept(act.toString()) {
-    init {
-        kinds.add(InDepthUnderstandingConcepts.Act.name)
-        kinds.add(act.name)
-    }
+fun buildATrans(actor: Concept, thing: Concept, from: Concept, to: Concept): Concept {
+    return Concept(Acts.ATRANS.name)
+        .with(Slot("actor", actor))
+        .with(Slot("thing", thing))
+        .with(Slot("from", from))
+        .with(Slot("to", to))
+        .with(Slot("kind", Concept(InDepthUnderstandingConcepts.Act.name)))
 }
-class ActAtrans(val actor: Human, val obj: PhysicalObject, val from: Human,val to: Human): Act(Acts.ATRANS)
-class ActGrasp(val actor: Human, val obj: PhysicalObject): Act(Acts.GRASP) {
-    val instr = ActMove(actor, Concept("fingers"), obj)
+fun buildGrasp(actor: Concept, thing: Concept): Concept {
+    return Concept(Acts.GRASP.name)
+        .with(Slot("actor", actor))
+        .with(Slot("thing", thing))
+        .with(Slot("instr", buildMove(actor, Concept("fingers"), thing)))
+        .with(Slot("kind", Concept(InDepthUnderstandingConcepts.Act.name)))
 }
-//FIXME obj could be FOOD?
-class ActIngest(val actor: Human, val obj: Concept): Act(Acts.INGEST)
-class ActMove(val actor: Human, val obj: Concept, val to: Concept): Act(Acts.MOVE)
-class ActMtrans(val actor: Human, val obj: Concept, val from: Human, val to: Human): Act(Acts.MTRANS)
-class ActPropel(val actor: Concept, val obj: Concept): Act(Acts.PROPEL)
-class ActPtrans(val actor: Human, val thing: Concept?, val to: Concept?, val instr: Act?): Act(Acts.PTRANS)
-class ActAttend(val actor: Human, val obj: Concept?, val to: Concept?): Act(Acts.ATTEND)
-class Human(val firstName: String, val lastName: String = "", val gender: Gender): Concept(firstName) {
-    init {
-        kinds.add(InDepthUnderstandingConcepts.Human.name)
-    }
+fun buildMove(actor: Concept, thing: Concept, to: Concept): Concept {
+    return Concept(Acts.MOVE.name)
+        .with(Slot("actor", actor))
+        .with(Slot("thing", thing))
+        .with(Slot("to", to))
+        .with(Slot("kind", Concept(InDepthUnderstandingConcepts.Act.name)))
+}
+fun buildIngest(actor: Concept, thing:Concept): Concept {
+    return Concept(Acts.INGEST.name)
+        .with(Slot("actor", actor))
+        .with(Slot("thing", thing))
+        .with(Slot("kind", Concept(InDepthUnderstandingConcepts.Act.name)))
+}
+fun buildMTrans(actor: Concept, thing: Concept, from: Concept, to: Concept): Concept {
+    return Concept(Acts.MTRANS.name)
+        .with(Slot("actor", actor))
+        .with(Slot("thing", thing))
+        .with(Slot("from", from))
+        .with(Slot("to", to))
+        .with(Slot("kind", Concept(InDepthUnderstandingConcepts.Act.name)))
+}
+fun buildPropel(actor: Concept, thing: Concept): Concept {
+    return Concept(Acts.PROPEL.name)
+        .with(Slot("actor", actor))
+        .with(Slot("thing", thing))
+        .with(Slot("kind", Concept(InDepthUnderstandingConcepts.Act.name)))
+}
+fun buildPTrans(actor: Concept, thing: Concept?, to: Concept?, instr: Concept?): Concept {
+    return Concept(Acts.PTRANS.name)
+        .with(Slot("actor", actor))
+        .with(Slot("thing", thing))
+        .with(Slot("to", to))
+        .with(Slot("instr", instr))
+        .with(Slot("kind", Concept(InDepthUnderstandingConcepts.Act.name)))
+}
+fun buildAttend(actor: Concept, thing: Concept?, to: Concept?): Concept {
+    return Concept(Acts.ATTEND.name)
+        .with(Slot("actor", actor))
+        .with(Slot("thing", thing))
+        .with(Slot("to", to))
+        .with(Slot("kind", Concept(InDepthUnderstandingConcepts.Act.name)))
 }
 
 enum class PhysicalObjectKind() {
+    PhysicalObject,
     Container,
     GameObject,
     Book,
@@ -111,75 +154,76 @@ enum class PhysicalObjectKind() {
 // FIXME how to define this? force
 val gravity = Concept("gravity")
 
-open class PhysicalObject(kind: PhysicalObjectKind, name: String): Concept(name) {
-    init {
-        kinds.add(InDepthUnderstandingConcepts.PhysicalObject.name)
-        kinds.add(kind.name)
-    }
-}
-
 class WordBall(): WordHandler("ball") {
     override fun build(wordContext: WordContext): List<Demon> {
-        wordContext.defHolder.value = PhysicalObject(PhysicalObjectKind.GameObject, "ball")
+        wordContext.defHolder.value = buildPhysicalObject(PhysicalObjectKind.GameObject.name, word)
         return listOf(SaveObjectDemon(wordContext))
     }
 }
 
 class WordBox(): WordHandler("box") {
     override fun build(wordContext: WordContext): List<Demon> {
-        wordContext.defHolder.value = PhysicalObject(PhysicalObjectKind.Container, "box")
+        wordContext.defHolder.value =  buildPhysicalObject(PhysicalObjectKind.Container.name, word)
         return listOf()
     }
 }
 
 class WordHome(): WordHandler("home") {
     override fun build(wordContext: WordContext): List<Demon> {
-        wordContext.defHolder.value = Location("Home", "home")
+        //FIXME not sure if this model matches box/ball structure
+        wordContext.defHolder.value = Concept("Location")
+            .with(Slot("Type", Concept("Residence")))
+            .with(Slot("name", Concept(word)))
         return listOf()
     }
 }
 
 // Exercise 1
-class WordPerson(val human: Human, word: String = human.firstName): WordHandler(word) {
+class WordPerson(val human: Concept, word: String = human.valueName("firstName")?:"unknown"): WordHandler(word) {
     override fun build(wordContext: WordContext): List<Demon> {
         // Fixme - not sure about the load/reuse
         return listOf(LoadCharacterDemon(human, wordContext), SaveCharacterDemon(wordContext))
     }
 }
 
+fun buildPhysicalObject(kind: String, name: String): Concept {
+    return Concept(PhysicalObjectKind.PhysicalObject.name)
+        .with(Slot("kind", Concept(kind)))
+        .with(Slot("name", Concept(name)))
+}
+
 class WordBook(): WordHandler("book") {
     override fun build(wordContext: WordContext): List<Demon> {
-        wordContext.defHolder.value = PhysicalObject(PhysicalObjectKind.GameObject, "book")
+        wordContext.defHolder.value =  buildPhysicalObject(PhysicalObjectKind.Book.name, word)
         return listOf(SaveObjectDemon(wordContext))
     }
 }
 
-class Food(foodKind: String, name: String): PhysicalObject(PhysicalObjectKind.Food, name) {
-    init {
-        kinds.add(foodKind)
-    }
+enum class FoodKind {
+    Lobster
 }
 
-class Location(locationKind: String, name: String): PhysicalObject(PhysicalObjectKind.Location, name) {
-    init {
-        kinds.add(locationKind)
-    }
+fun buildFood(kindOfFood: String, name: String = kindOfFood): Concept {
+    return Concept(PhysicalObjectKind.Food.name)
+        .with(Slot("kind", Concept(kindOfFood)))
+        .with(Slot("name", Concept(name)))
 }
 
 class WordLobster(): WordHandler("lobster") {
     override fun build(wordContext: WordContext): List<Demon> {
-        wordContext.defHolder.value = Food("Lobster", "lobster")
+        wordContext.defHolder.value =  buildFood(FoodKind.Lobster.name, word)
         return listOf(SaveObjectDemon(wordContext))
     }
 }
 
-class LoadCharacterDemon(val human: Human, wordContext: WordContext): Demon(wordContext) {
+class LoadCharacterDemon(val human: Concept, wordContext: WordContext): Demon(wordContext) {
     override fun run() {
         if (!wordContext.isDefSet()) {
-            var character: Human? = wordContext.context.workingMemory.findCharacter(human.firstName)
+            val firstName = human.valueName("firstName", "missing")
+            var character: Concept? = wordContext.context.workingMemory.findCharacter(firstName)
             if (character == null && wordContext.context.qaMode) {
                 // FIXME try and get away from the qaMode test here
-                throw NoMentionOfCharacter(human.firstName)
+                throw NoMentionOfCharacter(firstName)
             }
             if (character == null) {
                 character = human
@@ -192,15 +236,30 @@ class LoadCharacterDemon(val human: Human, wordContext: WordContext): Demon(word
     }
 }
 
+open class ConceptAccessor(val concept: Concept) {
+
+}
+
+class Human(concept: Concept): ConceptAccessor(concept) {
+    fun isCompatible(): Boolean {
+        return concept.name == InDepthUnderstandingConcepts.Human.name
+    }
+    fun firstName(): String? {
+        return concept.valueName("firstName")
+    }
+}
+
 class SaveCharacterDemon(wordContext: WordContext): Demon(wordContext){
     override fun run() {
         val character = wordContext.def()
-        if (character is Human) {
+        if (character != null && Human(character).isCompatible()) {
             wordContext.context.mostRecentCharacter = character
             if (wordContext.context.localCharacter != null) {
                 wordContext.context.localCharacter = character
             }
             active = false
+        } else {
+            println("SaveCharacter failed as def = $character")
         }
     }
 }
@@ -226,21 +285,21 @@ class WordPicked(): WordHandler("picked") {
                 if (wordContext.isDefSet() || !nextWordIsUp) {
                     active = false
                 } else {
-                    val humanConcept = humanHolder?.value as? Human
-                    val objectConcept = objectHolder?.value as? PhysicalObject
+                    val humanConcept = humanHolder?.value
+                    val objectConcept = objectHolder?.value
                     if (humanConcept != null && objectConcept != null) {
                         humanHolder?.addFlag(ParserFlags.Inside)
                         objectHolder?.addFlag(ParserFlags.Inside)
-                        wordContext.defHolder.value = ActGrasp(humanConcept, objectConcept)
+                        wordContext.defHolder.value = buildGrasp(humanConcept, objectConcept)
                         active = false
                     }
                 }
             }
         }
-        val humanBefore = ExpectDemon(matchConceptByClass<Human>(), SearchDirection.Before, wordContext) {
+        val humanBefore = ExpectDemon(matchConceptByHead(InDepthUnderstandingConcepts.Human.name), SearchDirection.Before, wordContext) {
             pickUp.humanHolder = it
         }
-        val objectAfter = ExpectDemon(matchConceptByClass<PhysicalObject>(), SearchDirection.After, wordContext) {
+        val objectAfter = ExpectDemon(matchConceptByHead(InDepthUnderstandingConcepts.PhysicalObject.name), SearchDirection.After, wordContext) {
             pickUp.objectHolder = it
         }
 
@@ -259,28 +318,28 @@ class WordDropped(): WordHandler("dropped") {
                 if (wordContext.isDefSet()) {
                     active = false
                 } else {
-                    val actorConcept = actorHolder?.value as? Human
+                    val actorConcept = actorHolder?.value
                     val thingConcept = thingHolder?.value
                     val toConcept = toHolder?.value
                     if (actorConcept != null && thingConcept != null && toConcept != null) {
                         actorHolder?.addFlag(ParserFlags.Inside)
                         thingHolder?.addFlag(ParserFlags.Inside)
                         toHolder?.addFlag(ParserFlags.Inside)
-                        wordContext.defHolder.value = ActPtrans(actorConcept, thingConcept, toConcept, ActPropel(gravity, thingConcept))
+                        wordContext.defHolder.value = buildPTrans(actorConcept, thingConcept, toConcept, buildPropel(gravity, thingConcept))
                         active = false
                     }
                 }
             }
         }
-        val humanBefore = ExpectDemon(matchConceptByClass<Human>(), SearchDirection.Before, wordContext) {
+        val humanBefore = ExpectDemon(matchConceptByHead(InDepthUnderstandingConcepts.Human.name), SearchDirection.Before, wordContext) {
             dropped.actorHolder = it
         }
-        val thing = ExpectDemon(matchConceptByClass<PhysicalObject>(), SearchDirection.After, wordContext) {
+        val thing = ExpectDemon(matchConceptByHead(InDepthUnderstandingConcepts.PhysicalObject.name), SearchDirection.After, wordContext) {
             dropped.thingHolder = it
         }
         val matchers = matchAll(listOf(
             matchPrepIn(setOf(Preposition.In.name, Preposition.Into.name, Preposition.On.name)),
-            matchConceptByKind(setOf(InDepthUnderstandingConcepts.Human.name, InDepthUnderstandingConcepts.PhysicalObject.name))
+            matchConceptByHead(setOf(InDepthUnderstandingConcepts.Human.name, InDepthUnderstandingConcepts.PhysicalObject.name))
         ))
         var to = PrepDemon(matchers, SearchDirection.After, wordContext) {
             dropped.toHolder = it
@@ -292,14 +351,18 @@ class WordDropped(): WordHandler("dropped") {
 
 class WordIn(): WordHandler("in") {
     override fun build(wordContext: WordContext): List<Demon> {
-        wordContext.defHolder.value = Prep(Preposition.In.name)
+        wordContext.defHolder.value = buildPrep(Preposition.In.name)
 
-        val matcher = matchConceptByKind(setOf(InDepthUnderstandingConcepts.PhysicalObject.name, InDepthUnderstandingConcepts.Setting.name))
+        val matcher = matchConceptByHead(setOf(InDepthUnderstandingConcepts.PhysicalObject.name, InDepthUnderstandingConcepts.Setting.name))
         val addPrepObj = InsertAfterDemon(matcher, wordContext) {
             if (wordContext.isDefSet()) {
-                wordContext.defHolder.addFlag(ParserFlags.Inside)
-                it.value?.prepobj = wordContext.defHolder.value as? Prep
-                println("Updated with prepobj concept=${it}")
+                val itValue = it.value
+                val holderValue = wordContext.defHolder.value
+                if (itValue != null && holderValue != null) {
+                    withPrepObj(itValue, holderValue)
+                    wordContext.defHolder.addFlag(ParserFlags.Inside)
+                    println("Updated with prepobj concept=${it}")
+                }
             }
         }
         return listOf(addPrepObj)
@@ -328,26 +391,26 @@ class WordGave(): WordHandler("gave") {
                 if (wordContext.isDefSet()) {
                     active = false
                 } else {
-                    val actorConcept = actorHolder?.value as? Human
-                    val thingConcept = thingHolder?.value as? PhysicalObject
-                    val toConcept = toHolder?.value as? Human
+                    val actorConcept = actorHolder?.value
+                    val thingConcept = thingHolder?.value
+                    val toConcept = toHolder?.value
                     if (actorConcept != null && thingConcept != null && toConcept != null) {
                         actorHolder?.addFlag(ParserFlags.Inside)
                         thingHolder?.addFlag(ParserFlags.Inside)
                         toHolder?.addFlag(ParserFlags.Inside)
-                        wordContext.defHolder.value = ActAtrans(actorConcept, thingConcept, actorConcept, toConcept)
+                        wordContext.defHolder.value = buildATrans(actorConcept, thingConcept, actorConcept, toConcept)
                         active = false
                     }
                 }
             }
         }
-        val humanBefore = ExpectDemon(matchConceptByClass<Human>(), SearchDirection.Before, wordContext) {
+        val humanBefore = ExpectDemon(matchConceptByHead(InDepthUnderstandingConcepts.Human.name), SearchDirection.Before, wordContext) {
             gave.actorHolder = it
         }
-        val thing = ExpectDemon(matchConceptByClass<PhysicalObject>(), SearchDirection.After, wordContext) {
+        val thing = ExpectDemon(matchConceptByHead(InDepthUnderstandingConcepts.PhysicalObject.name), SearchDirection.After, wordContext) {
             gave.thingHolder = it
         }
-        val humanAfter = ExpectDemon(matchConceptByClass<Human>(), SearchDirection.After, wordContext) {
+        val humanAfter = ExpectDemon(matchConceptByHead(InDepthUnderstandingConcepts.Human.name), SearchDirection.After, wordContext) {
             gave.toHolder = it
         }
 
@@ -366,23 +429,23 @@ class WordKiss(): WordHandler("kissed") {
                 if (wordContext.isDefSet()) {
                     active = false
                 } else {
-                    val actorConcept = actorHolder?.value as? Human
-                    val toConcept = toHolder?.value as? Human
+                    val actorConcept = actorHolder?.value
+                    val toConcept = toHolder?.value
                     if (actorConcept != null && toConcept != null) {
                         actorHolder?.addFlag(ParserFlags.Inside)
                         toHolder?.addFlag(ParserFlags.Inside)
                         // FIXME better representation....
-                        val lips = PhysicalObject(PhysicalObjectKind.BodyPart, "lips")
-                        wordContext.defHolder.value = ActAttend(actorConcept, lips, toConcept)
+                        val lips = buildPhysicalObject(PhysicalObjectKind.BodyPart.name, "lips")
+                        wordContext.defHolder.value = buildAttend(actorConcept, lips, toConcept)
                         active = false
                     }
                 }
             }
         }
-        val humanBefore = ExpectDemon(matchConceptByClass<Human>(), SearchDirection.Before, wordContext) {
+        val humanBefore = ExpectDemon(matchConceptByHead(InDepthUnderstandingConcepts.Human.name), SearchDirection.Before, wordContext) {
             kiss.actorHolder = it
         }
-        val humanAfter = ExpectDemon(matchConceptByClass<Human>(), SearchDirection.After, wordContext) {
+        val humanAfter = ExpectDemon(matchConceptByHead(InDepthUnderstandingConcepts.Human.name), SearchDirection.After, wordContext) {
             kiss.toHolder = it
         }
 
@@ -401,27 +464,27 @@ class WordTold(): WordHandler("told") {
                 if (wordContext.isDefSet()) {
                     active = false
                 } else {
-                    val actorConcept = actorHolder?.value as? Human
+                    val actorConcept = actorHolder?.value
                     val thingConcept = thingHolder?.value
-                    val toConcept = toHolder?.value as? Human
+                    val toConcept = toHolder?.value
                     if (actorConcept != null && thingConcept != null && toConcept != null) {
                         actorHolder?.addFlag(ParserFlags.Inside)
                         thingHolder?.addFlag(ParserFlags.Inside)
                         toHolder?.addFlag(ParserFlags.Inside)
-                        wordContext.defHolder.value = ActMtrans(actorConcept, thingConcept, actorConcept, toConcept)
+                        wordContext.defHolder.value = buildMTrans(actorConcept, thingConcept, actorConcept, toConcept)
                         active = false
                     }
                 }
             }
         }
-        val humanBefore = ExpectDemon(matchConceptByClass<Human>(), SearchDirection.Before, wordContext) {
+        val humanBefore = ExpectDemon(matchConceptByHead(InDepthUnderstandingConcepts.Human.name), SearchDirection.Before, wordContext) {
             demon.actorHolder = it
         }
         // fIXME unsure of this, really the "that" word to find the linked act?
         val actAfter = ExpectDemon(matchConceptByKind(InDepthUnderstandingConcepts.Act.name), SearchDirection.After, wordContext) {
             demon.thingHolder = it
         }
-        val humanAfter = ExpectDemon(matchConceptByClass<Human>(), SearchDirection.After, wordContext) {
+        val humanAfter = ExpectDemon(matchConceptByHead(InDepthUnderstandingConcepts.Human.name), SearchDirection.After, wordContext) {
             demon.toHolder = it
         }
 
@@ -440,22 +503,22 @@ class WordWent(): WordHandler("went") {
                 if (wordContext.isDefSet()) {
                     active = false
                 } else {
-                    val actorConcept = actorHolder?.value as? Human
-                    val locationConcept = locationHolder?.value as? PhysicalObject
+                    val actorConcept = actorHolder?.value
+                    val locationConcept = locationHolder?.value
                     if (actorConcept != null && locationConcept != null) {
                         actorHolder?.addFlag(ParserFlags.Inside)
                         locationHolder?.addFlag(ParserFlags.Inside)
-                        wordContext.defHolder.value = ActPtrans(actorConcept, null, locationConcept, null)
+                        wordContext.defHolder.value = buildPTrans(actorConcept, null, locationConcept, null)
                         active = false
                     }
                 }
             }
         }
-        val humanBefore = ExpectDemon(matchConceptByClass<Human>(), SearchDirection.Before, wordContext) {
+        val humanBefore = ExpectDemon(matchConceptByHead(InDepthUnderstandingConcepts.Human.name), SearchDirection.Before, wordContext) {
             demon.actorHolder = it
         }
-        // FIXME should this be a LOCATION
-        val locationAfter = ExpectDemon(matchConceptByClass<PhysicalObject>(), SearchDirection.After, wordContext) {
+        // FIXME should this be a LOCATION (Was physical location)
+        val locationAfter = ExpectDemon(matchConceptByHead(InDepthUnderstandingConcepts.Location.name), SearchDirection.After, wordContext) {
             demon.locationHolder = it
         }
 
@@ -473,21 +536,21 @@ class WordEats(): WordHandler("eats") {
                 if (wordContext.isDefSet()) {
                     active = false
                 } else {
-                    val actorConcept = actorHolder?.value as? Human
-                    val thingConcept = foodHolder?.value as? PhysicalObject
+                    val actorConcept = actorHolder?.value
+                    val thingConcept = foodHolder?.value
                     if (actorConcept != null && thingConcept != null) {
                         actorHolder?.addFlag(ParserFlags.Inside)
                         foodHolder?.addFlag(ParserFlags.Inside)
-                        wordContext.defHolder.value = ActIngest(actorConcept, thingConcept)
+                        wordContext.defHolder.value = buildIngest(actorConcept, thingConcept)
                         active = false
                     }
                 }
             }
         }
-        val humanBefore = ExpectDemon(matchConceptByClass<Human>(), SearchDirection.Before, wordContext) {
+        val humanBefore = ExpectDemon(matchConceptByHead(InDepthUnderstandingConcepts.Human.name), SearchDirection.Before, wordContext) {
             demon.actorHolder = it
         }
-        val food = ExpectDemon(matchConceptByKind(PhysicalObjectKind.Food.name), SearchDirection.After, wordContext) {
+        val food = ExpectDemon(matchConceptByHead(PhysicalObjectKind.Food.name), SearchDirection.After, wordContext) {
             demon.foodHolder = it
         }
 
@@ -503,13 +566,14 @@ class ModifierWord(word: String, val modifier: String, val value: String = word)
             override fun run() {
                 val thingConcept = thingHolder?.value
                 if (thingConcept != null) {
-                    thingConcept.addModifier(modifier, value)
+                    thingConcept.with(Slot(modifier, Concept(value)))
+                    //FIXME remove thingConcept.addModifier(modifier, value)
                     active = false
                 }
             }
         }
         //FIXME list of kinds is not complete
-        val thingDemon = ExpectDemon(matchConceptByKind(listOf(InDepthUnderstandingConcepts.Human.name, InDepthUnderstandingConcepts.PhysicalObject.name)), SearchDirection.After, wordContext) {
+        val thingDemon = ExpectDemon(matchConceptByHead(listOf(InDepthUnderstandingConcepts.Human.name, InDepthUnderstandingConcepts.PhysicalObject.name)), SearchDirection.After, wordContext) {
             demon.thingHolder = it
         }
         return listOf(demon, thingDemon)
@@ -519,7 +583,7 @@ class ModifierWord(word: String, val modifier: String, val value: String = word)
 class WordMan(word: String): WordHandler(word) {
     override fun build(wordContext: WordContext): List<Demon> {
         if (!wordContext.isDefSet()) {
-            wordContext.defHolder.value = Human("", "", Gender.Male)
+            wordContext.defHolder.value = buildHuman("", "", Gender.Male)
         }
         return listOf()
     }
@@ -529,16 +593,16 @@ class PronounWord(word: String, val genderMatch: Gender): WordHandler(word) {
     override fun build(wordContext: WordContext): List<Demon> {
         // FIXME partial implementation - also why not use demon
         val localHuman = wordContext.context.localCharacter
-        if (localHuman != null && localHuman.gender == genderMatch) {
+        if (localHuman != null && localHuman.valueName("gender") == genderMatch.name) {
             wordContext.defHolder.value = localHuman
         } else {
             val mostRecentHuman = wordContext.context.mostRecentCharacter
-            if (mostRecentHuman != null && mostRecentHuman.gender == genderMatch) {
+            if (mostRecentHuman != null && mostRecentHuman.valueName("gender") == genderMatch.name) {
                 wordContext.defHolder.value = mostRecentHuman
             }
         }
         if (!wordContext.isDefSet()) {
-            val mostRecentHuman = wordContext.context.workingMemory.charactersRecent.firstOrNull { it.gender == genderMatch }
+            val mostRecentHuman = wordContext.context.workingMemory.charactersRecent.firstOrNull { it.valueName("gender") == genderMatch.name }
             if (mostRecentHuman != null) {
                 wordContext.defHolder.value = mostRecentHuman
             }
@@ -556,6 +620,6 @@ class WordWho(): WordHandler("who") {
 class WhoDemon(wordContext: WordContext): Demon(wordContext) {
     override fun run() {
         //FIXME not sure what to use for placeholder
-        wordContext.defHolder.value = Human("who", "who", Gender.Male)
+        wordContext.defHolder.value = buildHuman("who", "who", Gender.Male)
     }
 }

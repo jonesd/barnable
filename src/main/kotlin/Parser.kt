@@ -1,6 +1,3 @@
-// FIXME using Gson serialization for toString...
-import com.google.gson.Gson
-
 class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
     val workingMemory = WorkingMemory()
     var agenda = Agenda()
@@ -36,7 +33,7 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
             return "No mention of a character named ${e.characterName}."
         }
 
-        val acts = qaMemory.concepts.filterIsInstance<Act>()
+        val acts = qaMemory.concepts.filter{ isActHead(it) }
         if (acts.isEmpty()) {
             return "I don't know."
         }
@@ -44,14 +41,14 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
         val c = acts[0]
         val closestMatch = this.findMatchingConceptFromWorking(c)
         if (closestMatch != null) {
-            if (c is ActAtrans) {
-                if (closestMatch is ActAtrans) {
-                    if (c.actor.firstName == "who") {
-                        return closestMatch.actor.firstName
-                    } else if (c.from.firstName == "who") {
-                        return closestMatch.from.firstName
-                    } else if (c.to.firstName == "who") {
-                        return closestMatch.to.firstName
+            if (c.name == Acts.ATRANS.name) {
+                if (closestMatch.name == Acts.ATRANS.name) {
+                    if (c.value("actor")?.valueName("firstName") == "who") {
+                        return closestMatch.value("actor")?.valueName("firstName") ?: "missing"
+                    } else if (c.value("from")?.valueName("firstName") == "who") {
+                        return closestMatch.value("from")?.valueName("firstName") ?:"missing"
+                    } else if (c.value("to")?.valueName("firstName") == "who") {
+                        return closestMatch.value("to")?.valueName("firstName") ?:  "missing"
                     }
                 }
             }
@@ -59,11 +56,16 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
         return "I don't know."
     }
 
-     fun findMatchingConceptFromWorking(whoAct: Act): Act? {
+    fun isActHead(concept: Concept): Boolean {
+        val names = Acts.values().map { it.name }
+        return names.contains(concept.name)
+    }
+
+     fun findMatchingConceptFromWorking(whoAct: Concept): Concept? {
          println("finding best match for $whoAct")
-         workingMemory.concepts.filterIsInstance<Act>().forEach {
+         workingMemory.concepts.filter{ isActHead(it)}.forEach {
              // FIXME hack....
-                 if (it.act == whoAct.act) {
+                 if (it.name == whoAct.name) {
                      return it
                  }
          }
@@ -127,8 +129,6 @@ class WordContext(val wordIndex: Int, val wordElement: WordElement, val word: St
         totalDemons += 1
         return index
     }
-
-
 }
 
 class SentenceContext(val sentence: TextSentence, val workingMemory: WorkingMemory, val qaMode: Boolean) {
@@ -138,8 +138,8 @@ class SentenceContext(val sentence: TextSentence, val workingMemory: WorkingMemo
     var currentWordIndex = -1;
     // FIXME var currentDemon: Demon? = null
     var mostRecentObject: Concept? = null
-    var mostRecentCharacter: Human? = null
-    var localCharacter: Human? = null
+    var mostRecentCharacter: Concept? = null
+    var localCharacter: Concept? = null
     val wordContexts = mutableListOf<WordContext>()
 
     fun pushWord(wordContext: WordContext) {
@@ -164,20 +164,20 @@ class WorkingMemory() {
         reasoningScripts.add(script)
     }
 
-    val charactersRecent = mutableListOf<Human>()
-    val characters = mutableMapOf<String, Human>()
+    val charactersRecent = mutableListOf<Concept>()
+    val characters = mutableMapOf<String, Concept>()
 
-    fun findCharacter(firstName: String): Human? {
+    fun findCharacter(firstName: String): Concept? {
         //FIXME should be fancier...
         return characters[firstName.toLowerCase()]
     }
 
-    fun addCharacter(human: Human) {
-        characters[human.firstName.toLowerCase()] = human
+    fun addCharacter(human: Concept) {
+        characters[human.valueName("firstName", "unknown").toLowerCase()] = human
         markAsRecentCharacter(human)
     }
 
-    fun markAsRecentCharacter(human: Human) {
+    fun markAsRecentCharacter(human: Concept) {
         charactersRecent.remove(human)
         charactersRecent.add(0, human)
     }
@@ -267,44 +267,103 @@ class ConceptHolder(val instanceNumber: Int) {
     }
 }
 
-open class Concept(val name: String) {
-    val kinds = mutableListOf<String>()
-    var prepobj: Prep? = null
-    val modifiers = mutableMapOf<String, String>()
+class Concept(val name: String) {
+    private val slots = mutableMapOf<String,Slot>()
+
+    fun value(slotName: String): Concept? {
+        return slot(slotName)?.value
+    }
+    fun value(slotName: SL): Concept? {
+        return value(slotName.name)
+    }
+    fun valueName(slotName: String): String? {
+        return value(slotName)?.name
+    }
+    fun valueName(slotName: String, default: String = "unknown"): String {
+        return value(slotName)?.name ?: default
+    }
+    fun valueName(slotName: SL): String? {
+        return valueName(slotName.name)
+    }
+    fun value(slotName: String, value: Concept?): Concept {
+        var slot = slot(slotName)
+        if (slot != null) {
+            slot.value = value
+        } else {
+            slot = Slot(slotName, value)
+            // FIXME not thread safe?
+            with(slot)
+        }
+        return this
+    }
+
+    fun slot(name:String): Slot? {
+        return slots[name]
+    }
+
+    fun with(slot: Slot): Concept {
+        // FIXME what if slot is already present?
+        slots[slot.name] = slot
+        return this
+    }
 
     override fun toString(): String {
-        return Gson().toJson(this)
+        return printIndented(0)
+        return "($name ${slots.values.map{it.toString()}.joinToString(separator = "\n  ") { it }})"
     }
 
-    fun isKind(kind: String): Boolean {
-        return kinds.contains(kind)
+    fun printIndented(indent: Int = 1): String {
+        val indentString = " ".repeat(indent * 2)
+        val continuedString = " ".repeat((indent + 1) * 2)
+        return "($name ${slots.values.map{it.printIndented(indent + 1)}.joinToString(separator = "\n$indentString") { it }})"
     }
+}
 
-    fun addModifier(modifier: String, value: String) {
-        modifiers.put(modifier, value)
+class Slot(val name: String, var value: Concept? = null) {
+    override fun toString(): String {
+        return "$name $value}"
     }
+    fun printIndented(indent: Int = 1): String {
+        val indentString = " ".repeat(indent * 2)
+        return "$indentString$name ${value?.printIndented(indent)}"
+    }
+}
 
-    fun modifier(modifier: String): String? {
-        return modifiers[modifier]
-    }
+class DemonProducer() {
+
 }
 
 enum class Preposition {
     In,
     Into,
-    On
+    On,
+    To,
+    With
 }
 
-class Prep(val value: String): Concept("prep")
+fun withPrepObj(concept: Concept, prep: Concept) {
+    concept.with(Slot(SL.PrepObject.name, prep))
+}
+fun buildPrep(preposition: String): Concept {
+    return Concept("prep")
+        .with(Slot("is", Concept(preposition)))
+}
 
 enum class ParserKinds {
     Conjunction
 }
 
-class ConjunctionAnd(): Concept("and") {
-    init {
-        kinds.add(ParserKinds.Conjunction.name)
-    }
+enum class Conjunction {
+    And
+}
+
+fun withConjunctionObj(concept: Concept, conjunction: Concept) {
+    concept.with(Slot("conjObj", conjunction))
+}
+
+fun buildConjunction(conjunction: String): Concept {
+    return Concept("conjunction")
+        .with(Slot("is", Concept(conjunction)))
 }
 
 enum class ParserFlags() {
@@ -342,20 +401,24 @@ enum class SearchDirection {
     Before
 }
 
+enum class SL {
+    PrepObject
+}
+
 fun matchPrepIn(preps: Collection<String>): (Concept?) -> Boolean {
-    return { c -> preps.contains(c?.prepobj?.value) }
+    return { c -> preps.contains(c?.value(SL.PrepObject)?.valueName("is")) }
+}
+
+fun matchConceptByHead(kind: String): (Concept?) -> Boolean {
+    return { c -> c?.name == kind }
 }
 
 fun matchConceptByKind(kind: String): (Concept?) -> Boolean {
-    return { c -> c != null && c.isKind(kind) }
+    return { c -> c?.valueName("kind") == kind }
 }
 
-fun matchConceptByKind(kinds: Collection<String>): (Concept?) -> Boolean {
-    return { c -> c != null && c.kinds.any{ it in kinds }}
-}
-
-inline fun <reified T> matchConceptByClass(): (Concept?) -> Boolean {
-    return { c -> c != null && c is T }
+fun matchConceptByHead(kinds: Collection<String>): (Concept?) -> Boolean {
+    return { c -> kinds.contains(c?.name)}
 }
 
 inline fun matchAny(matchers: List<(Concept?) -> Boolean>): (Concept?) -> Boolean {
@@ -367,7 +430,7 @@ inline fun matchAll(matchers: List<(Concept?) -> Boolean>): (Concept?) -> Boolea
 }
 
 inline fun matchConjunction(): (Concept?) -> Boolean {
-    return matchConceptByKind(ParserKinds.Conjunction.name)
+    return matchConceptByHead(ParserKinds.Conjunction.name)
 }
 
 inline fun matchNever(): (Concept?) -> Boolean {
@@ -415,13 +478,13 @@ class ExpectDemon(val matcher: (Concept?) -> Boolean, val direction: SearchDirec
     }
 
     private fun isConjunction(concept: Concept?): Boolean {
-        return matchConceptByKind(ParserKinds.Conjunction.name)(concept)
+        return matchConceptByHead(ParserKinds.Conjunction.name)(concept)
     }
 }
 
 class WordAnd(): WordHandler("and") {
     override fun build(wordContext: WordContext): List<Demon> {
-        wordContext.defHolder.value = ConjunctionAnd()
+        wordContext.defHolder.value = buildConjunction(Conjunction.And.name)
         return listOf(IgnoreDemon(wordContext))
     }
 }

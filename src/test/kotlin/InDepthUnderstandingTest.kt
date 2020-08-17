@@ -17,24 +17,22 @@ class InDepthUnderstandingTest {
 
         val grasp = textProcessor.workingMemory.concepts[0]
         assertEquals("GRASP", grasp.name)
-        val actGrasp = grasp as ActGrasp
-        assertEquals("John",  actGrasp.actor.firstName)
-        assertEquals("ball", actGrasp.obj.name)
-        val actGraspInstr = grasp.instr
+        assertEquals("John",  grasp.value("actor")?.valueName("firstName"))
+        assertEquals("ball", grasp.value("thing")?.valueName("name"))
+        val actGraspInstr = grasp.value("instr")!!
         // FIXME move structural element not present, rely on name
         assertEquals("MOVE", actGraspInstr.name)
-        assertEquals("John", actGraspInstr.actor.firstName)
-        assertEquals("ball", (actGraspInstr.to as PhysicalObject).name)
+        assertEquals("John", actGraspInstr.value("actor")?.valueName("firstName"))
+        assertEquals("ball", actGraspInstr.value("to")?.valueName("name"))
 
         val ptrans = textProcessor.workingMemory.concepts[1]
         assertEquals("PTRANS", ptrans.name)
-        val actPtrans = ptrans as ActPtrans
-        assertEquals("John", actPtrans.actor.firstName)
+        assertEquals("John", ptrans.value("actor")?.valueName("firstName"))
         // FIXME thing should be obj
-        assertEquals("ball", actPtrans.thing?.name)
-        assertEquals("box", (actPtrans.to as PhysicalObject).name)
-        val actPtransIntr = actPtrans.instr as ActPropel
-        assertEquals("gravity", actPtransIntr.actor.name)
+        assertEquals("ball", ptrans.value("thing")?.valueName("name"))
+        assertEquals("box", ptrans.value("to")?.valueName("name"))
+        val ptransIntr = ptrans.value("instr")
+        assertEquals("gravity", ptransIntr?.value("actor")?.name)
     }
 
     @Test
@@ -49,12 +47,11 @@ class InDepthUnderstandingTest {
 
         val atrans = textProcessor.workingMemory.concepts[0]
         assertEquals("ATRANS", atrans.name)
-        val actAtrans = atrans as ActAtrans
-        assertEquals("John", actAtrans.actor.firstName)
+        assertEquals("John", atrans.value("actor")?.valueName("firstName"))
         //FIXME should match TYPE (BOOK)
-        assertEquals("book", actAtrans.obj.name)
-        assertEquals("Mary", actAtrans.to.firstName)
-        assertEquals("John", actAtrans.from.firstName)
+        assertEquals("book", atrans.value("thing")?.valueName("name"))
+        assertEquals("Mary", atrans.value("to")?.valueName("firstName"))
+        assertEquals("John", atrans.value("from")?.valueName("firstName"))
     }
 
     @Test
@@ -88,16 +85,15 @@ class InDepthUnderstandingTest {
 
         val mtrans = textProcessor.workingMemory.concepts[0]
         assertEquals("MTRANS", mtrans.name)
-        val actMtrans = mtrans as ActMtrans
-        assertEquals("Fred", actMtrans.actor.firstName)
-        assertEquals("Fred", actMtrans.from.firstName)
-        assertEquals("Mary", actMtrans.to.firstName)
-        val ingest = actMtrans.obj as ActIngest
+        assertEquals("Fred", mtrans.value("actor")?.valueName("firstName"))
+        assertEquals("Fred", mtrans.value("from")?.valueName("firstName"))
+        assertEquals("Mary", mtrans.value("to")?.valueName("firstName"))
+        val ingest = mtrans.value("thing")!!
         //FIXME this what the book has:
         // assertEquals("Fred", ingest.actor.firstName)
         // this seems correct:
-        assertEquals("John", ingest.actor.firstName)
-        assertTrue(ingest.obj.isKind("Lobster"))
+        assertEquals("John", ingest.value("actor")?.valueName("firstName"))
+        assertEquals("Lobster", ingest.value("thing")?.valueName("kind"))
     }
 
     @Test
@@ -110,8 +106,8 @@ class InDepthUnderstandingTest {
 
         assertEquals(1, workingMemory.concepts.size)
         val concept = textProcessor.workingMemory.concepts.first()
-        assertTrue(concept is PhysicalObject)
-        assertEquals("red", (concept as PhysicalObject).modifier("colour"))
+        assertEquals(PhysicalObjectKind.Book.name, concept.valueName("kind"))
+        assertEquals("red", concept.valueName("colour"))
     }
 
     @Test
@@ -124,8 +120,8 @@ class InDepthUnderstandingTest {
 
         assertEquals(1, workingMemory.concepts.size)
         val concept = textProcessor.workingMemory.concepts.first()
-        assertEquals("GT-NORM", concept.modifier("age"))
-        assertEquals("LT-NORM", concept.modifier("weight"))
+        assertEquals("GT-NORM", concept.valueName("age"))
+        assertEquals("LT-NORM", concept.valueName("weight"))
     }
 
     @Test
@@ -135,16 +131,15 @@ class InDepthUnderstandingTest {
 
         val textProcessor = TextProcessor(textModel, lexicon)
         val workingMemory = textProcessor.runProcessor()
+        println(workingMemory.concepts)
 
         assertEquals(2, workingMemory.concepts.size)
         val travel = textProcessor.workingMemory.concepts[0]
-        val travelPtrans =(travel as ActPtrans)
-        assertEquals("John", travelPtrans.actor.firstName)
-        assertEquals("home", travelPtrans.to?.name)
-        val kiss = textProcessor.workingMemory.concepts[1]
-        val kissAttend = kiss as ActAttend
-        assertEquals("John", kissAttend.actor.firstName)
-        assertEquals("Anne", (kissAttend.to as Human).firstName)
+        assertEquals("John", travel.value("actor")?.valueName("firstName"))
+        assertEquals("home", travel.value("to")?.valueName("name"))
+        val kissAttend = textProcessor.workingMemory.concepts[1]
+        assertEquals("John", kissAttend.value("actor")?.valueName("firstName"))
+        assertEquals("Anne", kissAttend.value("to")?.valueName("firstName"))
 
         //FIXME more assertions
     }

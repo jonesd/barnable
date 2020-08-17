@@ -20,7 +20,7 @@ class WordHurtHandler() : WordHandler("hurt") {
         )
     }*/
 }
-
+/* FIXME
 // Core Concepts
 class Goal(name: String): Concept(name)
 class Plan(name: String): Concept(name)
@@ -33,7 +33,7 @@ class Country(name: String): Concept(name)
 class Product(name: String): Concept(name)
 class EconomicQuantityConcept(name: String): Concept(name)
 class Occupation(name: String): Concept(name)
-
+*/
 val ConceptAuthorities = listOf("the Reagan administration")
 val ConceptInstitutions = listOf("the Common Market", "steel industry", "automobile industry")
 val ConceptCountries = listOf("United States", "Japan")
