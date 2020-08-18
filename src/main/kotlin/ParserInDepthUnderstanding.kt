@@ -3,8 +3,8 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     val lexicon = Lexicon();
     lexicon.addMapping(WordPerson(buildHuman("John", "", Gender.Male)))
     lexicon.addMapping(WordPick())
-    lexicon.addMapping(WordIgnore("up"))
-    lexicon.addMapping(WordIgnore("the"))
+    lexicon.addMapping(WordIgnore(EntryWord("up")))
+    lexicon.addMapping(WordIgnore(EntryWord("the")))
     lexicon.addMapping(WordBall())
     lexicon.addMapping(WordAnd())
     lexicon.addMapping(WordDrop())
@@ -14,14 +14,14 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
 
     lexicon.addMapping(WordPerson(buildHuman("Mary", "", Gender.Female)))
     lexicon.addMapping(WordGive())
-    lexicon.addMapping(WordIgnore("a"))
+    lexicon.addMapping(WordIgnore(EntryWord("a").and("an")))
     lexicon.addMapping(WordBook())
 
     lexicon.addMapping(WordPerson(buildHuman("Fred", "", Gender.Male)))
     lexicon.addMapping(WordTell())
-    // FIXME not sure whether should ignore that - its a subordinate conjnuction and should link
+    // FIXME not sure whether should ignore that - its a subordinate conjunction and should link
     // the Mtrans from "told" to the Ingest of "eats"
-    lexicon.addMapping(WordIgnore("that"))
+    lexicon.addMapping(WordIgnore(EntryWord("that")))
     lexicon.addMapping(WordEats())
     lexicon.addMapping(WordLobster())
 

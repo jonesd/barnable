@@ -371,7 +371,7 @@ enum class ParserFlags() {
     Ignore // Concept has been processed and can be ignored
 }
 
-class WordIgnore(word: String): WordHandler(EntryWord(word)) {
+class WordIgnore(word: EntryWord): WordHandler(word) {
     override fun build(wordContext: WordContext): List<Demon> {
         return listOf(IgnoreDemon(wordContext))
     }
