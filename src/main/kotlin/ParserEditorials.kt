@@ -1,4 +1,4 @@
-class WordRecentHandler() : WordHandler("recent") {
+class WordRecentHandler() : WordHandler(EntryWord("recent")) {
     /*
     override fun createDemons(): List<Demon> {
         return listOf(
@@ -9,7 +9,7 @@ class WordRecentHandler() : WordHandler("recent") {
     }*/
 }
 
-class WordHurtHandler() : WordHandler("hurt") {
+class WordHurtHandler() : WordHandler(EntryWord("hurt")) {
     /*
     override fun createDemons(): List<Demon> {
         return listOf(

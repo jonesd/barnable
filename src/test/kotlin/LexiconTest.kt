@@ -5,7 +5,7 @@ class LexiconTest {
     @Test
     fun `can create concept`() {
         val lexicon = Lexicon()
-        lexicon.addMapping(WordHandler("test"))
+        lexicon.addMapping(WordHandler(EntryWord("test")))
         print(lexicon)
         assertNotNull(lexicon)
     }

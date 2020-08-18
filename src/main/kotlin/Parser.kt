@@ -214,7 +214,7 @@ class Lexicon() {
     val wordMappings: MutableMap<String, WordHandler> = mutableMapOf()
 
     fun addMapping(handler: WordHandler) {
-        wordMappings.put(handler.word.toLowerCase(), handler)
+        handler.word.entries().forEach { wordMappings.put(it.toLowerCase(), handler)}
     }
 
     fun findWordHandler(word: String): WordHandler? {
@@ -222,7 +222,7 @@ class Lexicon() {
     }
 }
 
-open class WordHandler(val word: String) {
+open class WordHandler(val word: EntryWord) {
     open fun build(wordContext: WordContext): List<Demon> {
         return listOf()
     }
@@ -371,7 +371,7 @@ enum class ParserFlags() {
     Ignore // Concept has been processed and can be ignored
 }
 
-class WordIgnore(word: String): WordHandler(word) {
+class WordIgnore(word: String): WordHandler(EntryWord(word)) {
     override fun build(wordContext: WordContext): List<Demon> {
         return listOf(IgnoreDemon(wordContext))
     }
@@ -384,7 +384,7 @@ class IgnoreDemon(wordContext: WordContext): Demon(wordContext) {
     }
 }
 
-class WordUnknown(word: String): WordHandler(word) {
+class WordUnknown(word: String): WordHandler(EntryWord(word)) {
     override fun build(wordContext: WordContext): List<Demon> {
         return listOf(UnknownDemon(wordContext))
     }
@@ -482,14 +482,14 @@ class ExpectDemon(val matcher: (Concept?) -> Boolean, val direction: SearchDirec
     }
 }
 
-class WordAnd(): WordHandler("and") {
+class WordAnd(): WordHandler(EntryWord("and")) {
     override fun build(wordContext: WordContext): List<Demon> {
         wordContext.defHolder.value = buildConjunction(Conjunction.And.name)
         return listOf(IgnoreDemon(wordContext))
     }
 }
 
-class WordIt(): WordHandler("it") {
+class WordIt(): WordHandler(EntryWord("it")) {
     override fun build(wordContext: WordContext): List<Demon> {
         return listOf(FindObjectReferenceDemon(wordContext))
     }

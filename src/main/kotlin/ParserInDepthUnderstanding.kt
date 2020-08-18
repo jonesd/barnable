@@ -2,23 +2,23 @@
 fun buildInDepthUnderstandingLexicon(): Lexicon {
     val lexicon = Lexicon();
     lexicon.addMapping(WordPerson(buildHuman("John", "", Gender.Male)))
-    lexicon.addMapping(WordPicked())
+    lexicon.addMapping(WordPick())
     lexicon.addMapping(WordIgnore("up"))
     lexicon.addMapping(WordIgnore("the"))
     lexicon.addMapping(WordBall())
     lexicon.addMapping(WordAnd())
-    lexicon.addMapping(WordDropped())
+    lexicon.addMapping(WordDrop())
     lexicon.addMapping(WordIt())
     lexicon.addMapping(WordIn())
     lexicon.addMapping(WordBox())
 
     lexicon.addMapping(WordPerson(buildHuman("Mary", "", Gender.Female)))
-    lexicon.addMapping(WordGave())
+    lexicon.addMapping(WordGive())
     lexicon.addMapping(WordIgnore("a"))
     lexicon.addMapping(WordBook())
 
     lexicon.addMapping(WordPerson(buildHuman("Fred", "", Gender.Male)))
-    lexicon.addMapping(WordTold())
+    lexicon.addMapping(WordTell())
     // FIXME not sure whether should ignore that - its a subordinate conjnuction and should link
     // the Mtrans from "told" to the Ingest of "eats"
     lexicon.addMapping(WordIgnore("that"))
@@ -41,7 +41,7 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     lexicon.addMapping(PronounWord("he", Gender.Male))
     lexicon.addMapping(PronounWord("she", Gender.Female))
     lexicon.addMapping(WordHome())
-    lexicon.addMapping(WordWent())
+    lexicon.addMapping(WordGo())
     lexicon.addMapping(WordKiss())
 
     // FIXME only for QA
@@ -154,32 +154,32 @@ enum class PhysicalObjectKind() {
 // FIXME how to define this? force
 val gravity = Concept("gravity")
 
-class WordBall(): WordHandler("ball") {
+class WordBall(): WordHandler(EntryWord("ball")) {
     override fun build(wordContext: WordContext): List<Demon> {
-        wordContext.defHolder.value = buildPhysicalObject(PhysicalObjectKind.GameObject.name, word)
+        wordContext.defHolder.value = buildPhysicalObject(PhysicalObjectKind.GameObject.name, word.word)
         return listOf(SaveObjectDemon(wordContext))
     }
 }
 
-class WordBox(): WordHandler("box") {
+class WordBox(): WordHandler(EntryWord("box")) {
     override fun build(wordContext: WordContext): List<Demon> {
-        wordContext.defHolder.value =  buildPhysicalObject(PhysicalObjectKind.Container.name, word)
+        wordContext.defHolder.value =  buildPhysicalObject(PhysicalObjectKind.Container.name, word.word)
         return listOf()
     }
 }
 
-class WordHome(): WordHandler("home") {
+class WordHome(): WordHandler(EntryWord("home")) {
     override fun build(wordContext: WordContext): List<Demon> {
         //FIXME not sure if this model matches box/ball structure
         wordContext.defHolder.value = Concept("Location")
             .with(Slot("Type", Concept("Residence")))
-            .with(Slot("name", Concept(word)))
+            .with(Slot("name", Concept(word.word)))
         return listOf()
     }
 }
 
 // Exercise 1
-class WordPerson(val human: Concept, word: String = human.valueName("firstName")?:"unknown"): WordHandler(word) {
+class WordPerson(val human: Concept, word: String = human.valueName("firstName")?:"unknown"): WordHandler(EntryWord(word)) {
     override fun build(wordContext: WordContext): List<Demon> {
         // Fixme - not sure about the load/reuse
         return listOf(LoadCharacterDemon(human, wordContext), SaveCharacterDemon(wordContext))
@@ -192,9 +192,9 @@ fun buildPhysicalObject(kind: String, name: String): Concept {
         .with(Slot("name", Concept(name)))
 }
 
-class WordBook(): WordHandler("book") {
+class WordBook(): WordHandler(EntryWord("book")) {
     override fun build(wordContext: WordContext): List<Demon> {
-        wordContext.defHolder.value =  buildPhysicalObject(PhysicalObjectKind.Book.name, word)
+        wordContext.defHolder.value =  buildPhysicalObject(PhysicalObjectKind.Book.name, word.word)
         return listOf(SaveObjectDemon(wordContext))
     }
 }
@@ -209,9 +209,9 @@ fun buildFood(kindOfFood: String, name: String = kindOfFood): Concept {
         .with(Slot("name", Concept(name)))
 }
 
-class WordLobster(): WordHandler("lobster") {
+class WordLobster(): WordHandler(EntryWord("lobster")) {
     override fun build(wordContext: WordContext): List<Demon> {
-        wordContext.defHolder.value =  buildFood(FoodKind.Lobster.name, word)
+        wordContext.defHolder.value =  buildFood(FoodKind.Lobster.name, word.word)
         return listOf(SaveObjectDemon(wordContext))
     }
 }
@@ -274,7 +274,7 @@ class SaveObjectDemon(wordContext: WordContext): Demon(wordContext) {
     }
 }
 
-class WordPicked(): WordHandler("picked") {
+class WordPick(): WordHandler(EntryWord("pick").and("picked")) {
     override fun build(wordContext: WordContext): List<Demon> {
         val nextWordIsUp = "up".equals(wordContext.context.nextWord)
         val pickUp = object : Demon(wordContext) {
@@ -307,7 +307,7 @@ class WordPicked(): WordHandler("picked") {
     }
 }
 
-class WordDropped(): WordHandler("dropped") {
+class WordDrop(): WordHandler(EntryWord("drop").and("dropped")) {
     override fun build(wordContext: WordContext): List<Demon> {
         val dropped = object : Demon(wordContext) {
             var actorHolder: ConceptHolder? = null
@@ -349,7 +349,7 @@ class WordDropped(): WordHandler("dropped") {
     }
 }
 
-class WordIn(): WordHandler("in") {
+class WordIn(): WordHandler(EntryWord("in")) {
     override fun build(wordContext: WordContext): List<Demon> {
         wordContext.defHolder.value = buildPrep(Preposition.In.name)
 
@@ -380,7 +380,7 @@ class InsertAfterDemon(val matcher: (Concept?) -> Boolean, wordContext: WordCont
     }
 }
 
-class WordGave(): WordHandler("gave") {
+class WordGive(): WordHandler(EntryWord("give").and("gave")) {
     override fun build(wordContext: WordContext): List<Demon> {
         val gave = object : Demon(wordContext) {
             var actorHolder: ConceptHolder? = null
@@ -418,8 +418,7 @@ class WordGave(): WordHandler("gave") {
     }
 }
 
-//FIXME kiss & kissed
-class WordKiss(): WordHandler("kissed") {
+class WordKiss(): WordHandler(EntryWord("kiss").and("kissing").and("kissed")) {
     override fun build(wordContext: WordContext): List<Demon> {
         val kiss = object : Demon(wordContext) {
             var actorHolder: ConceptHolder? = null
@@ -453,7 +452,7 @@ class WordKiss(): WordHandler("kissed") {
     }
 }
 
-class WordTold(): WordHandler("told") {
+class WordTell(): WordHandler(EntryWord("tell").past("told")) {
     override fun build(wordContext: WordContext): List<Demon> {
         val demon = object : Demon(wordContext) {
             var actorHolder: ConceptHolder? = null
@@ -492,8 +491,23 @@ class WordTold(): WordHandler("told") {
     }
 }
 
-// FIXME really GO and WENT is past
-class WordWent(): WordHandler("went") {
+class EntryWord(val word: String) {
+    val pastWords = mutableListOf<String>()
+    val extras = mutableListOf<String>()
+
+    fun entries() = listOf(listOf(word), pastWords, extras).flatten()
+
+    fun past(word: String): EntryWord {
+        pastWords.add(word)
+        return this
+    }
+    fun and(word: String): EntryWord {
+        extras.add(word)
+        return this
+    }
+}
+
+class WordGo(): WordHandler(EntryWord("go").past("went")) {
     override fun build(wordContext: WordContext): List<Demon> {
         val demon = object : Demon(wordContext) {
             var actorHolder: ConceptHolder? = null
@@ -526,7 +540,7 @@ class WordWent(): WordHandler("went") {
     }
 }
 
-class WordEats(): WordHandler("eats") {
+class WordEats(): WordHandler(EntryWord("eats")) {
     override fun build(wordContext: WordContext): List<Demon> {
         val demon = object : Demon(wordContext) {
             var actorHolder: ConceptHolder? = null
@@ -558,7 +572,7 @@ class WordEats(): WordHandler("eats") {
     }
 }
 
-class ModifierWord(word: String, val modifier: String, val value: String = word): WordHandler(word) {
+class ModifierWord(word: String, val modifier: String, val value: String = word): WordHandler(EntryWord(word)) {
     override fun build(wordContext: WordContext): List<Demon> {
         val demon = object : Demon(wordContext) {
             var thingHolder: ConceptHolder? = null
@@ -580,7 +594,7 @@ class ModifierWord(word: String, val modifier: String, val value: String = word)
     }
 }
 
-class WordMan(word: String): WordHandler(word) {
+class WordMan(word: String): WordHandler(EntryWord(word)) {
     override fun build(wordContext: WordContext): List<Demon> {
         if (!wordContext.isDefSet()) {
             wordContext.defHolder.value = buildHuman("", "", Gender.Male)
@@ -589,7 +603,7 @@ class WordMan(word: String): WordHandler(word) {
     }
 }
 
-class PronounWord(word: String, val genderMatch: Gender): WordHandler(word) {
+class PronounWord(word: String, val genderMatch: Gender): WordHandler(EntryWord(word)) {
     override fun build(wordContext: WordContext): List<Demon> {
         // FIXME partial implementation - also why not use demon
         val localHuman = wordContext.context.localCharacter
@@ -611,7 +625,7 @@ class PronounWord(word: String, val genderMatch: Gender): WordHandler(word) {
     }
 }
 
-class WordWho(): WordHandler("who") {
+class WordWho(): WordHandler(EntryWord("who")) {
     override fun build(wordContext: WordContext): List<Demon> {
         return listOf(WhoDemon(wordContext));
     }
