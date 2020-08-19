@@ -17,7 +17,7 @@ class InDepthUnderstandingTest {
 
         val grasp = textProcessor.workingMemory.concepts[0]
         assertEquals("GRASP", grasp.name)
-        assertEquals("John",  grasp.value("actor")?.valueName("firstName"))
+        assertEquals("John", grasp.value("actor")?.valueName("firstName"))
         assertEquals("ball", grasp.value("thing")?.valueName("name"))
         val actGraspInstr = grasp.value("instr")!!
         // FIXME move structural element not present, rely on name
@@ -142,5 +142,23 @@ class InDepthUnderstandingTest {
         assertEquals("Anne", kissAttend.value("to")?.valueName("firstName"))
 
         //FIXME more assertions
+    }
+
+    @Test
+    fun `Basic pronoun reference 2`() {
+        val textModel = TextModelBuilder("John told Bill that he was hungry.").buildModel()
+        val lexicon = buildInDepthUnderstandingLexicon()
+
+        val textProcessor = TextProcessor(textModel, lexicon)
+        val workingMemory = textProcessor.runProcessor()
+        println(workingMemory.concepts)
+
+        assertEquals(2 /*should be 1?*/, workingMemory.concepts.size)
+        var told = workingMemory.concepts[0]
+        assertEquals("MTRANS", told.name)
+        assertEquals("John", told.value("actor")?.valueName("firstName"))
+        assertEquals("Bill", told.value("to")?.valueName("firstName"))
+        assertEquals("S-Hunger", told.valueName("thing"))
+
     }
 }

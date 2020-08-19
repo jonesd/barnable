@@ -43,6 +43,8 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     lexicon.addMapping(WordHome())
     lexicon.addMapping(WordGo())
     lexicon.addMapping(WordKiss())
+    lexicon.addMapping(WordPerson(buildHuman("Bill", "", Gender.Male)))
+    lexicon.addMapping(WordHungry())
 
     // FIXME only for QA
     lexicon.addMapping(WordWho())
@@ -61,6 +63,32 @@ enum class Gender {
     Male,
     Female,
     Other
+}
+enum class SatisfactionGoal {
+    `S-Sex`,
+    `S-Hunger`,
+    `S-Thirst`
+}
+enum class DeltaGoal {
+    `D-Know`,
+    `D-Proximity`,
+    `D-ControlSomeone`,
+    `D-ControlSomething`
+}
+enum class EntertainmentGoal {
+    `E-Company`,
+    `E-Travel`,
+    `E-Exercise`
+}
+enum class AchievementGoal {
+    `A-Good-Job`,
+    `A-Skill`
+}
+enum class PreservationGoal {
+    `P-Health`,
+    `P-Comfort`,
+    `P-Appearance`,
+    `P-Finances`
 }
 enum class Acts {
     ATRANS, // Transfer of Posession
@@ -81,7 +109,9 @@ enum class InDepthUnderstandingConcepts {
     Human,
     PhysicalObject,
     Setting,
-    Location
+    Location,
+    Goal,
+    Plan
 }
 fun buildATrans(actor: Concept, thing: Concept, from: Concept, to: Concept): Concept {
     return Concept(Acts.ATRANS.name)
@@ -480,7 +510,7 @@ class WordTell(): WordHandler(EntryWord("tell").past("told")) {
             demon.actorHolder = it
         }
         // fIXME unsure of this, really the "that" word to find the linked act?
-        val actAfter = ExpectDemon(matchConceptByKind(InDepthUnderstandingConcepts.Act.name), SearchDirection.After, wordContext) {
+        val actAfter = ExpectDemon(matchConceptByKind(listOf(InDepthUnderstandingConcepts.Act.name, InDepthUnderstandingConcepts.Goal.name, InDepthUnderstandingConcepts.Plan.name)), SearchDirection.After, wordContext) {
             demon.thingHolder = it
         }
         val humanAfter = ExpectDemon(matchConceptByHead(InDepthUnderstandingConcepts.Human.name), SearchDirection.After, wordContext) {
@@ -537,6 +567,14 @@ class WordGo(): WordHandler(EntryWord("go").past("went")) {
         }
 
         return listOf(demon, humanBefore, locationAfter)
+    }
+}
+
+class WordHungry(): WordHandler(EntryWord("hungry")) {
+    override fun build(wordContext: WordContext): List<Demon> {
+        wordContext.defHolder.value = Concept(SatisfactionGoal.`S-Hunger`.name)
+            .with(Slot("kind", Concept(InDepthUnderstandingConcepts.Goal.name)))
+        return listOf()
     }
 }
 

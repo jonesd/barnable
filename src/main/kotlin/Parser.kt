@@ -413,6 +413,10 @@ fun matchConceptByHead(kind: String): (Concept?) -> Boolean {
     return { c -> c?.name == kind }
 }
 
+fun matchConceptByKind(kinds: Collection<String>): (Concept?) -> Boolean {
+    return { c -> kinds.contains(c?.valueName("kind")) }
+}
+
 fun matchConceptByKind(kind: String): (Concept?) -> Boolean {
     return { c -> c?.valueName("kind") == kind }
 }
