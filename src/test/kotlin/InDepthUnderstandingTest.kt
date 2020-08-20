@@ -136,7 +136,7 @@ class InDepthUnderstandingTest {
         assertEquals(2, workingMemory.concepts.size)
         val travel = textProcessor.workingMemory.concepts[0]
         assertEquals("John", travel.value("actor")?.valueName("firstName"))
-        assertEquals("home", travel.value("to")?.valueName("name"))
+        assertEquals("Home", travel.value("to")?.valueName("name"))
         val kissAttend = textProcessor.workingMemory.concepts[1]
         assertEquals("John", kissAttend.value("actor")?.valueName("firstName"))
         assertEquals("Anne", kissAttend.value("to")?.valueName("firstName"))
@@ -159,6 +159,24 @@ class InDepthUnderstandingTest {
         assertEquals("John", told.value("actor")?.valueName("firstName"))
         assertEquals("Bill", told.value("to")?.valueName("firstName"))
         assertEquals("S-Hunger", told.valueName("thing"))
+
+    }
+
+    @Test
+    fun `Time modification`() {
+        val textModel = TextModelBuilder("John walked home yesterday").buildModel()
+        val lexicon = buildInDepthUnderstandingLexicon()
+
+        val textProcessor = TextProcessor(textModel, lexicon)
+        val workingMemory = textProcessor.runProcessor()
+        println(workingMemory.concepts)
+
+        assertEquals(1 /*should be 1?*/, workingMemory.concepts.size)
+        var walk = workingMemory.concepts[0]
+        assertEquals("PTRANS", walk.name)
+        assertEquals("John", walk.value("actor")?.valueName("firstName"))
+        assertEquals("Home", walk.value("to")?.valueName("name"))
+        assertEquals("Yesterday", walk.valueName("time"))
 
     }
 }

@@ -36,6 +36,8 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     lexicon.addMapping(ModifierWord("old", "age", "GT-NORM"))
     lexicon.addMapping(ModifierWord("young", "age", "LT-NORM"))
 
+    lexicon.addMapping(WordYesterday())
+
     // pronoun
     lexicon.addMapping(WordPerson(buildHuman("Anne", "", Gender.Female)))
     lexicon.addMapping(PronounWord("he", Gender.Male))
@@ -45,6 +47,7 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     lexicon.addMapping(WordKiss())
     lexicon.addMapping(WordPerson(buildHuman("Bill", "", Gender.Male)))
     lexicon.addMapping(WordHungry())
+    lexicon.addMapping(WordWalk())
 
     // FIXME only for QA
     lexicon.addMapping(WordWho())
@@ -113,6 +116,26 @@ enum class InDepthUnderstandingConcepts {
     Goal,
     Plan
 }
+
+enum class TimeConcepts {
+    Yesterday,
+    Tomorrow,
+    Afternoon,
+    Morning,
+    Evening,
+    Monday,
+    Tuesday,
+    Wednesday,
+    Thursday,
+    Friday,
+    Saturday,
+    Sunday
+}
+enum class BodyParts {
+    Legs,
+    Fingers
+}
+
 fun buildATrans(actor: Concept, thing: Concept, from: Concept, to: Concept): Concept {
     return Concept(Acts.ATRANS.name)
         .with(Slot("actor", actor))
@@ -125,10 +148,10 @@ fun buildGrasp(actor: Concept, thing: Concept): Concept {
     return Concept(Acts.GRASP.name)
         .with(Slot("actor", actor))
         .with(Slot("thing", thing))
-        .with(Slot("instr", buildMove(actor, Concept("fingers"), thing)))
+        .with(Slot("instr", buildMove(actor, Concept(BodyParts.Fingers.name), thing)))
         .with(Slot("kind", Concept(InDepthUnderstandingConcepts.Act.name)))
 }
-fun buildMove(actor: Concept, thing: Concept, to: Concept): Concept {
+fun buildMove(actor: Concept, thing: Concept, to: Concept? = null): Concept {
     return Concept(Acts.MOVE.name)
         .with(Slot("actor", actor))
         .with(Slot("thing", thing))
@@ -203,7 +226,7 @@ class WordHome(): WordHandler(EntryWord("home")) {
         //FIXME not sure if this model matches box/ball structure
         wordContext.defHolder.value = Concept("Location")
             .with(Slot("Type", Concept("Residence")))
-            .with(Slot("name", Concept(word.word)))
+            .with(Slot("name", Concept("Home")))
         return listOf()
     }
 }
@@ -570,6 +593,40 @@ class WordGo(): WordHandler(EntryWord("go").past("went")) {
     }
 }
 
+class WordWalk(): WordHandler(EntryWord("walk").past("walked")) {
+    override fun build(wordContext: WordContext): List<Demon> {
+        val demon = object : Demon(wordContext) {
+            var actorHolder: ConceptHolder? = null
+            var locationHolder: ConceptHolder? = null
+
+            override fun run() {
+                if (wordContext.isDefSet()) {
+                    active = false
+                } else {
+                    val actorConcept = actorHolder?.value
+                    val locationConcept = locationHolder?.value
+                    if (actorConcept != null && locationConcept != null) {
+                        actorHolder?.addFlag(ParserFlags.Inside)
+                        locationHolder?.addFlag(ParserFlags.Inside)
+                        val instr = buildMove(actorConcept, Concept(BodyParts.Legs.name))
+                        wordContext.defHolder.value = buildPTrans(actorConcept, null, locationConcept, instr)
+                        active = false
+                    }
+                }
+            }
+        }
+        val humanBefore = ExpectDemon(matchConceptByHead(InDepthUnderstandingConcepts.Human.name), SearchDirection.Before, wordContext) {
+            demon.actorHolder = it
+        }
+        // FIXME should this be a LOCATION (Was physical location)
+        val locationAfter = ExpectDemon(matchConceptByHead(InDepthUnderstandingConcepts.Location.name), SearchDirection.After, wordContext) {
+            demon.locationHolder = it
+        }
+
+        return listOf(demon, humanBefore, locationAfter)
+    }
+}
+
 class WordHungry(): WordHandler(EntryWord("hungry")) {
     override fun build(wordContext: WordContext): List<Demon> {
         wordContext.defHolder.value = Concept(SatisfactionGoal.`S-Hunger`.name)
@@ -607,6 +664,33 @@ class WordEats(): WordHandler(EntryWord("eats")) {
         }
 
         return listOf(demon, humanBefore, food)
+    }
+}
+
+class WordYesterday(): WordHandler(EntryWord("yesterday")) {
+    override fun build(wordContext: WordContext): List<Demon> {
+        val demon = object : Demon(wordContext) {
+            var actHolder: ConceptHolder? = null
+
+            override fun run() {
+                if (wordContext.isDefSet()) {
+                    active = false
+                } else {
+                    val actConcept = actHolder?.value
+                    if (actConcept != null) {
+                        wordContext.defHolder.value = Concept(TimeConcepts.Yesterday.name)
+                        wordContext.defHolder.addFlag(ParserFlags.Inside)
+                        actConcept.with(Slot("time", wordContext.def()))
+                        active = false
+                    }
+                }
+            }
+        }
+        val actDemon = ExpectDemon(matchConceptByKind(InDepthUnderstandingConcepts.Act.name), SearchDirection.Before, wordContext) {
+            demon.actHolder = it
+        }
+
+        return listOf(demon, actDemon)
     }
 }
 
