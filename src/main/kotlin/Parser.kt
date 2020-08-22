@@ -131,7 +131,7 @@ class WordContext(val wordIndex: Int, val wordElement: WordElement, val word: St
     }
 }
 
-class SentenceContext(val sentence: TextSentence, val workingMemory: WorkingMemory, val qaMode: Boolean) {
+class SentenceContext(val sentence: TextSentence, val workingMemory: WorkingMemory, val qaMode: Boolean = false) {
     var currentWord: String = ""
     var nextWord: String = ""
     var previousWord: String = ""
@@ -267,7 +267,7 @@ class ConceptHolder(val instanceNumber: Int) {
     }
 }
 
-class Concept(val name: String) {
+data class Concept(val name: String) {
     private val slots = mutableMapOf<String,Slot>()
 
     fun value(slotName: String): Concept? {
@@ -470,8 +470,8 @@ class ExpectDemon(val matcher: (Concept?) -> Boolean, val direction: SearchDirec
         if (existing != null) {
             return existing
         }
-        var defHolder = wordContext.context.defHolderAtWordIndex(index)
-        var value = defHolder.value
+        val defHolder = wordContext.context.defHolderAtWordIndex(index)
+        val value = defHolder.value
         if (isConjunction(value)) {
             return null
         }
