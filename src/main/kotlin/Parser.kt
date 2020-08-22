@@ -405,47 +405,49 @@ enum class SL {
     PrepObject
 }
 
-fun matchPrepIn(preps: Collection<String>): (Concept?) -> Boolean {
+fun matchPrepIn(preps: Collection<String>): ConceptMatcher {
     return { c -> preps.contains(c?.value(SL.PrepObject)?.valueName("is")) }
 }
 
-fun matchConceptByHead(kind: String): (Concept?) -> Boolean {
+fun matchConceptByHead(kind: String): ConceptMatcher {
     return { c -> c?.name == kind }
 }
 
-fun matchConceptByKind(kinds: Collection<String>): (Concept?) -> Boolean {
+fun matchConceptByKind(kinds: Collection<String>): ConceptMatcher {
     return { c -> kinds.contains(c?.valueName("kind")) }
 }
 
-fun matchConceptByKind(kind: String): (Concept?) -> Boolean {
+fun matchConceptByKind(kind: String): ConceptMatcher {
     return { c -> c?.valueName("kind") == kind }
 }
 
-fun matchConceptByHead(kinds: Collection<String>): (Concept?) -> Boolean {
+fun matchConceptByHead(kinds: Collection<String>): ConceptMatcher {
     return { c -> kinds.contains(c?.name)}
 }
 
-inline fun matchAny(matchers: List<(Concept?) -> Boolean>): (Concept?) -> Boolean {
+inline fun matchAny(matchers: List<ConceptMatcher>): ConceptMatcher {
     return { c -> matchers.any { it(c) }}
 }
 
-inline fun matchAll(matchers: List<(Concept?) -> Boolean>): (Concept?) -> Boolean {
+inline fun matchAll(matchers: List<ConceptMatcher>): ConceptMatcher {
     return { c -> matchers.all { it(c) }}
 }
 
-inline fun matchConjunction(): (Concept?) -> Boolean {
+inline fun matchConjunction(): ConceptMatcher {
     return matchConceptByHead(ParserKinds.Conjunction.name)
 }
 
-inline fun matchNever(): (Concept?) -> Boolean {
+inline fun matchNever(): ConceptMatcher {
     return { c -> false}
 }
 
-inline fun matchAlways(): (Concept?) -> Boolean {
+inline fun matchAlways(): ConceptMatcher {
     return { c -> true}
 }
 
-class ExpectDemon(val matcher: (Concept?) -> Boolean, val direction: SearchDirection, wordContext: WordContext, val action: (ConceptHolder) -> Unit): Demon(wordContext) {
+typealias ConceptMatcher = (Concept?) -> Boolean
+
+class ExpectDemon(val matcher: ConceptMatcher, val direction: SearchDirection, wordContext: WordContext, val action: (ConceptHolder) -> Unit): Demon(wordContext) {
     var found: ConceptHolder? = null
 
     override fun run() {
@@ -511,7 +513,7 @@ class FindObjectReferenceDemon(wordContext: WordContext): Demon(wordContext) {
     }
 }
 
-class PrepDemon(val matcher: (Concept?) -> Boolean, val direction: SearchDirection = SearchDirection.Before, wordContext: WordContext, val action: (ConceptHolder) -> Unit): Demon(wordContext) {
+class PrepDemon(val matcher: ConceptMatcher, val direction: SearchDirection = SearchDirection.Before, wordContext: WordContext, val action: (ConceptHolder) -> Unit): Demon(wordContext) {
     var found: ConceptHolder? = null
 
     override fun run() {

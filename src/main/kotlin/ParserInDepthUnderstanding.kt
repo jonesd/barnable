@@ -422,7 +422,7 @@ class WordIn(): WordHandler(EntryWord("in")) {
     }
 }
 
-class InsertAfterDemon(val matcher: (Concept?) -> Boolean, wordContext: WordContext, val action: (ConceptHolder) -> Unit): Demon(wordContext) {
+class InsertAfterDemon(val matcher: ConceptMatcher, wordContext: WordContext, val action: (ConceptHolder) -> Unit): Demon(wordContext) {
     override fun run() {
         searchContext(matcher, matchNever(), SearchDirection.After, wordContext) {
             if (it.value != null) {
