@@ -96,6 +96,16 @@ class LexicalConceptBuilder(val root: LexicalRootBuilder, conceptName: String) {
         child.apply(initializer)
         val c = child.build()
     }
+    fun human(firstName: String = "", lastName: String = "", gender: Gender? = null, initializer: LexicalConceptBuilder.() -> Unit): Concept {
+        val child = LexicalConceptBuilder(root, InDepthUnderstandingConcepts.Human.name)
+        child.slot("firstName", firstName)
+
+        return Concept(InDepthUnderstandingConcepts.Human.name)
+            .with(Slot("firstName", Concept(firstName)))
+            .with(Slot("lastName", Concept(lastName)))
+            //FIXME empty concept doesn't seem helpful
+            .with(Slot("gender", Concept(gender?.name ?: "")))
+    }
 }
 
 fun lexicalConcept(wordContext: WordContext, headName: String, initializer: LexicalConceptBuilder.() -> Unit): LexicalConcept {

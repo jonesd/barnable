@@ -90,12 +90,15 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
     }
 
     private fun runWord(index: Int, word: String, wordHandler: WordHandler, wordContext: WordContext) {
-        println("---------------------------------------")
-        println("Processing word: $word")
-        println("---------------------------------------")
+        println("")
+        println("${word.toUpperCase()} ==>")
         val wordDemons = wordHandler.build(wordContext)
-        wordDemons.forEach { agenda.withDemon(index, it) }
-        println("con${wordContext.defHolder.instanceNumber} = ${wordContext.def()}")
+        println("Adding to *working-memory*")
+        println("DEF.${wordContext.defHolder.instanceNumber} = ${wordContext.def()}")
+        wordDemons.forEach {
+            agenda.withDemon(index, it)
+            println("Spawning demon: $it")
+        }
     }
 
     // Run each active demon. Repeat again if any were fired
@@ -104,7 +107,6 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
             var fired = false
             // Use most recently recreated first
             agenda.activeDemons().reversed().forEach {
-                println("running demon $it")
                 it.run()
                 if (!it.active) {
                     println("Killed demon=$it")
@@ -207,7 +209,6 @@ class Agenda() {
     val demons = mutableListOf<Demon>()
 
     fun withDemon(index: Int, demon: Demon) {
-        println("adding demon=$demon")
         demons.add(demon)
     }
 
@@ -254,7 +255,11 @@ open class Demon(val wordContext: WordContext) {
     }
 
     override fun toString(): String {
-        return "{demon${wordContext.defHolder.instanceNumber}/${demonIndex}=${super.toString()}, active=$active}"
+        return "{demon${wordContext.defHolder.instanceNumber}/${demonIndex}=${description()}, active=$active}"
+    }
+
+    open fun description(): String {
+        return ""
     }
 }
 
@@ -388,6 +393,10 @@ class IgnoreDemon(wordContext: WordContext): Demon(wordContext) {
         wordContext.defHolder.addFlag(ParserFlags.Ignore)
         active = false
     }
+
+    override fun description(): String {
+        return "Ignore word=${wordContext.word}"
+    }
 }
 
 class WordUnknown(word: String): WordHandler(EntryWord(word)) {
@@ -397,7 +406,7 @@ class WordUnknown(word: String): WordHandler(EntryWord(word)) {
 }
 
 class UnknownDemon(wordContext: WordContext): Demon(wordContext) {
-    override fun toString(): String {
+    override fun description(): String {
         return "Unknown word=${wordContext.word}"
     }
 }
@@ -431,23 +440,23 @@ fun matchConceptByHead(kinds: Collection<String>): ConceptMatcher {
     return { c -> kinds.contains(c?.name)}
 }
 
-inline fun matchAny(matchers: List<ConceptMatcher>): ConceptMatcher {
+fun matchAny(matchers: List<ConceptMatcher>): ConceptMatcher {
     return { c -> matchers.any { it(c) }}
 }
 
-inline fun matchAll(matchers: List<ConceptMatcher>): ConceptMatcher {
+fun matchAll(matchers: List<ConceptMatcher>): ConceptMatcher {
     return { c -> matchers.all { it(c) }}
 }
 
-inline fun matchConjunction(): ConceptMatcher {
+fun matchConjunction(): ConceptMatcher {
     return matchConceptByHead(ParserKinds.Conjunction.name)
 }
 
-inline fun matchNever(): ConceptMatcher {
+fun matchNever(): ConceptMatcher {
     return { c -> false}
 }
 
-inline fun matchAlways(): ConceptMatcher {
+fun matchAlways(): ConceptMatcher {
     return { c -> true}
 }
 
@@ -491,6 +500,10 @@ class ExpectDemon(val matcher: ConceptMatcher, val direction: SearchDirection, w
 
     private fun isConjunction(concept: Concept?): Boolean {
         return matchConceptByHead(ParserKinds.Conjunction.name)(concept)
+    }
+
+    override fun description(): String {
+        return "ExpectDemon $direction $action"
     }
 }
 
@@ -558,6 +571,10 @@ class PrepDemon(val matcher: ConceptMatcher, val direction: SearchDirection = Se
     // private fun isConjunction(concept: Concept?): Boolean {
     //    return matchConceptByKind(ParserKinds.Conjunction.name)(concept)
     //}
+
+    override fun description(): String {
+        return "PrepDemon $matcher"
+    }
 }
 
 

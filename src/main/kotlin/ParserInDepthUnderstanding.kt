@@ -318,6 +318,10 @@ class SaveCharacterDemon(wordContext: WordContext): Demon(wordContext){
             println("SaveCharacter failed as def = $character")
         }
     }
+
+    override fun description(): String {
+        return "SaveCharacter ${wordContext.def()}"
+    }
 }
 
 class SaveObjectDemon(wordContext: WordContext): Demon(wordContext) {
@@ -327,6 +331,10 @@ class SaveObjectDemon(wordContext: WordContext): Demon(wordContext) {
             wordContext.context.mostRecentObject = o
             active = false
         }
+    }
+
+    override fun description(): String {
+        return "SaveObject def=${wordContext.def()}"
     }
 }
 
@@ -350,6 +358,10 @@ class WordPick(): WordHandler(EntryWord("pick").and("picked")) {
                         active = false
                     }
                 }
+            }
+
+            override fun description(): String {
+                return "Pick Up"
             }
         }
         val humanBefore = ExpectDemon(matchConceptByHead(InDepthUnderstandingConcepts.Human.name), SearchDirection.Before, wordContext) {
@@ -409,6 +421,10 @@ class InsertAfterDemon(val matcher: ConceptMatcher, wordContext: WordContext, va
                 action(it)
             }
         }
+    }
+
+    override fun description(): String {
+        return "InsertAfter $matcher"
     }
 }
 
@@ -568,6 +584,10 @@ class WordYesterday(): WordHandler(EntryWord("yesterday")) {
                     }
                 }
             }
+
+            override fun description(): String {
+                return "Yesterday"
+            }
         }
         val actDemon = ExpectDemon(matchConceptByKind(InDepthUnderstandingConcepts.Act.name), SearchDirection.Before, wordContext) {
             demon.actHolder = it
@@ -590,6 +610,10 @@ class ModifierWord(word: String, val modifier: String, val value: String = word)
                     active = false
                 }
             }
+
+            override fun description(): String {
+                return "ModifierWord $value"
+            }
         }
         //FIXME list of kinds is not complete
         val thingDemon = ExpectDemon(matchConceptByHead(listOf(InDepthUnderstandingConcepts.Human.name, InDepthUnderstandingConcepts.PhysicalObject.name)), SearchDirection.After, wordContext) {
@@ -601,10 +625,12 @@ class ModifierWord(word: String, val modifier: String, val value: String = word)
 
 class WordMan(word: String): WordHandler(EntryWord(word)) {
     override fun build(wordContext: WordContext): List<Demon> {
-        if (!wordContext.isDefSet()) {
-            wordContext.defHolder.value = buildHuman("", "", Gender.Male)
+        val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
+            slot("firstName", "")
+            slot("lastName", "")
+            slot("gender", Gender.Male.name)
         }
-        return listOf()
+        return lexicalConcept.demons
     }
 }
 
