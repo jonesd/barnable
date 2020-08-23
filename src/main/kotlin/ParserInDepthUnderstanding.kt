@@ -435,112 +435,42 @@ class InsertAfterDemon(val matcher: ConceptMatcher, wordContext: WordContext, va
 
 class WordGive(): WordHandler(EntryWord("give").and("gave")) {
     override fun build(wordContext: WordContext): List<Demon> {
-        val gave = object : Demon(wordContext) {
-            var actorHolder: ConceptHolder? = null
-            var thingHolder: ConceptHolder? = null
-            var toHolder: ConceptHolder? = null
-
-            override fun run() {
-                if (wordContext.isDefSet()) {
-                    active = false
-                } else {
-                    val actorConcept = actorHolder?.value
-                    val thingConcept = thingHolder?.value
-                    val toConcept = toHolder?.value
-                    if (actorConcept != null && thingConcept != null && toConcept != null) {
-                        actorHolder?.addFlag(ParserFlags.Inside)
-                        thingHolder?.addFlag(ParserFlags.Inside)
-                        toHolder?.addFlag(ParserFlags.Inside)
-                        wordContext.defHolder.value = buildATrans(actorConcept, thingConcept, actorConcept, toConcept)
-                        active = false
-                    }
-                }
-            }
+        val lexicalConcept = lexicalConcept(wordContext, "ATRANS") {
+            expectHead("actor", variableName = "actor", headValue = "Human", direction = SearchDirection.Before)
+            expectHead("thing", headValue = InDepthUnderstandingConcepts.PhysicalObject.name)
+            varReference("from", "actor")
+            expectHead("to", headValue = "Human")
+            slot("kind", "Act")
         }
-        val humanBefore = ExpectDemon(matchConceptByHead(InDepthUnderstandingConcepts.Human.name), SearchDirection.Before, wordContext) {
-            gave.actorHolder = it
-        }
-        val thing = ExpectDemon(matchConceptByHead(InDepthUnderstandingConcepts.PhysicalObject.name), SearchDirection.After, wordContext) {
-            gave.thingHolder = it
-        }
-        val humanAfter = ExpectDemon(matchConceptByHead(InDepthUnderstandingConcepts.Human.name), SearchDirection.After, wordContext) {
-            gave.toHolder = it
-        }
-
-        return listOf(gave, humanBefore, thing, humanAfter)
+        return lexicalConcept.demons
     }
 }
 
 class WordKiss(): WordHandler(EntryWord("kiss").and("kissing").and("kissed")) {
     override fun build(wordContext: WordContext): List<Demon> {
-        val kiss = object : Demon(wordContext) {
-            var actorHolder: ConceptHolder? = null
-            var toHolder: ConceptHolder? = null
-
-            override fun run() {
-                if (wordContext.isDefSet()) {
-                    active = false
-                } else {
-                    val actorConcept = actorHolder?.value
-                    val toConcept = toHolder?.value
-                    if (actorConcept != null && toConcept != null) {
-                        actorHolder?.addFlag(ParserFlags.Inside)
-                        toHolder?.addFlag(ParserFlags.Inside)
-                        // FIXME better representation....
-                        val lips = buildPhysicalObject(PhysicalObjectKind.BodyPart.name, "lips")
-                        wordContext.defHolder.value = buildAttend(actorConcept, lips, toConcept)
-                        active = false
-                    }
-                }
+        val lexicalConcept = lexicalConcept(wordContext, "ATTEND") {
+            expectHead("actor", headValue = "Human", direction = SearchDirection.Before)
+            slot("thing", PhysicalObjectKind.PhysicalObject.name) {
+                slot("kind", PhysicalObjectKind.BodyPart.name)
+                slot("name", "lips")
             }
+            expectHead("to", headValue = "Human")
+            slot("kind", "Act")
         }
-        val humanBefore = ExpectDemon(matchConceptByHead(InDepthUnderstandingConcepts.Human.name), SearchDirection.Before, wordContext) {
-            kiss.actorHolder = it
-        }
-        val humanAfter = ExpectDemon(matchConceptByHead(InDepthUnderstandingConcepts.Human.name), SearchDirection.After, wordContext) {
-            kiss.toHolder = it
-        }
-
-        return listOf(kiss, humanBefore, humanAfter)
+        return lexicalConcept.demons
     }
 }
 
 class WordTell(): WordHandler(EntryWord("tell").past("told")) {
     override fun build(wordContext: WordContext): List<Demon> {
-        val demon = object : Demon(wordContext) {
-            var actorHolder: ConceptHolder? = null
-            var thingHolder: ConceptHolder? = null
-            var toHolder: ConceptHolder? = null
-
-            override fun run() {
-                if (wordContext.isDefSet()) {
-                    active = false
-                } else {
-                    val actorConcept = actorHolder?.value
-                    val thingConcept = thingHolder?.value
-                    val toConcept = toHolder?.value
-                    if (actorConcept != null && thingConcept != null && toConcept != null) {
-                        actorHolder?.addFlag(ParserFlags.Inside)
-                        thingHolder?.addFlag(ParserFlags.Inside)
-                        toHolder?.addFlag(ParserFlags.Inside)
-                        wordContext.defHolder.value = buildMTrans(actorConcept, thingConcept, actorConcept, toConcept)
-                        active = false
-                    }
-                }
-            }
+        val lexicalConcept = lexicalConcept(wordContext, "MTRANS") {
+            expectHead("actor", variableName = "actor", headValue = "Human", direction = SearchDirection.Before)
+            expectKind("thing", kinds = listOf(InDepthUnderstandingConcepts.Act.name, InDepthUnderstandingConcepts.Goal.name, InDepthUnderstandingConcepts.Plan.name))
+            varReference("from", "actor")
+            expectHead("to", headValue = "Human")
+            slot("kind", "Act")
         }
-        val humanBefore = ExpectDemon(matchConceptByHead(InDepthUnderstandingConcepts.Human.name), SearchDirection.Before, wordContext) {
-            demon.actorHolder = it
-        }
-        // fIXME unsure of this, really the "that" word to find the linked act?
-        val actAfter = ExpectDemon(matchConceptByKind(listOf(InDepthUnderstandingConcepts.Act.name, InDepthUnderstandingConcepts.Goal.name, InDepthUnderstandingConcepts.Plan.name)), SearchDirection.After, wordContext) {
-            demon.thingHolder = it
-        }
-        val humanAfter = ExpectDemon(matchConceptByHead(InDepthUnderstandingConcepts.Human.name), SearchDirection.After, wordContext) {
-            demon.toHolder = it
-        }
-
-        return listOf(demon, humanBefore, actAfter, humanAfter)
+        return lexicalConcept.demons
     }
 }
 
@@ -562,37 +492,15 @@ class EntryWord(val word: String) {
 
 class WordGo(): WordHandler(EntryWord("go").past("went")) {
     override fun build(wordContext: WordContext): List<Demon> {
-        val demon = object : Demon(wordContext) {
-            var actorHolder: ConceptHolder? = null
-            var locationHolder: ConceptHolder? = null
-
-            override fun run() {
-                if (wordContext.isDefSet()) {
-                    active = false
-                } else {
-                    val actorConcept = actorHolder?.value
-                    val locationConcept = locationHolder?.value
-                    if (actorConcept != null && locationConcept != null) {
-                        actorHolder?.addFlag(ParserFlags.Inside)
-                        locationHolder?.addFlag(ParserFlags.Inside)
-                        wordContext.defHolder.value = buildPTrans(actorConcept, null, locationConcept, null)
-                        active = false
-                    }
-                }
-            }
+        val lexicalConcept = lexicalConcept(wordContext, "PTRANS") {
+            expectHead("actor", variableName = "actor", headValue = "Human", direction = SearchDirection.Before)
+            expectHead("to", headValue = "Location")
+            slot("kind", "Act")
         }
-        val humanBefore = ExpectDemon(matchConceptByHead(InDepthUnderstandingConcepts.Human.name), SearchDirection.Before, wordContext) {
-            demon.actorHolder = it
-        }
-        // FIXME should this be a LOCATION (Was physical location)
-        val locationAfter = ExpectDemon(matchConceptByHead(InDepthUnderstandingConcepts.Location.name), SearchDirection.After, wordContext) {
-            demon.locationHolder = it
-        }
-
-        return listOf(demon, humanBefore, locationAfter)
+        return lexicalConcept.demons
     }
 }
-
+/* FIXME old
 class WordWalk(): WordHandler(EntryWord("walk").past("walked")) {
     override fun build(wordContext: WordContext): List<Demon> {
         val demon = object : Demon(wordContext) {
@@ -626,6 +534,23 @@ class WordWalk(): WordHandler(EntryWord("walk").past("walked")) {
         return listOf(demon, humanBefore, locationAfter)
     }
 }
+*/
+
+class WordWalk(): WordHandler(EntryWord("walk").past("walked")) {
+    override fun build(wordContext: WordContext): List<Demon> {
+        val lexicalConcept = lexicalConcept(wordContext, "PTRANS") {
+            expectHead("actor", variableName = "actor", headValue = "Human", direction = SearchDirection.Before)
+            expectHead("to", headValue = "Location")
+            slot("instr", "MOVE") {
+                varReference("actor", "actor")
+                slot("thing", BodyParts.Legs.name)
+                slot("kind", "Act")
+            }
+            slot("kind", "Act")
+        }
+        return lexicalConcept.demons
+    }
+}
 
 class WordHungry(): WordHandler(EntryWord("hungry")) {
     override fun build(wordContext: WordContext): List<Demon> {
@@ -637,33 +562,12 @@ class WordHungry(): WordHandler(EntryWord("hungry")) {
 
 class WordEats(): WordHandler(EntryWord("eats")) {
     override fun build(wordContext: WordContext): List<Demon> {
-        val demon = object : Demon(wordContext) {
-            var actorHolder: ConceptHolder? = null
-            var foodHolder: ConceptHolder? = null
-
-            override fun run() {
-                if (wordContext.isDefSet()) {
-                    active = false
-                } else {
-                    val actorConcept = actorHolder?.value
-                    val thingConcept = foodHolder?.value
-                    if (actorConcept != null && thingConcept != null) {
-                        actorHolder?.addFlag(ParserFlags.Inside)
-                        foodHolder?.addFlag(ParserFlags.Inside)
-                        wordContext.defHolder.value = buildIngest(actorConcept, thingConcept)
-                        active = false
-                    }
-                }
-            }
+        val lexicalConcept = lexicalConcept(wordContext, Acts.INGEST.name) {
+            expectHead("actor", headValue = "Human", direction = SearchDirection.Before)
+            expectHead("thing", headValue = PhysicalObjectKind.Food.name)
+            slot("kind", "Act")
         }
-        val humanBefore = ExpectDemon(matchConceptByHead(InDepthUnderstandingConcepts.Human.name), SearchDirection.Before, wordContext) {
-            demon.actorHolder = it
-        }
-        val food = ExpectDemon(matchConceptByHead(PhysicalObjectKind.Food.name), SearchDirection.After, wordContext) {
-            demon.foodHolder = it
-        }
-
-        return listOf(demon, humanBefore, food)
+        return lexicalConcept.demons
     }
 }
 

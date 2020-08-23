@@ -156,7 +156,8 @@ class SentenceContext(val sentence: TextSentence, val workingMemory: WorkingMemo
 }
 
 class WorkingMemory() {
-    var totalConceptHolders = 0;
+    var totalConceptHolders = 0
+    var totalVariables = 0
     val concepts = mutableListOf<Concept>()
 
     val reasoningScripts: MutableList<ReasoningScript> = mutableListOf()
@@ -186,7 +187,12 @@ class WorkingMemory() {
         val holder = ConceptHolder(totalConceptHolders)
         totalConceptHolders += 1
         return holder
+    }
 
+    fun nextVariableIndex(): Int {
+        val index = totalVariables;
+        totalVariables += 1
+        return index
     }
 }
 

@@ -21,4 +21,42 @@ class LexicalConceptBuilderTest {
         assertEquals("Act", lexicalConcept.head.valueName("type"))
     }
 
+    @Test
+    fun `create concept with expectDemon`() {
+        val defHolder = ConceptHolder(9)
+        var testElement = WordElement("one", "", "","")
+        val workingMemory = WorkingMemory()
+        val sentenceContext = SentenceContext(TextSentence("test", listOf(testElement)), workingMemory)
+        val wordContext = WordContext(0, WordElement("test", "", "",""), "test", defHolder, sentenceContext)
+
+        val lexicalConcept = lexicalConcept(wordContext, "MTRANS") {
+            expectHead("actor", headValue = "Human", direction = SearchDirection.Before)
+            expectHead("to", headValue = "Human")
+            slot("kind", "Act")
+        }
+        assertEquals("MTRANS", lexicalConcept.head.name)
+        assertEquals("*VAR.0*", lexicalConcept.head.valueName("actor"))
+        assertEquals("*VAR.1*", lexicalConcept.head.valueName("to"))
+    }
+
+    @Test
+    fun `create concept with shared variables`() {
+        val defHolder = ConceptHolder(9)
+        var testElement = WordElement("one", "", "","")
+        val workingMemory = WorkingMemory()
+        val sentenceContext = SentenceContext(TextSentence("test", listOf(testElement)), workingMemory)
+        val wordContext = WordContext(0, WordElement("test", "", "",""), "test", defHolder, sentenceContext)
+
+        val lexicalConcept = lexicalConcept(wordContext, "MTRANS") {
+            expectHead("actor", "ACTOR", headValue = "Human", direction = SearchDirection.Before)
+            varReference("from", "ACTOR")
+            expectHead("to", headValue = "Human")
+            slot("kind", "Act")
+        }
+
+        assertEquals("MTRANS", lexicalConcept.head.name)
+        assertEquals("*VAR.ACTOR*", lexicalConcept.head.valueName("actor"))
+        assertEquals("*VAR.ACTOR*", lexicalConcept.head.valueName("from"))
+        assertEquals("*VAR.0*", lexicalConcept.head.valueName("to"))
+    }
 }
