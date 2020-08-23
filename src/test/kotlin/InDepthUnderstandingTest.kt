@@ -32,7 +32,7 @@ class InDepthUnderstandingTest {
         assertEquals("ball", ptrans.value("thing")?.valueName("name"))
         assertEquals("box", ptrans.value("to")?.valueName("name"))
         val ptransIntr = ptrans.value("instr")
-        assertEquals("gravity", ptransIntr?.value("actor")?.name)
+        assertEquals("Gravity", ptransIntr?.value("actor")?.name)
     }
 
     @Test

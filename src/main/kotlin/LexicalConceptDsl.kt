@@ -66,9 +66,35 @@ class LexicalConceptBuilder(val root: LexicalRootBuilder, conceptName: String) {
         }
         root.addDemon(demon)
     }
+    fun expectPrep(slotName: String, variableName: String? = null, preps: Collection<Preposition>, matcher: ConceptMatcher, direction: SearchDirection = SearchDirection.After) {
+        val variableSlot = root.createVariable(slotName, variableName)
+        concept.with(variableSlot)
+        val matchers = matchAll(listOf(
+            matchPrepIn(preps.map { it.name }),
+            matcher
+        ))
+        val demon = PrepDemon(matchers, SearchDirection.After, root.wordContext) {
+            root.completeVariable(variableSlot, it)
+        }
+        root.addDemon(demon)
+    }
     fun varReference(slotName: String, variableName: String) {
         val variableSlot = root.createVariable(slotName, variableName)
         concept.with(variableSlot)
+    }
+    fun physicalObject(name: String, kind: String, initializer: LexicalConceptBuilder.() -> Unit)  {
+        val child = LexicalConceptBuilder(root, PhysicalObjectKind.PhysicalObject.name)
+        child.slot("name", name)
+        child.slot("kind", kind)
+        child.apply(initializer)
+        val c = child.build()
+    }
+    fun food(kindOfFood: String, name: String = kindOfFood, initializer: LexicalConceptBuilder.() -> Unit)  {
+        val child = LexicalConceptBuilder(root, PhysicalObjectKind.Food.name)
+        child.slot("name", name)
+        child.slot("kind", kindOfFood)
+        child.apply(initializer)
+        val c = child.build()
     }
 }
 

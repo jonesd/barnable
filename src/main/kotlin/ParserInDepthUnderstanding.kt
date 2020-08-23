@@ -135,6 +135,9 @@ enum class BodyParts {
     Legs,
     Fingers
 }
+enum class Force {
+    Gravity
+}
 
 fun buildATrans(actor: Concept, thing: Concept, from: Concept, to: Concept): Concept {
     return Concept(Acts.ATRANS.name)
@@ -223,11 +226,11 @@ class WordBox(): WordHandler(EntryWord("box")) {
 
 class WordHome(): WordHandler(EntryWord("home")) {
     override fun build(wordContext: WordContext): List<Demon> {
-        //FIXME not sure if this model matches box/ball structure
-        wordContext.defHolder.value = Concept("Location")
-            .with(Slot("Type", Concept("Residence")))
-            .with(Slot("name", Concept("Home")))
-        return listOf()
+        val lexicalConcept = lexicalConcept(wordContext, "Location") {
+            slot("type", "Residence")
+            slot("name", "Home")
+        }
+        return lexicalConcept.demons
     }
 }
 
@@ -362,43 +365,19 @@ class WordPick(): WordHandler(EntryWord("pick").and("picked")) {
 
 class WordDrop(): WordHandler(EntryWord("drop").and("dropped")) {
     override fun build(wordContext: WordContext): List<Demon> {
-        val dropped = object : Demon(wordContext) {
-            var actorHolder: ConceptHolder? = null
-            var thingHolder: ConceptHolder? = null
-            var toHolder: ConceptHolder? = null
-
-            override fun run() {
-                if (wordContext.isDefSet()) {
-                    active = false
-                } else {
-                    val actorConcept = actorHolder?.value
-                    val thingConcept = thingHolder?.value
-                    val toConcept = toHolder?.value
-                    if (actorConcept != null && thingConcept != null && toConcept != null) {
-                        actorHolder?.addFlag(ParserFlags.Inside)
-                        thingHolder?.addFlag(ParserFlags.Inside)
-                        toHolder?.addFlag(ParserFlags.Inside)
-                        wordContext.defHolder.value = buildPTrans(actorConcept, thingConcept, toConcept, buildPropel(gravity, thingConcept))
-                        active = false
-                    }
-                }
+        val lexicalConcept = lexicalConcept(wordContext, "PTRANS") {
+            expectHead("actor", variableName = "actor", headValue = "Human", direction = SearchDirection.Before)
+            expectHead("thing", variableName = "thing", headValue = InDepthUnderstandingConcepts.PhysicalObject.name)
+            varReference("from", "actor")
+            expectPrep("to", preps = setOf(Preposition.In, Preposition.Into, Preposition.On), matcher = matchConceptByHead(setOf(InDepthUnderstandingConcepts.Human.name, InDepthUnderstandingConcepts.PhysicalObject.name)))
+            slot("instr", "PROPEL") {
+                slot("actor", Force.Gravity.name)
+                varReference("thing", "thing")
+                slot("kind", InDepthUnderstandingConcepts.Act.name)
             }
+            slot("kind", "Act")
         }
-        val humanBefore = ExpectDemon(matchConceptByHead(InDepthUnderstandingConcepts.Human.name), SearchDirection.Before, wordContext) {
-            dropped.actorHolder = it
-        }
-        val thing = ExpectDemon(matchConceptByHead(InDepthUnderstandingConcepts.PhysicalObject.name), SearchDirection.After, wordContext) {
-            dropped.thingHolder = it
-        }
-        val matchers = matchAll(listOf(
-            matchPrepIn(setOf(Preposition.In.name, Preposition.Into.name, Preposition.On.name)),
-            matchConceptByHead(setOf(InDepthUnderstandingConcepts.Human.name, InDepthUnderstandingConcepts.PhysicalObject.name))
-        ))
-        var to = PrepDemon(matchers, SearchDirection.After, wordContext) {
-            dropped.toHolder = it
-        }
-
-        return listOf(dropped, humanBefore, thing, to)
+        return lexicalConcept.demons
     }
 }
 
