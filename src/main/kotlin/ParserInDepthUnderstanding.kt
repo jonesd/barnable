@@ -2,7 +2,7 @@
 fun buildInDepthUnderstandingLexicon(): Lexicon {
     val lexicon = Lexicon();
     lexicon.addMapping(WordPerson(buildHuman("John", "", Gender.Male)))
-    lexicon.addMapping(WordPick())
+    lexicon.addMapping(WordPickUp())
     lexicon.addMapping(WordIgnore(EntryWord("up")))
     lexicon.addMapping(WordIgnore(EntryWord("the")))
     lexicon.addMapping(WordBall())
@@ -338,9 +338,42 @@ class SaveObjectDemon(wordContext: WordContext): Demon(wordContext) {
     }
 }
 
-class WordPick(): WordHandler(EntryWord("pick").and("picked")) {
+//FIXME should use pick and calculate picked...
+class WordPickUp(): WordHandler(EntryWord("picked", listOf("picked", "up"))/*.and("picked")*/) {
     override fun build(wordContext: WordContext): List<Demon> {
-        val nextWordIsUp = "up".equals(wordContext.context.nextWord)
+        val lexicalConcept = lexicalConcept(wordContext, "GRASP") {
+            expectHead("actor", variableName = "actor", headValue = "Human", direction = SearchDirection.Before)
+            expectHead("thing", variableName = "thing", headValue = InDepthUnderstandingConcepts.PhysicalObject.name)
+            slot("instr", "MOVE") {
+                varReference("actor", "actor")
+                slot("thing", BodyParts.Fingers.name)
+                varReference("to", "thing")
+                slot("kind", InDepthUnderstandingConcepts.Act.name)
+            }
+            slot("kind", "Act")
+        }
+        return lexicalConcept.demons
+    }
+    fun description(): String {
+        return "Picked Up"
+    }
+    /*
+    fun buildGrasp(actor: Concept, thing: Concept): Concept {
+        return Concept(Acts.GRASP.name)
+            .with(Slot("actor", actor))
+            .with(Slot("thing", thing))
+            .with(Slot("instr", buildMove(actor, Concept(BodyParts.Fingers.name), thing)))
+            .with(Slot("kind", Concept(InDepthUnderstandingConcepts.Act.name)))
+    }
+    fun buildMove(actor: Concept, thing: Concept, to: Concept? = null): Concept {
+        return Concept(Acts.MOVE.name)
+            .with(Slot("actor", actor))
+            .with(Slot("thing", thing))
+            .with(Slot("to", to))
+            .with(Slot("kind", Concept(InDepthUnderstandingConcepts.Act.name)))
+    }
+    override fun build(wordContext: WordContext): List<Demon> {
+        val nextWordIsUp = true //"up".equals(wordContext.context.nextWord)
         val pickUp = object : Demon(wordContext) {
             var humanHolder: ConceptHolder? = null
             var objectHolder: ConceptHolder? = null
@@ -372,7 +405,7 @@ class WordPick(): WordHandler(EntryWord("pick").and("picked")) {
         }
 
         return listOf(pickUp, humanBefore, objectAfter)
-    }
+    }*/
 }
 
 class WordDrop(): WordHandler(EntryWord("drop").and("dropped")) {
@@ -469,7 +502,7 @@ class WordTell(): WordHandler(EntryWord("tell").past("told")) {
     }
 }
 
-class EntryWord(val word: String) {
+open class EntryWord(val word: String, val expression: List<String> = listOf(word)) {
     val pastWords = mutableListOf<String>()
     val extras = mutableListOf<String>()
 
@@ -484,6 +517,7 @@ class EntryWord(val word: String) {
         return this
     }
 }
+
 
 class WordGo(): WordHandler(EntryWord("go").past("went")) {
     override fun build(wordContext: WordContext): List<Demon> {

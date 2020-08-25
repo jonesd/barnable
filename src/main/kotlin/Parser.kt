@@ -12,16 +12,37 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
     fun processSentence(sentence: TextSentence) {
         agenda = Agenda()
         val context = SentenceContext(sentence, workingMemory, qaMode)
-        sentence.elements.forEachIndexed { index, element ->
+        println(sentence.text.toUpperCase())
+        var index = 0
+        do {
+            val element = sentence.elements[index]
             var word = element.token.toLowerCase()
             val wordHandler = lexicon.findWordHandler(word) ?: WordUnknown(word)
-            val wordContext = WordContext(index, element, word, workingMemory.createDefHolder(), context)
+            var expression = listOf(word)
+            if (wordHandler.word.expression.size > 1) {
+                if (doesExpressionMatch(sentence.elements, index, wordHandler.word.expression)) {
+                    expression = wordHandler.word.expression
+                }
+            }
+            word = expression.joinToString(" ")
+            val wordContext = WordContext(context.wordContexts.size, element, word, workingMemory.createDefHolder(), context)
             context.pushWord(wordContext)
 
             runWord(index, word, wordHandler, wordContext)
             runDemons(context)
-        }
+            index += expression.size
+        } while (index < sentence.elements.size)
         endSentence(context)
+    }
+
+    private fun doesExpressionMatch(elements: List<WordElement>, baseIndex: Int, expression: List<String>): Boolean {
+        var matched = true
+        expression.forEachIndexed { index, s ->
+            if (!elements[baseIndex + index].token.toLowerCase().equals(s)) {
+                matched = false
+            }
+        }
+        return matched
     }
 
     fun processQuestion(sentence: TextSentence): String {
@@ -95,6 +116,10 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
         val wordDemons = wordHandler.build(wordContext)
         println("Adding to *working-memory*")
         println("DEF.${wordContext.defHolder.instanceNumber} = ${wordContext.def()}")
+        println("Current working memory")
+        wordContext.context.wordContexts.forEachIndexed { index, wordContext ->
+            println("--- ${wordContext.word} ==> ${wordContext.defHolder?.value}")
+        }
         wordDemons.forEach {
             agenda.withDemon(index, it)
             println("Spawning demon: $it")
@@ -134,10 +159,10 @@ class WordContext(val wordIndex: Int, val wordElement: WordElement, val word: St
 }
 
 class SentenceContext(val sentence: TextSentence, val workingMemory: WorkingMemory, val qaMode: Boolean = false) {
-    var currentWord: String = ""
-    var nextWord: String = ""
-    var previousWord: String = ""
-    var currentWordIndex = -1;
+    //var currentWord: String = ""
+    //var nextWord: String = ""
+    //var previousWord: String = ""
+    //var currentWordIndex = -1;
     // FIXME var currentDemon: Demon? = null
     var mostRecentObject: Concept? = null
     var mostRecentCharacter: Concept? = null
@@ -146,10 +171,10 @@ class SentenceContext(val sentence: TextSentence, val workingMemory: WorkingMemo
 
     fun pushWord(wordContext: WordContext) {
         wordContexts.add(wordContext)
-        currentWord = wordContext.word
-        currentWordIndex += 1
-        previousWord = if (currentWordIndex > 0) sentence.elements[currentWordIndex - 1].token.toLowerCase() else ""
-        nextWord = if (currentWordIndex < sentence.elements.size - 1) sentence.elements[currentWordIndex + 1].token.toLowerCase() else ""
+        //currentWord = wordContext.word
+        //currentWordIndex += 1
+        //previousWord = if (currentWordIndex > 0) sentence.elements[currentWordIndex - 1].token.toLowerCase() else ""
+        //nextWord = if (currentWordIndex < sentence.elements.size - 1) sentence.elements[currentWordIndex + 1].token.toLowerCase() else ""
     }
 
     fun defHolderAtWordIndex(wordIndex: Int): ConceptHolder {
@@ -221,7 +246,13 @@ class Lexicon() {
     val wordMappings: MutableMap<String, WordHandler> = mutableMapOf()
 
     fun addMapping(handler: WordHandler) {
-        handler.word.entries().forEach { wordMappings.put(it.toLowerCase(), handler)}
+        handler.word.entries().forEach {
+            if (wordMappings.containsKey(it.toLowerCase())) {
+                // FIXME sepport multiple entries ???
+                throw IllegalStateException("mapping already exists = ${it.toLowerCase()}")
+            }
+            wordMappings[it.toLowerCase()] = handler
+        }
     }
 
     fun findWordHandler(word: String): WordHandler? {
@@ -578,7 +609,7 @@ class PrepDemon(val matcher: ConceptMatcher, val direction: SearchDirection = Se
 }
 
 
-fun searchContext(matcher: (Concept?) -> Boolean, abortSearch: (Concept?) -> Boolean = matchNever(), direction: SearchDirection = SearchDirection.Before, wordContext: WordContext, action: (ConceptHolder) -> Unit) {
+fun searchContext(matcher: ConceptMatcher, abortSearch: ConceptMatcher = matchNever(), direction: SearchDirection = SearchDirection.Before, wordContext: WordContext, action: (ConceptHolder) -> Unit) {
     var index = wordContext.wordIndex
     var found: ConceptHolder? = null
 
