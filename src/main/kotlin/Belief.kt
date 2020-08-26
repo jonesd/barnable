@@ -1,1 +1,0 @@
-class Belief(name: String)

@@ -266,6 +266,22 @@ open class WordHandler(val word: EntryWord) {
     }
 }
 
+open class EntryWord(val word: String, val expression: List<String> = listOf(word)) {
+    val pastWords = mutableListOf<String>()
+    val extras = mutableListOf<String>()
+
+    fun entries() = listOf(listOf(word), pastWords, extras).flatten()
+
+    fun past(word: String): EntryWord {
+        pastWords.add(word)
+        return this
+    }
+    fun and(word: String): EntryWord {
+        extras.add(word)
+        return this
+    }
+}
+
 open class Demon(val wordContext: WordContext) {
     val demonIndex = wordContext.nextDemonIndex()
     var active = true
@@ -375,39 +391,6 @@ class DemonProducer() {
 
 }
 
-enum class Preposition {
-    In,
-    Into,
-    On,
-    To,
-    With
-}
-
-fun withPrepObj(concept: Concept, prep: Concept) {
-    concept.with(Slot(SL.PrepObject.name, prep))
-}
-fun buildPrep(preposition: String): Concept {
-    return Concept("prep")
-        .with(Slot("is", Concept(preposition)))
-}
-
-enum class ParserKinds {
-    Conjunction
-}
-
-enum class Conjunction {
-    And
-}
-
-fun withConjunctionObj(concept: Concept, conjunction: Concept) {
-    concept.with(Slot("conjObj", conjunction))
-}
-
-fun buildConjunction(conjunction: String): Concept {
-    return Concept("conjunction")
-        .with(Slot("is", Concept(conjunction)))
-}
-
 enum class ParserFlags() {
     Inside, // Concept has been nested in another object
     Ignore // Concept has been processed and can be ignored
@@ -447,14 +430,6 @@ enum class SearchDirection {
     Before
 }
 
-enum class SL {
-    PrepObject
-}
-
-fun matchPrepIn(preps: Collection<String>): ConceptMatcher {
-    return { c -> preps.contains(c?.value(SL.PrepObject)?.valueName("is")) }
-}
-
 fun matchConceptByHead(kind: String): ConceptMatcher {
     return { c -> c?.name == kind }
 }
@@ -477,10 +452,6 @@ fun matchAny(matchers: List<ConceptMatcher>): ConceptMatcher {
 
 fun matchAll(matchers: List<ConceptMatcher>): ConceptMatcher {
     return { c -> matchers.all { it(c) }}
-}
-
-fun matchConjunction(): ConceptMatcher {
-    return matchConceptByHead(ParserKinds.Conjunction.name)
 }
 
 fun matchNever(): ConceptMatcher {
@@ -538,19 +509,6 @@ class ExpectDemon(val matcher: ConceptMatcher, val direction: SearchDirection, w
     }
 }
 
-class WordAnd(): WordHandler(EntryWord("and")) {
-    override fun build(wordContext: WordContext): List<Demon> {
-        wordContext.defHolder.value = buildConjunction(Conjunction.And.name)
-        return listOf(IgnoreDemon(wordContext))
-    }
-}
-
-class WordIt(): WordHandler(EntryWord("it")) {
-    override fun build(wordContext: WordContext): List<Demon> {
-        return listOf(FindObjectReferenceDemon(wordContext))
-    }
-}
-
 class FindObjectReferenceDemon(wordContext: WordContext): Demon(wordContext) {
     override fun run() {
         if (!wordContext.isDefSet()) {
@@ -562,52 +520,6 @@ class FindObjectReferenceDemon(wordContext: WordContext): Demon(wordContext) {
         }
     }
 }
-
-class PrepDemon(val matcher: ConceptMatcher, val direction: SearchDirection = SearchDirection.Before, wordContext: WordContext, val action: (ConceptHolder) -> Unit): Demon(wordContext) {
-    var found: ConceptHolder? = null
-
-    override fun run() {
-        if (direction == SearchDirection.Before) {
-            (wordContext.wordIndex - 1 downTo 0).forEach {
-                found = updateFrom(found, wordContext, it)
-            }
-        } else {
-            (wordContext.wordIndex + 1 until wordContext.context.wordContexts.size).forEach {
-                found = updateFrom(found, wordContext, it)
-            }
-        }
-        val foundConcept = found
-        if (foundConcept?.value != null) {
-            action(foundConcept)
-            println("Prep found concept=$foundConcept for match=$matcher")
-            active = false
-        }
-    }
-
-    private fun updateFrom(existing: ConceptHolder?, wordContext: WordContext, index: Int): ConceptHolder? {
-        if (existing != null) {
-            return existing
-        }
-        var defHolder = wordContext.context.defHolderAtWordIndex(index)
-        var value = defHolder.value
-        // if (isConjunction(value)) {
-        //    return null
-        //}
-        if (matcher(value)) {
-            return defHolder
-        }
-        return null
-    }
-
-    // private fun isConjunction(concept: Concept?): Boolean {
-    //    return matchConceptByKind(ParserKinds.Conjunction.name)(concept)
-    //}
-
-    override fun description(): String {
-        return "PrepDemon $matcher"
-    }
-}
-
 
 fun searchContext(matcher: ConceptMatcher, abortSearch: ConceptMatcher = matchNever(), direction: SearchDirection = SearchDirection.Before, wordContext: WordContext, action: (ConceptHolder) -> Unit) {
     var index = wordContext.wordIndex

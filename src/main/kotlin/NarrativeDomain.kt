@@ -1,20 +1,19 @@
 
 fun buildInDepthUnderstandingLexicon(): Lexicon {
-    val lexicon = Lexicon();
+    val lexicon = Lexicon()
+    buildEnglishGrammarLexicon(lexicon)
+
     lexicon.addMapping(WordPerson(buildHuman("John", "", Gender.Male)))
     lexicon.addMapping(WordPickUp())
     lexicon.addMapping(WordIgnore(EntryWord("up")))
     lexicon.addMapping(WordIgnore(EntryWord("the")))
     lexicon.addMapping(WordBall())
-    lexicon.addMapping(WordAnd())
     lexicon.addMapping(WordDrop())
-    lexicon.addMapping(WordIt())
     lexicon.addMapping(WordIn())
     lexicon.addMapping(WordBox())
 
     lexicon.addMapping(WordPerson(buildHuman("Mary", "", Gender.Female)))
     lexicon.addMapping(WordGive())
-    lexicon.addMapping(WordIgnore(EntryWord("a").and("an")))
     lexicon.addMapping(WordBook())
 
     lexicon.addMapping(WordPerson(buildHuman("Fred", "", Gender.Male)))
@@ -55,18 +54,6 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     return lexicon
 }
 
-fun buildHuman(firstName: String = "", lastName: String = "", gender: Gender? = null): Concept {
-    return Concept(InDepthUnderstandingConcepts.Human.name)
-        .with(Slot("firstName", Concept(firstName)))
-        .with(Slot("lastName", Concept(lastName)))
-            //FIXME empty concept doesn't seem helpful
-        .with(Slot("gender", Concept(gender?.name ?: "")))
-}
-enum class Gender {
-    Male,
-    Female,
-    Other
-}
 enum class SatisfactionGoal {
     `S-Sex`,
     `S-Hunger`,
@@ -234,43 +221,7 @@ class WordHome(): WordHandler(EntryWord("home")) {
     }
 }
 
-// Exercise 1
-class WordPerson(val human: Concept, word: String = human.valueName("firstName")?:"unknown"): WordHandler(EntryWord(word)) {
-    override fun build(wordContext: WordContext): List<Demon> {
-        // Fixme - not sure about the load/reuse
-        return listOf(LoadCharacterDemon(human, wordContext), SaveCharacterDemon(wordContext))
-    }
-}
 
-fun buildPhysicalObject(kind: String, name: String): Concept {
-    return Concept(PhysicalObjectKind.PhysicalObject.name)
-        .with(Slot("kind", Concept(kind)))
-        .with(Slot("name", Concept(name)))
-}
-
-class WordBook(): WordHandler(EntryWord("book")) {
-    override fun build(wordContext: WordContext): List<Demon> {
-        wordContext.defHolder.value =  buildPhysicalObject(PhysicalObjectKind.Book.name, word.word)
-        return listOf(SaveObjectDemon(wordContext))
-    }
-}
-
-enum class FoodKind {
-    Lobster
-}
-
-fun buildFood(kindOfFood: String, name: String = kindOfFood): Concept {
-    return Concept(PhysicalObjectKind.Food.name)
-        .with(Slot("kind", Concept(kindOfFood)))
-        .with(Slot("name", Concept(name)))
-}
-
-class WordLobster(): WordHandler(EntryWord("lobster")) {
-    override fun build(wordContext: WordContext): List<Demon> {
-        wordContext.defHolder.value =  buildFood(FoodKind.Lobster.name, word.word)
-        return listOf(SaveObjectDemon(wordContext))
-    }
-}
 
 class LoadCharacterDemon(val human: Concept, wordContext: WordContext): Demon(wordContext) {
     override fun run() {
@@ -357,55 +308,6 @@ class WordPickUp(): WordHandler(EntryWord("picked", listOf("picked", "up"))/*.an
     fun description(): String {
         return "Picked Up"
     }
-    /*
-    fun buildGrasp(actor: Concept, thing: Concept): Concept {
-        return Concept(Acts.GRASP.name)
-            .with(Slot("actor", actor))
-            .with(Slot("thing", thing))
-            .with(Slot("instr", buildMove(actor, Concept(BodyParts.Fingers.name), thing)))
-            .with(Slot("kind", Concept(InDepthUnderstandingConcepts.Act.name)))
-    }
-    fun buildMove(actor: Concept, thing: Concept, to: Concept? = null): Concept {
-        return Concept(Acts.MOVE.name)
-            .with(Slot("actor", actor))
-            .with(Slot("thing", thing))
-            .with(Slot("to", to))
-            .with(Slot("kind", Concept(InDepthUnderstandingConcepts.Act.name)))
-    }
-    override fun build(wordContext: WordContext): List<Demon> {
-        val nextWordIsUp = true //"up".equals(wordContext.context.nextWord)
-        val pickUp = object : Demon(wordContext) {
-            var humanHolder: ConceptHolder? = null
-            var objectHolder: ConceptHolder? = null
-
-            override fun run() {
-                if (wordContext.isDefSet() || !nextWordIsUp) {
-                    active = false
-                } else {
-                    val humanConcept = humanHolder?.value
-                    val objectConcept = objectHolder?.value
-                    if (humanConcept != null && objectConcept != null) {
-                        humanHolder?.addFlag(ParserFlags.Inside)
-                        objectHolder?.addFlag(ParserFlags.Inside)
-                        wordContext.defHolder.value = buildGrasp(humanConcept, objectConcept)
-                        active = false
-                    }
-                }
-            }
-
-            override fun description(): String {
-                return "Pick Up"
-            }
-        }
-        val humanBefore = ExpectDemon(matchConceptByHead(InDepthUnderstandingConcepts.Human.name), SearchDirection.Before, wordContext) {
-            pickUp.humanHolder = it
-        }
-        val objectAfter = ExpectDemon(matchConceptByHead(InDepthUnderstandingConcepts.PhysicalObject.name), SearchDirection.After, wordContext) {
-            pickUp.objectHolder = it
-        }
-
-        return listOf(pickUp, humanBefore, objectAfter)
-    }*/
 }
 
 class WordDrop(): WordHandler(EntryWord("drop").and("dropped")) {
@@ -501,23 +403,6 @@ class WordTell(): WordHandler(EntryWord("tell").past("told")) {
         return lexicalConcept.demons
     }
 }
-
-open class EntryWord(val word: String, val expression: List<String> = listOf(word)) {
-    val pastWords = mutableListOf<String>()
-    val extras = mutableListOf<String>()
-
-    fun entries() = listOf(listOf(word), pastWords, extras).flatten()
-
-    fun past(word: String): EntryWord {
-        pastWords.add(word)
-        return this
-    }
-    fun and(word: String): EntryWord {
-        extras.add(word)
-        return this
-    }
-}
-
 
 class WordGo(): WordHandler(EntryWord("go").past("went")) {
     override fun build(wordContext: WordContext): List<Demon> {
