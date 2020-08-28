@@ -18,6 +18,18 @@ class TextModelBuilder(val content: String) {
     }
 }
 
+class NaiveTextModelBuild(val content: String) {
+    fun buildModel(): TextModel {
+        val words = NaiveTokenizer().tokenize(content)
+        val stemmer = StansStemmer()
+
+        val wordElements = (0 until words.size).map { WordElement(words[it], "", stemmer.stemWord(words[it]), "")}
+
+        val sentence = TextSentence(content, wordElements)
+        return TextModel(content, listOf(sentence))
+    }
+}
+
 class TextSentence(val text: String, val elements: List<WordElement>) {
 
 }

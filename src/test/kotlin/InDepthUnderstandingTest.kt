@@ -7,7 +7,7 @@ class InDepthUnderstandingTest {
 
     @Test
     fun `Example execution`() {
-        val textModel = TextModelBuilder(johnPickedUpTheBallAndPutItInTheBox).buildModel()
+        val textModel = NaiveTextModelBuild(johnPickedUpTheBallAndPutItInTheBox).buildModel()
         val lexicon = buildInDepthUnderstandingLexicon()
 
         val textProcessor = TextProcessor(textModel, lexicon)
@@ -37,7 +37,7 @@ class InDepthUnderstandingTest {
 
     @Test
     fun `Exercise 1 John gave Mary a book`() {
-        val textModel = TextModelBuilder("John gave Mary a book").buildModel()
+        val textModel = NaiveTextModelBuild("John gave Mary a book").buildModel()
         val lexicon = buildInDepthUnderstandingLexicon()
 
         val textProcessor = TextProcessor(textModel, lexicon)
@@ -56,7 +56,7 @@ class InDepthUnderstandingTest {
 
     @Test
     fun `Question who gave mary the book - shared working memory`() {
-        val textModel = TextModelBuilder("John gave Mary a book").buildModel()
+        val textModel = NaiveTextModelBuild("John gave Mary a book").buildModel()
         val lexicon = buildInDepthUnderstandingLexicon()
 
         val textProcessor = TextProcessor(textModel, lexicon)
@@ -75,7 +75,7 @@ class InDepthUnderstandingTest {
 
     @Test
     fun `Exercise 2 Fred told Mary that John eats lobster`() {
-        val textModel = TextModelBuilder("Fred told Mary that John eats lobster").buildModel()
+        val textModel = NaiveTextModelBuild("Fred told Mary that John eats lobster").buildModel()
         val lexicon = buildInDepthUnderstandingLexicon()
 
         val textProcessor = TextProcessor(textModel, lexicon)
@@ -98,7 +98,7 @@ class InDepthUnderstandingTest {
 
     @Test
     fun `Colour modifier`() {
-        val textModel = TextModelBuilder("the red book").buildModel()
+        val textModel = NaiveTextModelBuild("the red book").buildModel()
         val lexicon = buildInDepthUnderstandingLexicon()
 
         val textProcessor = TextProcessor(textModel, lexicon)
@@ -112,7 +112,7 @@ class InDepthUnderstandingTest {
 
     @Test
     fun `Age-Weight modifiers`() {
-        val textModel = TextModelBuilder("a thin old man").buildModel()
+        val textModel = NaiveTextModelBuild("a thin old man").buildModel()
         val lexicon = buildInDepthUnderstandingLexicon()
 
         val textProcessor = TextProcessor(textModel, lexicon)
@@ -126,7 +126,7 @@ class InDepthUnderstandingTest {
 
     @Test
     fun `Basic pronoun reference`() {
-        val textModel = TextModelBuilder("John went home. He kissed his wife Anne.").buildModel()
+        val textModel = NaiveTextModelBuild("John went home. He kissed his wife Anne.").buildModel()
         val lexicon = buildInDepthUnderstandingLexicon()
 
         val textProcessor = TextProcessor(textModel, lexicon)
@@ -146,7 +146,7 @@ class InDepthUnderstandingTest {
 
     @Test
     fun `Basic pronoun reference 2`() {
-        val textModel = TextModelBuilder("John told Bill that he was hungry.").buildModel()
+        val textModel = NaiveTextModelBuild("John told Bill that he was hungry.").buildModel()
         val lexicon = buildInDepthUnderstandingLexicon()
 
         val textProcessor = TextProcessor(textModel, lexicon)
@@ -164,7 +164,7 @@ class InDepthUnderstandingTest {
 
     @Test
     fun `Time modification`() {
-        val textModel = TextModelBuilder("John walked home yesterday").buildModel()
+        val textModel = NaiveTextModelBuild("John walked home yesterday").buildModel()
         val lexicon = buildInDepthUnderstandingLexicon()
 
         val textProcessor = TextProcessor(textModel, lexicon)
