@@ -102,4 +102,5 @@ fabric.properties
 /bin/
 !/lib/**/*.jar
 
+.idea/vcs.xml
 
