@@ -1,10 +1,14 @@
 class TextModelBuilder(val content: String) {
-    val nlp = EditorialNLP(content)
+    val nlp = EditorialNLP()
 
     fun buildModel(): TextModel {
-        val sentencesText = nlp.detectSentences()
-        val sentences = sentencesText.map { generateSentenceMappings(it) }
-        return TextModel(content, sentences)
+        val paragraphTexts = NaiveTokenizer().splitIntoParagraphs(content)
+        val paragraphModels = paragraphTexts.mapNotNull {
+            val sentencesText = nlp.detectSentences(it)
+            val sentences = sentencesText.map { generateSentenceMappings(it) }
+            if (sentences.isNotEmpty()) TextParagraph(it, sentences) else null
+        }
+        return TextModel(content, paragraphModels)
     }
 
     private fun generateSentenceMappings(sentence: String): TextSentence {
@@ -18,27 +22,19 @@ class TextModelBuilder(val content: String) {
     }
 }
 
-class NaiveTextModelBuild(val content: String) {
+class NaiveTextModelBuilder(val content: String) {
     fun buildModel(): TextModel {
-        val words = NaiveTokenizer().tokenize(content)
-        val stemmer = StansStemmer()
-
-        val wordElements = (0 until words.size).map { WordElement(words[it], "", stemmer.stemWord(words[it]), "")}
-
-        val sentence = TextSentence(content, wordElements)
-        return TextModel(content, listOf(sentence))
+        return NaiveTokenizer().tokenizeText(content)
     }
 }
 
-class TextSentence(val text: String, val elements: List<WordElement>) {
+data class TextModel(val content: String, val paragraphs: List<TextParagraph>)
+data class TextParagraph(val content: String, val sentences: List<TextSentence>)
+data class TextSentence(val text: String, val elements: List<WordElement>)
 
-}
-
-class WordElement(val token: String, val tag: String, val lemma: String, val chunk: String) {
+data class WordElement(val token: String, val tag: String, val lemma: String, val chunk: String) {
     val missingLemma = "O"
 
     fun lemmaOrToken(): String = if (lemma == missingLemma) token else lemma
-
 }
 
-class TextModel(val content: String, val sentences: List<TextSentence>)

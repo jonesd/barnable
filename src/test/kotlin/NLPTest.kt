@@ -4,15 +4,15 @@ import org.junit.jupiter.api.Test
 class NLPTest {
     @Test
     fun `split editorial by sentence`() {
-        val s = EditorialNLP(ED_JOBS.content).detectSentences()
+        val s = EditorialNLP().detectSentences(ED_JOBS.content)
         print(s)
         Assertions.assertEquals(7, s.size)
     }
 
     @Test
     fun `tokenize editorial sentence`() {
-        val nlp = EditorialNLP(ED_JOBS.content);
-        val s = nlp.detectSentences()[0]
+        val nlp = EditorialNLP();
+        val s = nlp.detectSentences(ED_JOBS.content)[0]
         val tokens = nlp.tokenize(s)
         print(s)
         Assertions.assertEquals(11, tokens.size)
@@ -20,16 +20,16 @@ class NLPTest {
 
     @Test
     fun `named recognition`() {
-        val nlp = EditorialNLP(ED_JOBS.content);
-        val s = nlp.detectSentences()[0]
-        val spans = nlp.namedEntityRecognition(nlp.text)
+        val nlp = EditorialNLP();
+        val s = nlp.detectSentences(ED_JOBS.content)[0]
+        val spans = nlp.namedEntityRecognition(ED_JOBS.content)
         Assertions.assertEquals(1, spans.size)
     }
 
     @Test
     fun `chunking`() {
-        val nlp = EditorialNLP(ED_JOBS.content);
-        val s = nlp.detectSentences()[0]
+        val nlp = EditorialNLP();
+        val s = nlp.detectSentences(ED_JOBS.content)[0]
         val chunks = nlp.chunking(s)
         Assertions.assertEquals(11, chunks.size)
     }

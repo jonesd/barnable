@@ -5,8 +5,13 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
     var qaMemory = WorkingMemory()
 
     fun runProcessor(): WorkingMemory {
-        textModel.sentences.forEach { processSentence(it) }
+
+        textModel.paragraphs.forEach { processParagraph(it) }
         return workingMemory
+    }
+
+    fun processParagraph(paragraphModel: TextParagraph) {
+        paragraphModel.sentences.forEach { processSentence(it) }
     }
 
     fun processSentence(sentence: TextSentence) {

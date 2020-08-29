@@ -6,7 +6,7 @@ class TextModelTest {
 
     @Test
     fun `Build up sentences from source`() {
-        val textModel = TextModelBuilder(source).buildModel()
-        assertEquals(7, textModel.sentences.size)
+        val textModel = NaiveTextModelBuilder(source).buildModel()
+        assertEquals(7, textModel.paragraphs.first().sentences.size)
     }
 }

@@ -17,15 +17,14 @@ import java.util.*
 
 /* Apache OpenNLP */
 
-class EditorialNLP(val text: String) {
+class EditorialNLP() {
     val modelPath = "~/code/opennlp/models-1.5"
 
-    fun detectSentences(): Array<String> {
+    fun detectSentences(text: String): Array<String> {
         val sentenceModelStream = modelFile("en-sent.bin");
         val model = SentenceModel(sentenceModelStream)
         val sdetector = SentenceDetectorME(model)
         val sentences = sdetector.sentDetect(text)
-        print(sentences)
         return sentences;
     }
 
@@ -34,7 +33,6 @@ class EditorialNLP(val text: String) {
         val model = TokenizerModel(tokenizeModelStream)
         val tokenizer = TokenizerME(model)
         val tokens = tokenizer.tokenize(sentence)
-        print(tokens)
         return tokens
     }
 
