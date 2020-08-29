@@ -1,8 +1,9 @@
 plugins {
     kotlin("jvm") version "1.4.0"
+    jacoco
 }
 
-group = "info.dgjones"
+group = "info.dgjones.au"
 version = "0.1-SNAPSHOT"
 
 repositories {
@@ -27,3 +28,11 @@ tasks {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
+tasks.test {
+    finalizedBy(tasks.jacocoTestReport) // report is always generated after tests run
+}
+tasks.jacocoTestReport {
+    dependsOn(tasks.test) // tests are required to run before generating the report
+}
+
