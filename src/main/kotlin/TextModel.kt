@@ -1,26 +1,3 @@
-class TextModelBuilder(val content: String) {
-    val nlp = EditorialNLP()
-
-    fun buildModel(): TextModel {
-        val paragraphTexts = NaiveTokenizer().splitIntoParagraphs(content)
-        val paragraphModels = paragraphTexts.mapNotNull {
-            val sentencesText = nlp.detectSentences(it)
-            val sentences = sentencesText.map { generateSentenceMappings(it) }
-            if (sentences.isNotEmpty()) TextParagraph(it, sentences) else null
-        }
-        return TextModel(content, paragraphModels)
-    }
-
-    private fun generateSentenceMappings(sentence: String): TextSentence {
-        val tokens = nlp.tokenize(sentence)
-        var tags = nlp.tags(tokens);
-        val entities = nlp.namedEntityRecognition(tokens)
-        var lemmas = nlp.lemmas(tokens, tags)
-        val chunking = nlp.chunking(tokens, tags)
-        val wordElements = (0 until tokens.size).map { WordElement(tokens[it], tags[it], lemmas[it], chunking[it])}
-        return TextSentence(sentence, wordElements)
-    }
-}
 
 class NaiveTextModelBuilder(val content: String) {
     fun buildModel(): TextModel {
