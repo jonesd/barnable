@@ -1,10 +1,7 @@
 package org.dgjones.au.parser
 
 import org.dgjones.au.narrative.Acts
-import org.dgjones.au.nlp.TextModel
-import org.dgjones.au.nlp.TextParagraph
-import org.dgjones.au.nlp.TextSentence
-import org.dgjones.au.nlp.WordElement
+import org.dgjones.au.nlp.*
 
 class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
     val workingMemory = WorkingMemory()
@@ -30,18 +27,18 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
         do {
             val element = sentence.elements[index]
             var word = element.token.toLowerCase()
-            val wordHandler = lexicon.findWordHandler(word) ?: WordUnknown(word)
+            val wordHandlerWithSuffix = lexicon.findWordHandler(word) ?: WordHandlerWithSuffix(WordUnknown(word))
             var expression = listOf(word)
-            if (wordHandler.word.expression.size > 1) {
-                if (doesExpressionMatch(sentence.elements, index, wordHandler.word.expression)) {
-                    expression = wordHandler.word.expression
+            if (wordHandlerWithSuffix.wordHandler.word.expression.size > 1) {
+                if (doesExpressionMatch(sentence.elements, index, wordHandlerWithSuffix.wordHandler.word.expression)) {
+                    expression = wordHandlerWithSuffix.wordHandler.word.expression
                 }
             }
             word = expression.joinToString(" ")
             val wordContext = WordContext(context.wordContexts.size, element, word, workingMemory.createDefHolder(), context)
             context.pushWord(wordContext)
 
-            runWord(index, word, wordHandler, wordContext)
+            runWord(index, word, wordHandlerWithSuffix.wordHandler, wordHandlerWithSuffix.suffix, wordContext)
             runDemons(context)
             index += expression.size
         } while (index < sentence.elements.size)
@@ -123,10 +120,12 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
         memory.concepts.addAll(defs)
     }
 
-    private fun runWord(index: Int, word: String, wordHandler: WordHandler, wordContext: WordContext) {
+    private fun runWord(index: Int, word: String, wordHandler: WordHandler, suffix: String?, wordContext: WordContext) {
         println("")
         println("${word.toUpperCase()} ==>")
+        val suffixDemon = if (suffix != null) buildSuffixDemon(suffix, wordContext) else null
         val wordDemons = wordHandler.build(wordContext)
+
         println("Adding to *working-memory*")
         println("DEF.${wordContext.defHolder.instanceNumber} = ${wordContext.def()}")
         println("Current working memory")
@@ -134,9 +133,16 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
             println("--- ${wordContext.word} ==> ${wordContext.defHolder?.value}")
         }
         wordDemons.forEach {
-            agenda.withDemon(index, it)
-            println("Spawning demon: $it")
+            spawnDemon(index, it)
         }
+        if (suffixDemon != null) {
+            spawnDemon(index, suffixDemon)
+        }
+    }
+
+    private fun spawnDemon(index: Int, demon: Demon) {
+        agenda.withDemon(index, demon)
+        println("Spawning demon: $demon")
     }
 
     // Run each active demon. Repeat again if any were fired
@@ -152,10 +158,6 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
                 }
             }
         } while (fired)
-    }
-
-    fun findWordHandler(word: String): WordHandler? {
-        return lexicon.findWordHandler(word)
     }
 }
 
@@ -257,19 +259,44 @@ class Agenda() {
 
 class Lexicon() {
     val wordMappings: MutableMap<String, WordHandler> = mutableMapOf()
+    val stemmer = StansStemmer()
 
     fun addMapping(handler: WordHandler) {
         handler.word.entries().forEach {
             if (wordMappings.containsKey(it.toLowerCase())) {
-                // FIXME sepport multiple entries ???
+                // FIXME support multiple entries ???
                 throw IllegalStateException("mapping already exists = ${it.toLowerCase()}")
             }
             wordMappings[it.toLowerCase()] = handler
         }
     }
 
-    fun findWordHandler(word: String): WordHandler? {
+    private fun wordHandlerFor(word: String): WordHandler? {
         return wordMappings[word.toLowerCase()]
+    }
+
+    fun findWordHandler(word: String): WordHandlerWithSuffix? {
+        var activeWord = word
+        var wordHandler = wordHandlerFor(activeWord)
+        if (wordHandler == null) {
+            activeWord =  stemmer.stemWord(word)
+            wordHandler = wordHandlerFor(activeWord)
+        }
+        // FIXME hacked up stemming
+        var suffix: String? = null
+        if (wordHandler == null) {
+            if (word.endsWith("ed", ignoreCase = true)) {
+                activeWord= word.substring(0, word.length - 2)
+                suffix = "ed"
+                wordHandler = wordHandlerFor(activeWord)
+            }
+        }
+        println("word = $word ==> $activeWord = wordHandler")
+        return if (wordHandler != null) {
+            WordHandlerWithSuffix(wordHandler, suffix)
+        } else {
+            null
+        }
     }
 }
 
@@ -278,6 +305,8 @@ open class WordHandler(val word: EntryWord) {
         return listOf()
     }
 }
+
+data class WordHandlerWithSuffix(val wordHandler: WordHandler, val suffix: String? = null)
 
 open class EntryWord(val word: String, val expression: List<String> = listOf(word)) {
     val pastWords = mutableListOf<String>()

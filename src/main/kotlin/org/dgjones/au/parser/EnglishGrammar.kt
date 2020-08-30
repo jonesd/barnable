@@ -126,3 +126,24 @@ class WordIt(): WordHandler(EntryWord("it")) {
         return listOf(FindObjectReferenceDemon(wordContext))
     }
 }
+
+/* Suffix Daemons */
+
+fun buildSuffixDemon(suffix: String, wordContext: WordContext): Demon? {
+    when (suffix) {
+        "ed" -> return EdSuffixDemon(wordContext)
+        else -> return null
+    }
+}
+
+class EdSuffixDemon(wordContext: WordContext): Demon(wordContext) {
+    override fun run() {
+        val def = wordContext.def()
+        if (def != null) {
+            if (def.value("time") == null) {
+                def.value("time", Concept("past"))
+                active = false
+            }
+        }
+    }
+}

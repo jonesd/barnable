@@ -381,7 +381,7 @@ class WordGive(): WordHandler(EntryWord("give").and("gave")) {
     }
 }
 
-class WordKiss(): WordHandler(EntryWord("kiss").and("kissing").and("kissed")) {
+class WordKiss(): WordHandler(EntryWord("kiss")) {
     override fun build(wordContext: WordContext): List<Demon> {
         val lexicalConcept = lexicalConcept(wordContext, "ATTEND") {
             expectHead("actor", headValue = "Human", direction = SearchDirection.Before)
@@ -419,43 +419,8 @@ class WordGo(): WordHandler(EntryWord("go").past("went")) {
         return lexicalConcept.demons
     }
 }
-/* FIXME old
-class WordWalk(): WordHandler(EntryWord("walk").past("walked")) {
-    override fun build(wordContext: WordContext): List<Demon> {
-        val demon = object : Demon(wordContext) {
-            var actorHolder: ConceptHolder? = null
-            var locationHolder: ConceptHolder? = null
 
-            override fun run() {
-                if (wordContext.isDefSet()) {
-                    active = false
-                } else {
-                    val actorConcept = actorHolder?.value
-                    val locationConcept = locationHolder?.value
-                    if (actorConcept != null && locationConcept != null) {
-                        actorHolder?.addFlag(ParserFlags.Inside)
-                        locationHolder?.addFlag(ParserFlags.Inside)
-                        val instr = buildMove(actorConcept, Concept(BodyParts.Legs.name))
-                        wordContext.defHolder.value = buildPTrans(actorConcept, null, locationConcept, instr)
-                        active = false
-                    }
-                }
-            }
-        }
-        val humanBefore = ExpectDemon(matchConceptByHead(InDepthUnderstandingConcepts.Human.name), SearchDirection.Before, wordContext) {
-            demon.actorHolder = it
-        }
-        // FIXME should this be a LOCATION (Was physical location)
-        val locationAfter = ExpectDemon(matchConceptByHead(InDepthUnderstandingConcepts.Location.name), SearchDirection.After, wordContext) {
-            demon.locationHolder = it
-        }
-
-        return listOf(demon, humanBefore, locationAfter)
-    }
-}
-*/
-
-class WordWalk(): WordHandler(EntryWord("walk").past("walked")) {
+class WordWalk(): WordHandler(EntryWord("walk")) {
     override fun build(wordContext: WordContext): List<Demon> {
         val lexicalConcept = lexicalConcept(wordContext, "PTRANS") {
             expectHead("actor", variableName = "actor", headValue = "Human", direction = SearchDirection.Before)
@@ -577,18 +542,5 @@ class PronounWord(word: String, val genderMatch: Gender): WordHandler(EntryWord(
             }
         }
         return listOf()
-    }
-}
-
-class WordWho(): WordHandler(EntryWord("who")) {
-    override fun build(wordContext: WordContext): List<Demon> {
-        return listOf(WhoDemon(wordContext));
-    }
-}
-
-class WhoDemon(wordContext: WordContext): Demon(wordContext) {
-    override fun run() {
-        //FIXME not sure what to use for placeholder
-        wordContext.defHolder.value = buildHuman("who", "who", Gender.Male)
     }
 }
