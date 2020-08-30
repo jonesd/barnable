@@ -51,6 +51,9 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     lexicon.addMapping(WordHungry())
     lexicon.addMapping(WordWalk())
 
+    // Divorce2
+    lexicon.addMapping(WordPerson(buildHuman("George", "", Gender.Male)))
+
     // FIXME only for QA
     lexicon.addMapping(WordWho())
 
