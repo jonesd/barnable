@@ -5,14 +5,12 @@ import org.dgjones.au.parser.TextProcessor
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
-class InDepthUnderstandingTest {
-
-    val johnPickedUpTheBallAndPutItInTheBox = "John picked up the ball and dropped it in the box"
+class NarrativeDomainTest {
+    val lexicon = buildInDepthUnderstandingLexicon()
 
     @Test
     fun `Example execution`() {
-        val textModel = NaiveTextModelBuilder(johnPickedUpTheBallAndPutItInTheBox).buildModel()
-        val lexicon = buildInDepthUnderstandingLexicon()
+        val textModel = NaiveTextModelBuilder("John picked up the ball and dropped it in the box").buildModel()
 
         val textProcessor = TextProcessor(textModel, lexicon)
         textProcessor.runProcessor()
@@ -42,7 +40,6 @@ class InDepthUnderstandingTest {
     @Test
     fun `Exercise 1 John gave Mary a book`() {
         val textModel = NaiveTextModelBuilder("John gave Mary a book").buildModel()
-        val lexicon = buildInDepthUnderstandingLexicon()
 
         val textProcessor = TextProcessor(textModel, lexicon)
         textProcessor.runProcessor()
@@ -59,28 +56,8 @@ class InDepthUnderstandingTest {
     }
 
     @Test
-    fun `Question who gave mary the book - shared working memory`() {
-        val textModel = NaiveTextModelBuilder("John gave Mary a book").buildModel()
-        val lexicon = buildInDepthUnderstandingLexicon()
-
-        val textProcessor = TextProcessor(textModel, lexicon)
-        textProcessor.runProcessor()
-
-        val questionModel = NaiveTextModelBuilder("Who gave Mary a book").buildModel()
-        val response = textProcessor.processQuestion(questionModel.paragraphs.first().sentences.first())
-
-        assertEquals("John", response)
-
-        val questionModel2 = NaiveTextModelBuilder("John gave who the book").buildModel()
-        val response2 = textProcessor.processQuestion(questionModel2.paragraphs.first().sentences.first())
-
-        assertEquals("Mary", response2)
-    }
-
-    @Test
     fun `Exercise 2 Fred told Mary that John eats lobster`() {
         val textModel = NaiveTextModelBuilder("Fred told Mary that John eats lobster").buildModel()
-        val lexicon = buildInDepthUnderstandingLexicon()
 
         val textProcessor = TextProcessor(textModel, lexicon)
         textProcessor.runProcessor()
@@ -103,7 +80,6 @@ class InDepthUnderstandingTest {
     @Test
     fun `Colour modifier`() {
         val textModel = NaiveTextModelBuilder("the red book").buildModel()
-        val lexicon = buildInDepthUnderstandingLexicon()
 
         val textProcessor = TextProcessor(textModel, lexicon)
         val workingMemory = textProcessor.runProcessor()
@@ -117,7 +93,6 @@ class InDepthUnderstandingTest {
     @Test
     fun `Age-Weight modifiers`() {
         val textModel = NaiveTextModelBuilder("a thin old man").buildModel()
-        val lexicon = buildInDepthUnderstandingLexicon()
 
         val textProcessor = TextProcessor(textModel, lexicon)
         val workingMemory = textProcessor.runProcessor()
@@ -131,7 +106,6 @@ class InDepthUnderstandingTest {
     @Test
     fun `Basic pronoun reference`() {
         val textModel = NaiveTextModelBuilder("John went home. He kissed his wife Anne.").buildModel()
-        val lexicon = buildInDepthUnderstandingLexicon()
 
         val textProcessor = TextProcessor(textModel, lexicon)
         val workingMemory = textProcessor.runProcessor()
@@ -151,7 +125,6 @@ class InDepthUnderstandingTest {
     @Test
     fun `Basic pronoun reference 2`() {
         val textModel = NaiveTextModelBuilder("John told Bill that he was hungry.").buildModel()
-        val lexicon = buildInDepthUnderstandingLexicon()
 
         val textProcessor = TextProcessor(textModel, lexicon)
         val workingMemory = textProcessor.runProcessor()
@@ -169,7 +142,6 @@ class InDepthUnderstandingTest {
     @Test
     fun `Time modification`() {
         val textModel = NaiveTextModelBuilder("John walked home yesterday").buildModel()
-        val lexicon = buildInDepthUnderstandingLexicon()
 
         val textProcessor = TextProcessor(textModel, lexicon)
         val workingMemory = textProcessor.runProcessor()
