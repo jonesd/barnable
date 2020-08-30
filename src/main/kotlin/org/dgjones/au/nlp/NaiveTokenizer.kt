@@ -1,3 +1,7 @@
+package org.dgjones.au.nlp
+
+import org.dgjones.au.nlp.StansStemmer
+
 class NaiveTokenizer() {
     val stemmer = StansStemmer()
 

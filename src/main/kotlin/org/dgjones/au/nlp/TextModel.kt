@@ -1,3 +1,6 @@
+package org.dgjones.au.nlp
+
+import org.dgjones.au.nlp.NaiveTokenizer
 
 class NaiveTextModelBuilder(val content: String) {
     fun buildModel(): TextModel {

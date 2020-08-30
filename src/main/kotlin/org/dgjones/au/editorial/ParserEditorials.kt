@@ -1,3 +1,8 @@
+package org.dgjones.au.editorial
+
+import org.dgjones.au.parser.EntryWord
+import org.dgjones.au.parser.WordHandler
+
 class WordRecentHandler() : WordHandler(EntryWord("recent")) {
     /*
     override fun createDemons(): List<Demon> {

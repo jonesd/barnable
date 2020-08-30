@@ -1,3 +1,7 @@
+package org.dgjones.au.parser
+
+import org.dgjones.au.nlp.TextSentence
+import org.dgjones.au.nlp.WordElement
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 

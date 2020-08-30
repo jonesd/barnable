@@ -1,3 +1,5 @@
+package org.dgjones.au.parser
+
 class LexicalRootBuilder(val wordContext: WordContext, val headName: String) {
     val root = LexicalConceptBuilder(this, headName)
 

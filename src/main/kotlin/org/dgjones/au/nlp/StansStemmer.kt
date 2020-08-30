@@ -1,3 +1,5 @@
+package org.dgjones.au.nlp
+
 /* Implementation of the STANS stemmer based on:
  http://docsdrive.com/pdfs/ansinet/itj/2006/685-688.pdf
  */

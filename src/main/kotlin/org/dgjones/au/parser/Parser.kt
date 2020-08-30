@@ -1,3 +1,11 @@
+package org.dgjones.au.parser
+
+import org.dgjones.au.narrative.Acts
+import org.dgjones.au.nlp.TextModel
+import org.dgjones.au.nlp.TextParagraph
+import org.dgjones.au.nlp.TextSentence
+import org.dgjones.au.nlp.WordElement
+
 class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
     val workingMemory = WorkingMemory()
     var agenda = Agenda()
@@ -331,7 +339,7 @@ class ConceptHolder(val instanceNumber: Int) {
 }
 
 data class Concept(val name: String) {
-    private val slots = mutableMapOf<String,Slot>()
+    private val slots = mutableMapOf<String, Slot>()
 
     fun value(slotName: String): Concept? {
         return slot(slotName)?.value

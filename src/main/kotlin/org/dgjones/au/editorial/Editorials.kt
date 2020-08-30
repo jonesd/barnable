@@ -1,3 +1,5 @@
+package org.dgjones.au.editorial
+
 class Editorial(val content: String, val writer: String, val country: String) {
 }
 

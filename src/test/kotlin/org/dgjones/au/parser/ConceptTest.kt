@@ -1,3 +1,6 @@
+package org.dgjones.au.parser
+
+import org.dgjones.au.parser.Concept
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 

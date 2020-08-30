@@ -1,3 +1,5 @@
+package org.dgjones.au.editorial
+
 class Belief(name: String)
 
 class BeliefRelationship(from: Belief, to: Belief, relationship: RelationshipBind)

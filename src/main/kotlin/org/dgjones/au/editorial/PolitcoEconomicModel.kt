@@ -1,3 +1,5 @@
+package org.dgjones.au.editorial
+
 val tradeRelationships = buildTradeRelationshipModel()
 
 fun buildTradeRelationshipModel(): EconomicQuantityNetwork {

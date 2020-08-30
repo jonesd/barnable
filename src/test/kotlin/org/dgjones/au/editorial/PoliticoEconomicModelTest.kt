@@ -1,3 +1,5 @@
+package org.dgjones.au.editorial
+
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 

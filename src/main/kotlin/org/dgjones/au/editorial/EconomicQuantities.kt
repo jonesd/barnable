@@ -1,3 +1,5 @@
+package org.dgjones.au.editorial
+
 import org.jgrapht.*
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath
 import org.jgrapht.graph.DefaultDirectedGraph

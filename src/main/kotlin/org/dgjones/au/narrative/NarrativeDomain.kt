@@ -1,3 +1,6 @@
+package org.dgjones.au.narrative
+
+import org.dgjones.au.parser.*
 
 fun buildInDepthUnderstandingLexicon(): Lexicon {
     val lexicon = Lexicon()
@@ -148,7 +151,7 @@ fun buildMove(actor: Concept, thing: Concept, to: Concept? = null): Concept {
         .with(Slot("to", to))
         .with(Slot("kind", Concept(InDepthUnderstandingConcepts.Act.name)))
 }
-fun buildIngest(actor: Concept, thing:Concept): Concept {
+fun buildIngest(actor: Concept, thing: Concept): Concept {
     return Concept(Acts.INGEST.name)
         .with(Slot("actor", actor))
         .with(Slot("thing", thing))
@@ -316,7 +319,9 @@ class WordDrop(): WordHandler(EntryWord("drop").and("dropped")) {
             expectHead("actor", variableName = "actor", headValue = "Human", direction = SearchDirection.Before)
             expectHead("thing", variableName = "thing", headValue = InDepthUnderstandingConcepts.PhysicalObject.name)
             varReference("from", "actor")
-            expectPrep("to", preps = setOf(Preposition.In, Preposition.Into, Preposition.On), matcher = matchConceptByHead(setOf(InDepthUnderstandingConcepts.Human.name, InDepthUnderstandingConcepts.PhysicalObject.name)))
+            expectPrep("to", preps = setOf(Preposition.In, Preposition.Into, Preposition.On), matcher = matchConceptByHead(setOf(
+                InDepthUnderstandingConcepts.Human.name, InDepthUnderstandingConcepts.PhysicalObject.name))
+            )
             slot("instr", "PROPEL") {
                 slot("actor", Force.Gravity.name)
                 varReference("thing", "thing")

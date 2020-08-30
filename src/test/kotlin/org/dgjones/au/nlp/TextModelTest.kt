@@ -1,8 +1,11 @@
+package org.dgjones.au.nlp
+
+import org.dgjones.au.editorial.ED_JOBS
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 class TextModelTest {
-    val source = ED_JOBS.content
+    private val source = ED_JOBS.content
 
     @Test
     fun `Build up sentences from source`() {

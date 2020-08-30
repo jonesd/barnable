@@ -1,3 +1,5 @@
+package org.dgjones.au.parser
+
 enum class ParserKinds {
     Conjunction
 }

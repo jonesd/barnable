@@ -1,3 +1,7 @@
+package org.dgjones.au.parser
+
+import org.dgjones.au.narrative.*
+
 /* Physical Objects */
 
 fun LexicalConceptBuilder.physicalObject(name: String, kind: String, initializer: LexicalConceptBuilder.() -> Unit)  {

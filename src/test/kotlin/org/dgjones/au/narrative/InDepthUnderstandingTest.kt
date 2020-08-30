@@ -1,3 +1,7 @@
+package org.dgjones.au.narrative
+
+import org.dgjones.au.nlp.NaiveTextModelBuilder
+import org.dgjones.au.parser.TextProcessor
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
