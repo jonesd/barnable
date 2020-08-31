@@ -7,9 +7,11 @@ class LexicalRootBuilder(val wordContext: WordContext, val headName: String) {
     val variableSlots = mutableListOf<Slot>()
     val completedSlots = mutableListOf<Slot>()
     val completedConceptHolders = mutableListOf<ConceptHolder>()
+    val disambiguations = mutableListOf<Demon>()
+    var totalSuccessfulDisambiguations = 0;
 
     fun build(): LexicalConcept {
-        return LexicalConcept(wordContext, root.build(), demons)
+        return LexicalConcept(wordContext, root.build(), demons, disambiguations)
     }
 
     // FIXME shouldn't associate this state that lives on beyond build() to builder
@@ -32,10 +34,35 @@ class LexicalRootBuilder(val wordContext: WordContext, val headName: String) {
             completedConceptHolders.forEach { it.addFlag(ParserFlags.Inside)  }
         }
     }
+    fun disambiguationResult(result: Boolean) {
+        this.totalSuccessfulDisambiguations += 1
+    }
     fun addDemon(demon: Demon) {
         this.demons.add(demon)
     }
+    fun addDisambiguationDemon(demon: Demon) {
+        this.disambiguations.add(demon)
+    }
 }
+
+/*class LexicalConceptDisambiguateBuilder(val root: LexicalRootBuilder) {
+    fun disambiguateUsingWord(word: String, heads: List<String>, direction: SearchDirection = SearchDirection.After) {
+        val demon = DisambiguateUsingWord(word, matchConceptByHead(heads), direction, root.wordContext) {
+            root.disambiguationResult(true)
+        }
+        root.addDisambiguationDemon(demon)
+    }
+    fun disambiguate(head: String, direction: SearchDirection = SearchDirection.After) {
+        disambiguate(listOf(head), direction)
+    }
+    fun disambiguate(heads: List<String>, direction: SearchDirection = SearchDirection.After) {
+        val demon = DisambiguateUsingMatch(matchConceptByHead(heads), direction, root.wordContext) {
+            root.disambiguationResult(true)
+
+        }
+        root.addDisambiguationDemon(demon)
+    }
+}*/
 
 class LexicalConceptBuilder(val root: LexicalRootBuilder, conceptName: String) {
     val concept = Concept(conceptName)
@@ -82,7 +109,7 @@ fun lexicalConcept(wordContext: WordContext, headName: String, initializer: Lexi
 
 class LexicalRoot(val wordContext: WordContext, val head: Concept)
 
-class LexicalConcept(val wordContext: WordContext, val head: Concept, val demons: List<Demon>) {
+class LexicalConcept(val wordContext: WordContext, val head: Concept, val demons: List<Demon>, val disambiguateDemons: List<Demon>) {
     init {
         wordContext.defHolder.value = head
     }

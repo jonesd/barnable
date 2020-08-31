@@ -125,6 +125,13 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
         println("${word.toUpperCase()} ==>")
         val suffixDemon = if (suffix != null) buildSuffixDemon(suffix, wordContext) else null
         val wordDemons = wordHandler.build(wordContext)
+        val allDemons = wordDemons.toMutableList()
+        if (suffixDemon != null) {
+            allDemons.add(suffixDemon)
+        }
+        val disambiguationHandler = DisambiguationHandler(wordContext, wordHandler, agenda, allDemons)
+        val disambiguationDemons = wordHandler.disambiguationDemons(wordContext, disambiguationHandler)
+        disambiguationHandler.startDisambiguation(disambiguationDemons)
 
         println("Adding to *working-memory*")
         println("DEF.${wordContext.defHolder.instanceNumber} = ${wordContext.def()}")
@@ -132,17 +139,6 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
         wordContext.context.wordContexts.forEachIndexed { index, wordContext ->
             println("--- ${wordContext.word} ==> ${wordContext.defHolder?.value}")
         }
-        wordDemons.forEach {
-            spawnDemon(index, it)
-        }
-        if (suffixDemon != null) {
-            spawnDemon(index, suffixDemon)
-        }
-    }
-
-    private fun spawnDemon(index: Int, demon: Demon) {
-        agenda.withDemon(index, demon)
-        println("Spawning demon: $demon")
     }
 
     // Run each active demon. Repeat again if any were fired
@@ -158,6 +154,41 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
                 }
             }
         } while (fired)
+    }
+}
+
+class DisambiguationHandler(val wordContext: WordContext, val wordHandler: WordHandler, val agenda: Agenda, val wordDemons: List<Demon>) {
+    var outstandingDisambiguations = 0;
+
+    fun startDisambiguation(disambigutionDemons: List<Demon>) {
+        outstandingDisambiguations = disambigutionDemons.size
+        if (outstandingDisambiguations == 0) {
+            spawnDemons(wordDemons)
+        } else {
+            spawnDemons(disambigutionDemons)
+        }
+    }
+
+    private fun spawnDemons(demons: List<Demon>) {
+        demons.forEach { spawnDemon(wordContext.wordIndex, it) }
+    }
+
+    private fun spawnDemon(index: Int, demon: Demon) {
+        agenda.withDemon(index, demon)
+        println("Spawning demon: $demon")
+    }
+
+    fun result(success: Boolean) {
+        if (success) {
+            outstandingDisambiguations -= 1
+            if (outstandingDisambiguations <= 0) {
+                spawnDemons(wordDemons)
+            }
+        } else {
+            // failed do not run wordDemons
+            println("Disambiguation failure of ${wordContext.word} for $wordHandler")
+        }
+
     }
 }
 
@@ -192,6 +223,9 @@ class SentenceContext(val sentence: TextSentence, val workingMemory: WorkingMemo
         //nextWord = if (currentWordIndex < sentence.elements.size - 1) sentence.elements[currentWordIndex + 1].token.toLowerCase() else ""
     }
 
+    fun sentenceWordAtWordIndex(wordIndex: Int): String {
+        return wordContexts[wordIndex].word
+    }
     fun defHolderAtWordIndex(wordIndex: Int): ConceptHolder {
         return wordContexts[wordIndex].defHolder
     }
@@ -289,6 +323,10 @@ class Lexicon() {
                 activeWord= word.substring(0, word.length - 2)
                 suffix = "ed"
                 wordHandler = wordHandlerFor(activeWord)
+            } else if (wordHandler == null && word.endsWith("s", ignoreCase = true)) {
+                activeWord = word.substring(0, word.length - 1)
+                suffix = "s"
+                wordHandler = wordHandlerFor(activeWord)
             }
         }
         println("word = $word ==> $activeWord = wordHandler")
@@ -302,6 +340,9 @@ class Lexicon() {
 
 open class WordHandler(val word: EntryWord) {
     open fun build(wordContext: WordContext): List<Demon> {
+        return listOf()
+    }
+    open fun disambiguationDemons(wordContext: WordContext, disambiguationHandler: DisambiguationHandler): List<Demon> {
         return listOf()
     }
 }
@@ -322,6 +363,11 @@ open class EntryWord(val word: String, val expression: List<String> = listOf(wor
         extras.add(word)
         return this
     }
+}
+
+class WordDisambiguator(val wordContext: WordContext) {
+    val wordHandlers = mutableListOf<WordHandler>()
+
 }
 
 open class Demon(val wordContext: WordContext) {
@@ -563,13 +609,43 @@ class FindObjectReferenceDemon(wordContext: WordContext): Demon(wordContext) {
     }
 }
 
-fun searchContext(matcher: ConceptMatcher, abortSearch: ConceptMatcher = matchNever(), direction: SearchDirection = SearchDirection.Before, wordContext: WordContext, action: (ConceptHolder) -> Unit) {
+class DisambiguateUsingWord(val word: String, val matcher: ConceptMatcher, val direction: SearchDirection = SearchDirection.After, wordContext: WordContext, val disambiguationHandler: DisambiguationHandler): Demon(wordContext) {
+    override fun run() {
+        searchContext(matcher, matchPreviousWord = word, direction = direction, wordContext = wordContext) {
+            disambiguationHandler.result(it != null)
+            active = false
+        }
+    }
+    override fun description(): String {
+        return "DisambiguateUsingWord word=$word"
+    }
+}
+class DisambiguateUsingMatch(val matcher: ConceptMatcher, val direction: SearchDirection = SearchDirection.After, wordContext: WordContext, val disambiguationHandler: DisambiguationHandler): Demon(wordContext) {
+    override fun run() {
+        searchContext(matcher, direction = direction, wordContext = wordContext) {
+            disambiguationHandler.result(it != null)
+            active = false
+        }
+    }
+    override fun description(): String {
+        return "DisambiguateUsingMatch"
+    }
+}
+
+fun searchContext(matcher: ConceptMatcher, abortSearch: ConceptMatcher = matchNever(), matchPreviousWord: String? = null, direction: SearchDirection = SearchDirection.Before, wordContext: WordContext, action: (ConceptHolder) -> Unit) {
     var index = wordContext.wordIndex
     var found: ConceptHolder? = null
 
+    fun isMatchWithSentenceWord(index: Int): Boolean {
+        return (matchPreviousWord != null && index >= 0 && wordContext.context.sentenceWordAtWordIndex(index) == matchPreviousWord)
+    }
     fun updateFrom(existing: ConceptHolder?, wordContext: WordContext, index: Int): ConceptHolder? {
         if (existing?.value != null) {
             return existing
+        }
+        if (matchPreviousWord != null && !isMatchWithSentenceWord(index - 1)) {
+            // failed to include match on provies sentence word
+            return null
         }
         val defHolder = wordContext.context.defHolderAtWordIndex(index)
         var value = defHolder.value

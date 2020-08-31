@@ -22,8 +22,10 @@ fun LexicalConceptBuilder.food(kindOfFood: String, name: String = kindOfFood, in
     val c = child.build()
 }
 
+// FIXME generate food word handlers
 enum class FoodKind {
-    Lobster
+    Lobster,
+    Sugar
 }
 
 fun buildFood(kindOfFood: String, name: String = kindOfFood): Concept {
@@ -32,9 +34,17 @@ fun buildFood(kindOfFood: String, name: String = kindOfFood): Concept {
         .with(Slot("name", Concept(name)))
 }
 
-class WordLobster(): WordHandler(EntryWord("lobster")) {
+
+class WordLobster : WordHandler(EntryWord("lobster")) {
     override fun build(wordContext: WordContext): List<Demon> {
         wordContext.defHolder.value =  buildFood(FoodKind.Lobster.name, word.word)
+        return listOf(SaveObjectDemon(wordContext))
+    }
+}
+
+class WordSugar(): WordHandler(EntryWord("sugar")) {
+    override fun build(wordContext: WordContext): List<Demon> {
+        wordContext.defHolder.value =  buildFood(FoodKind.Sugar.name, word.word)
         return listOf(SaveObjectDemon(wordContext))
     }
 }

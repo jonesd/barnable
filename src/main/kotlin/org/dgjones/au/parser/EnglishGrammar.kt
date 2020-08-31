@@ -113,6 +113,7 @@ fun buildEnglishGrammarLexicon(lexicon: Lexicon) {
     lexicon.addMapping(WordAnd())
     lexicon.addMapping(WordIt())
     lexicon.addMapping(WordIgnore(EntryWord("a").and("an")))
+    lexicon.addMapping(WordIgnore(EntryWord("the")))
 }
 class WordAnd(): WordHandler(EntryWord("and")) {
     override fun build(wordContext: WordContext): List<Demon> {
@@ -131,17 +132,30 @@ class WordIt(): WordHandler(EntryWord("it")) {
 
 fun buildSuffixDemon(suffix: String, wordContext: WordContext): Demon? {
     when (suffix) {
-        "ed" -> return EdSuffixDemon(wordContext)
+        "ed" -> return SuffixEdDemon(wordContext)
+        "s" -> return SuffixSDemon(wordContext)
         else -> return null
     }
 }
 
-class EdSuffixDemon(wordContext: WordContext): Demon(wordContext) {
+class SuffixEdDemon(wordContext: WordContext): Demon(wordContext) {
     override fun run() {
         val def = wordContext.def()
         if (def != null) {
             if (def.value("time") == null) {
                 def.value("time", Concept("past"))
+                active = false
+            }
+        }
+    }
+}
+
+class SuffixSDemon(wordContext: WordContext): Demon(wordContext) {
+    override fun run() {
+        val def = wordContext.def()
+        if (def != null) {
+            if (def.value("group-instances") == null) {
+                def.value("group-instances", Concept("*multiple*"))
                 active = false
             }
         }

@@ -14,11 +14,12 @@ When he got there, he found his wife Ann and another man in bed. George became e
     
 At the bar he ran into an old college roomate David, who he hadn't seen in years. David offered to buy him a few drinks and soon they were both pretty drunk. When George found out that David was a layer, he told him all about his troubles and asked David to represent him in court. Since David owed George money he had never returned, he felt obligated to help out.
  
-Later, David wrote to Ann, informing her that George wanted a divorce. Her layer called back and told David that she intended to get the house, the childaren, and a lot of alimony. When George heard this, he was very worried. He didn't earn much at the junior high school. David told him not to worry, since the judge would aword the case to George once he learned that Ann has been cheating him.
+Later, David wrote to Ann, informing her that George wanted a divorce. Her layer called back and told David that she intended to get the house, the children, and a lot of alimony. When George heard this, he was very worried. He didn't earn much at the junior high school. David told him not to worry, since the judge would award the case to George once he learned that Ann has been cheating him.
 
 When they got to court, David presented George's case, but without a witness they had no proof and Ann won. George almost had a fit. David could only offer George his condolences.
 """.trimIndent()
 
+/* Attempt to work through Divorce2 based on the "In-Depth Understanding" trace starting p302 */
 class Divorce2Test {
     val lexicon = buildInDepthUnderstandingLexicon()
 

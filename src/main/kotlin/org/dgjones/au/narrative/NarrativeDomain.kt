@@ -5,11 +5,11 @@ import org.dgjones.au.parser.*
 fun buildInDepthUnderstandingLexicon(): Lexicon {
     val lexicon = Lexicon()
     buildEnglishGrammarLexicon(lexicon)
+    buildNumberLexicon(lexicon)
 
     lexicon.addMapping(WordPerson(buildHuman("John", "", Gender.Male)))
     lexicon.addMapping(WordPickUp())
     lexicon.addMapping(WordIgnore(EntryWord("up")))
-    lexicon.addMapping(WordIgnore(EntryWord("the")))
     lexicon.addMapping(WordBall())
     lexicon.addMapping(WordDrop())
     lexicon.addMapping(WordIn())
@@ -25,7 +25,10 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     // the Mtrans from "told" to the Ingest of "eats"
     lexicon.addMapping(WordIgnore(EntryWord("that")))
     lexicon.addMapping(WordEats())
+
+    // Food
     lexicon.addMapping(WordLobster())
+    lexicon.addMapping(WordSugar())
 
     lexicon.addMapping(WordPerson(buildHuman("", "", Gender.Female), "woman"))
     lexicon.addMapping(WordPerson(buildHuman("", "", Gender.Female), "man"))
@@ -53,6 +56,9 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
 
     // Divorce2
     lexicon.addMapping(WordPerson(buildHuman("George", "", Gender.Male)))
+
+    // Disambiguate
+    lexicon.addMapping(WordMeasure())
 
     // FIXME only for QA
     lexicon.addMapping(WordWho())
@@ -196,6 +202,7 @@ enum class PhysicalObjectKind() {
     GameObject,
     Book,
     Food,
+    Liquid,
     Location,
     BodyPart
 }
@@ -358,7 +365,7 @@ class WordIn(): WordHandler(EntryWord("in")) {
 
 class InsertAfterDemon(val matcher: ConceptMatcher, wordContext: WordContext, val action: (ConceptHolder) -> Unit): Demon(wordContext) {
     override fun run() {
-        searchContext(matcher, matchNever(), SearchDirection.After, wordContext) {
+        searchContext(matcher, matchNever(), direction = SearchDirection.After, wordContext = wordContext) {
             if (it.value != null) {
                 active = false
                 action(it)
@@ -458,6 +465,22 @@ class WordEats(): WordHandler(EntryWord("eats")) {
     }
 }
 
+class WordMeasure(): WordHandler(EntryWord("measure")) {
+    override fun build(wordContext: WordContext): List<Demon> {
+        val lexicalConcept = lexicalConcept(wordContext, "Quantity") {
+            expectHead("amount", headValue = "number", direction = SearchDirection.Before)
+            slot("unit", "measure")
+        }
+        return lexicalConcept.demons
+    }
+
+    override fun disambiguationDemons(wordContext: WordContext, disambiguationHandler: DisambiguationHandler): List<Demon> {
+        return listOf(
+            DisambiguateUsingWord("of", matchConceptByHead(listOf(PhysicalObjectKind.Food.name, PhysicalObjectKind.Liquid.name)), SearchDirection.After ,wordContext, disambiguationHandler)
+        )
+    }
+}
+
 class WordYesterday(): WordHandler(EntryWord("yesterday")) {
     override fun build(wordContext: WordContext): List<Demon> {
         val demon = object : Demon(wordContext) {
@@ -547,3 +570,4 @@ class PronounWord(word: String, val genderMatch: Gender): WordHandler(EntryWord(
         return listOf()
     }
 }
+
