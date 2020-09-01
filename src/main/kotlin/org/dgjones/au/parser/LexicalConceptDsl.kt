@@ -80,9 +80,12 @@ class LexicalConceptBuilder(val root: LexicalRootBuilder, conceptName: String) {
         return concept
     }
     fun expectHead(slotName: String, variableName: String? = null, headValue: String, direction: SearchDirection = SearchDirection.After) {
+        expectHead(slotName, variableName, listOf(headValue), direction)
+    }
+    fun expectHead(slotName: String, variableName: String? = null, headValues: List<String>, direction: SearchDirection = SearchDirection.After) {
         val variableSlot = root.createVariable(slotName, variableName)
         concept.with(variableSlot)
-        val demon = ExpectDemon(matchConceptByHead(headValue), direction, root.wordContext) {
+        val demon = ExpectDemon(matchConceptByHead(headValues), direction, root.wordContext) {
             root.completeVariable(variableSlot, it)
         }
         root.addDemon(demon)

@@ -95,3 +95,10 @@ class WordBook(): WordHandler(EntryWord("book")) {
         return listOf(SaveObjectDemon(wordContext))
     }
 }
+
+class WordTree(): WordHandler(EntryWord("tree")) {
+    override fun build(wordContext: WordContext): List<Demon> {
+        wordContext.defHolder.value =  buildPhysicalObject(PhysicalObjectKind.Plant.name, "tree")
+        return listOf(SaveObjectDemon(wordContext))
+    }
+}

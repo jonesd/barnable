@@ -148,6 +148,10 @@ class SuffixEdDemon(wordContext: WordContext): Demon(wordContext) {
             }
         }
     }
+
+    override fun description(): String {
+        return "ED"
+    }
 }
 
 class SuffixSDemon(wordContext: WordContext): Demon(wordContext) {
@@ -159,5 +163,8 @@ class SuffixSDemon(wordContext: WordContext): Demon(wordContext) {
                 active = false
             }
         }
+    }
+    override fun description(): String {
+        return "S"
     }
 }

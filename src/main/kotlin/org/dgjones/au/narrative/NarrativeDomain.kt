@@ -18,6 +18,7 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     lexicon.addMapping(WordPerson(buildHuman("Mary", "", Gender.Female)))
     lexicon.addMapping(WordGive())
     lexicon.addMapping(WordBook())
+    lexicon.addMapping(WordTree())
 
     lexicon.addMapping(WordPerson(buildHuman("Fred", "", Gender.Male)))
     lexicon.addMapping(WordTell())
@@ -59,6 +60,7 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
 
     // Disambiguate
     lexicon.addMapping(WordMeasure())
+    lexicon.addMapping(WordMeasure2())
 
     // FIXME only for QA
     lexicon.addMapping(WordWho())
@@ -204,7 +206,8 @@ enum class PhysicalObjectKind() {
     Food,
     Liquid,
     Location,
-    BodyPart
+    BodyPart,
+    Plant, // Tree?
 }
 
 // FIXME how to define this? force
@@ -470,13 +473,34 @@ class WordMeasure(): WordHandler(EntryWord("measure")) {
         val lexicalConcept = lexicalConcept(wordContext, "Quantity") {
             expectHead("amount", headValue = "number", direction = SearchDirection.Before)
             slot("unit", "measure")
+            expectHead("of", headValues = listOf(PhysicalObjectKind.Liquid.name, PhysicalObjectKind.Food.name))
         }
         return lexicalConcept.demons
     }
 
     override fun disambiguationDemons(wordContext: WordContext, disambiguationHandler: DisambiguationHandler): List<Demon> {
         return listOf(
-            DisambiguateUsingWord("of", matchConceptByHead(listOf(PhysicalObjectKind.Food.name, PhysicalObjectKind.Liquid.name)), SearchDirection.After ,wordContext, disambiguationHandler)
+            DisambiguateUsingWord("of", matchConceptByHead(listOf(PhysicalObjectKind.Food.name, PhysicalObjectKind.Liquid.name)), SearchDirection.After, wordContext, disambiguationHandler)
+        )
+    }
+}
+
+class WordMeasure2(): WordHandler(EntryWord("measure2")) {
+    override fun build(wordContext: WordContext): List<Demon> {
+        // FIXME not sure how to model this...
+        val lexicalConcept = lexicalConcept(wordContext, "ATRANS") {
+            expectHead("actor", variableName = "actor", headValue = "Human", direction = SearchDirection.Before)
+            expectHead("thing", headValue = InDepthUnderstandingConcepts.PhysicalObject.name)
+            varReference("from", "actor")
+            //expectHead("to", headValue = "Human")
+            slot("kind", "Act")
+        }
+        return lexicalConcept.demons
+    }
+
+    override fun disambiguationDemons(wordContext: WordContext, disambiguationHandler: DisambiguationHandler): List<Demon> {
+        return listOf(
+            DisambiguateUsingMatch(matchConceptByHead(InDepthUnderstandingConcepts.Human.name), SearchDirection.Before, wordContext, disambiguationHandler)
         )
     }
 }
