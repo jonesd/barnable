@@ -103,7 +103,6 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
          return null
      }
 
-
     private fun endSentence(context: SentenceContext) {
         val memory = if (qaMode) qaMemory else workingMemory
         promteDefsToWorkingMemory(context, memory)
@@ -123,13 +122,8 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
     private fun runWord(index: Int, word: String, wordHandler: WordHandler, suffix: String?, wordContext: WordContext) {
         println("")
         println("${word.toUpperCase()} ==>")
-        val suffixDemon = if (suffix != null) buildSuffixDemon(suffix, wordContext) else null
-        val wordDemons = wordHandler.build(wordContext)
-        val allDemons = wordDemons.toMutableList()
-        if (suffixDemon != null) {
-            allDemons.add(suffixDemon)
-        }
-        val disambiguationHandler = DisambiguationHandler(wordContext, wordHandler, agenda, allDemons)
+
+        val disambiguationHandler = DisambiguationHandler(wordContext, wordHandler, suffix, agenda)
         val disambiguationDemons = wordHandler.disambiguationDemons(wordContext, disambiguationHandler)
         disambiguationHandler.startDisambiguation(disambiguationDemons)
 
@@ -142,7 +136,7 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
     }
 
     // Run each active demon. Repeat again if any were fired
-    fun runDemons(context: SentenceContext) {
+    private fun runDemons(context: SentenceContext) {
         do {
             var fired = false
             // Use most recently recreated first
@@ -157,16 +151,31 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
     }
 }
 
-class DisambiguationHandler(val wordContext: WordContext, val wordHandler: WordHandler, val agenda: Agenda, val wordDemons: List<Demon>) {
+class DisambiguationHandler(val wordContext: WordContext, val wordHandler: WordHandler, val suffix: String?, val agenda: Agenda) {
     var outstandingDisambiguations = 0;
 
     fun startDisambiguation(disambigutionDemons: List<Demon>) {
         outstandingDisambiguations = disambigutionDemons.size
         if (outstandingDisambiguations == 0) {
-            spawnDemons(wordDemons)
+            buildWordDemons()
         } else {
             spawnDemons(disambigutionDemons)
         }
+    }
+
+    private fun disambiguated() {
+        println("Disambiguated $wordHandler - building Demons...")
+        buildWordDemons()
+    }
+
+    private fun buildWordDemons(){
+        val suffixDemon = if (suffix != null) buildSuffixDemon(suffix, wordContext) else null
+        val wordDemons = wordHandler.build(wordContext)
+        val allDemons = wordDemons.toMutableList()
+        if (suffixDemon != null) {
+            allDemons.add(suffixDemon)
+        }
+        spawnDemons(allDemons)
     }
 
     private fun spawnDemons(demons: List<Demon>) {
@@ -182,7 +191,7 @@ class DisambiguationHandler(val wordContext: WordContext, val wordHandler: WordH
         if (success) {
             outstandingDisambiguations -= 1
             if (outstandingDisambiguations <= 0) {
-                spawnDemons(wordDemons)
+                disambiguated()
             }
         } else {
             // failed do not run wordDemons
@@ -580,6 +589,7 @@ class DisambiguateUsingWord(val word: String, val matcher: ConceptMatcher, val d
         return "DisambiguateUsingWord word=$word"
     }
 }
+
 class DisambiguateUsingMatch(val matcher: ConceptMatcher, val direction: SearchDirection = SearchDirection.After, wordContext: WordContext, val disambiguationHandler: DisambiguationHandler): Demon(wordContext) {
     override fun run() {
         searchContext(matcher, direction = direction, wordContext = wordContext) {
