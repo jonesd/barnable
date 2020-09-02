@@ -192,7 +192,7 @@ class DisambiguationHandler(val wordContext: WordContext, val wordHandler: WordH
     }
 }
 
-class WordContext(val wordIndex: Int, val wordElement: WordElement, val word: String, val defHolder: ConceptHolder, val context: SentenceContext) {
+data class WordContext(val wordIndex: Int, val wordElement: WordElement, val word: String, val defHolder: ConceptHolder, val context: SentenceContext) {
     var totalDemons = 0
 
     fun def() = defHolder.value
@@ -400,7 +400,7 @@ open class Demon(val wordContext: WordContext) {
 
 class DemonComment(val test: String, val act: String)
 
-class ConceptHolder(val instanceNumber: Int, var value: Concept? = null) {
+data class ConceptHolder(val instanceNumber: Int, var value: Concept? = null) {
     val flags = mutableListOf<ParserFlags>()
 
     fun addFlag(flag: ParserFlags) {
