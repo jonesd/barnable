@@ -25,14 +25,16 @@ class DisambiguateMeasureTest {
     }
 
     @Test
-    fun `the gardner measures the tree`() {
+    fun `John measures the tree`() {
         val textModel = NaiveTextModelBuilder("John measures the tree").buildModel()
 
         val textProcessor = TextProcessor(textModel, lexicon)
         textProcessor.runProcessor()
 
-        assertEquals(2, textProcessor.workingMemory.concepts.size)
+        assertEquals(1, textProcessor.workingMemory.concepts.size)
         val toMeasure = textProcessor.workingMemory.concepts[0]
-        // fIXME assertEquals("ATRANS", toMeasure.name)
+        assertEquals("ATRANS", toMeasure.name)
+        assertEquals("John", toMeasure.value("actor")?.valueName("firstName"))
+        assertEquals("tree", toMeasure.value("thing")?.valueName("name"))
     }
 }

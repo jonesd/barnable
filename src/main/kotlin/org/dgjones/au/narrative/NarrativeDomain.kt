@@ -59,8 +59,8 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     lexicon.addMapping(WordPerson(buildHuman("George", "", Gender.Male)))
 
     // Disambiguate
-    lexicon.addMapping(WordMeasure())
-    lexicon.addMapping(WordMeasure2())
+    lexicon.addMapping(WordMeasureQuantity())
+    lexicon.addMapping(WordMeasureObject())
 
     // FIXME only for QA
     lexicon.addMapping(WordWho())
@@ -468,9 +468,10 @@ class WordEats(): WordHandler(EntryWord("eats")) {
     }
 }
 
-class WordMeasure(): WordHandler(EntryWord("measure")) {
+class WordMeasureQuantity() : WordHandler(EntryWord("measure")) {
     override fun build(wordContext: WordContext): List<Demon> {
         val lexicalConcept = lexicalConcept(wordContext, "Quantity") {
+            // FIXME also support "a measure of ..." = default to 1 unit
             expectHead("amount", headValue = "number", direction = SearchDirection.Before)
             slot("unit", "measure")
             expectHead("of", headValues = listOf(PhysicalObjectKind.Liquid.name, PhysicalObjectKind.Food.name))
@@ -485,7 +486,7 @@ class WordMeasure(): WordHandler(EntryWord("measure")) {
     }
 }
 
-class WordMeasure2(): WordHandler(EntryWord("measure2")) {
+class WordMeasureObject(): WordHandler(EntryWord("measure")) {
     override fun build(wordContext: WordContext): List<Demon> {
         // FIXME not sure how to model this...
         val lexicalConcept = lexicalConcept(wordContext, "ATRANS") {
@@ -500,7 +501,8 @@ class WordMeasure2(): WordHandler(EntryWord("measure2")) {
 
     override fun disambiguationDemons(wordContext: WordContext, disambiguationHandler: DisambiguationHandler): List<Demon> {
         return listOf(
-            DisambiguateUsingMatch(matchConceptByHead(InDepthUnderstandingConcepts.Human.name), SearchDirection.Before, wordContext, disambiguationHandler)
+            DisambiguateUsingMatch(matchConceptByHead(InDepthUnderstandingConcepts.Human.name), SearchDirection.Before, wordContext, disambiguationHandler),
+            DisambiguateUsingMatch(matchConceptByHead(InDepthUnderstandingConcepts.PhysicalObject.name), SearchDirection.After, wordContext, disambiguationHandler)
         )
     }
 }
