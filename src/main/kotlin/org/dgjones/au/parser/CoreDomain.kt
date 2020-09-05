@@ -12,43 +12,6 @@ fun LexicalConceptBuilder.physicalObject(name: String, kind: String, initializer
     val c = child.build()
 }
 
-/* Food */
-
-fun LexicalConceptBuilder.food(kindOfFood: String, name: String = kindOfFood, initializer: LexicalConceptBuilder.() -> Unit)  {
-    val child = LexicalConceptBuilder(root, PhysicalObjectKind.Food.name)
-    child.slot("name", name)
-    child.slot("kind", kindOfFood)
-    child.apply(initializer)
-    val c = child.build()
-}
-
-// FIXME generate food word handlers
-enum class FoodKind {
-    Lobster,
-    Sugar
-}
-
-fun buildFood(kindOfFood: String, name: String = kindOfFood): Concept {
-    return Concept(PhysicalObjectKind.Food.name)
-        .with(Slot("kind", Concept(kindOfFood)))
-        .with(Slot("name", Concept(name)))
-}
-
-
-class WordLobster : WordHandler(EntryWord("lobster")) {
-    override fun build(wordContext: WordContext): List<Demon> {
-        wordContext.defHolder.value =  buildFood(FoodKind.Lobster.name, word.word)
-        return listOf(SaveObjectDemon(wordContext))
-    }
-}
-
-class WordSugar(): WordHandler(EntryWord("sugar")) {
-    override fun build(wordContext: WordContext): List<Demon> {
-        wordContext.defHolder.value =  buildFood(FoodKind.Sugar.name, word.word)
-        return listOf(SaveObjectDemon(wordContext))
-    }
-}
-
 /* Humans */
 
 fun LexicalConceptBuilder.human(firstName: String = "", lastName: String = "", gender: Gender? = null, initializer: LexicalConceptBuilder.() -> Unit): Concept {

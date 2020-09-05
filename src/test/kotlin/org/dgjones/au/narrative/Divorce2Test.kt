@@ -32,7 +32,7 @@ class Divorce2Test {
 
         // FIXME implement more...
 
-        Assertions.assertEquals(1, textProcessor.workingMemory.concepts.size)
+        Assertions.assertEquals(5, textProcessor.workingMemory.concepts.size)
     }
 
     private fun textModelFromFirstSentence(): TextModel {

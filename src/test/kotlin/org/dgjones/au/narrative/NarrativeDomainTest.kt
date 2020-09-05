@@ -153,6 +153,31 @@ class NarrativeDomainTest {
         assertEquals("John", walk.value("actor")?.valueName("firstName"))
         assertEquals("Home", walk.value("to")?.valueName("name"))
         assertEquals("Yesterday", walk.valueName("time"))
+    }
 
+    @Test
+    fun `John had lunch with George`() {
+        val textModel = NaiveTextModelBuilder("John had lunch with George").buildModel()
+        val textProcessor = TextProcessor(textModel, lexicon)
+        val workingMemory = textProcessor.runProcessor()
+        println(workingMemory.concepts)
+
+        assertEquals(1, workingMemory.concepts.size)
+        val meal = workingMemory.concepts[0]
+        assertEquals("M-Meal", meal.name)
+        assertEquals("John", meal.value("eater-a")?.valueName("firstName"))
+        assertEquals("George", meal.value("eater-b")?.valueName("firstName"))
+        assertEquals("EV-LUNCH", meal.valueName("event"))
+    }
+
+    @Test
+    fun `Word KNOCKED - John knocked a glass of water over`() {
+        val textModel = NaiveTextModelBuilder("John knocked a glass of water over").buildModel()
+        val textProcessor = TextProcessor(textModel, lexicon)
+        val workingMemory = textProcessor.runProcessor()
+        println(workingMemory.concepts)
+
+        // FIXME implement
+        assertEquals(3 /*should be 1?*/, workingMemory.concepts.size)
     }
 }

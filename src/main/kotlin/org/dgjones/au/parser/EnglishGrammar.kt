@@ -1,5 +1,8 @@
 package org.dgjones.au.parser
 
+import org.dgjones.au.narrative.InDepthUnderstandingConcepts
+import org.dgjones.au.narrative.InsertAfterDemon
+
 enum class ParserKinds {
     Conjunction
 }
@@ -88,6 +91,28 @@ class PrepDemon(val matcher: ConceptMatcher, val direction: SearchDirection = Se
     }
 }
 
+class WordWith(): WordHandler(EntryWord("with")) {
+    override fun build(wordContext: WordContext): List<Demon> {
+        wordContext.defHolder.value = buildPrep(Preposition.With.name)
+
+        // FIXME implement InDepth pp304
+        // needs to match human befor and after
+        val matcher = matchConceptByHead(setOf(InDepthUnderstandingConcepts.Human.name))
+        val addPrepObj = InsertAfterDemon(matcher, wordContext) {
+            if (wordContext.isDefSet()) {
+                val itValue = it.value
+                val holderValue = wordContext.defHolder.value
+                if (itValue != null && holderValue != null) {
+                    withPrepObj(itValue, holderValue)
+                    wordContext.defHolder.addFlag(ParserFlags.Inside)
+                    println("Updated with prepobj concept=${it}")
+                }
+            }
+        }
+        return listOf(addPrepObj)
+    }
+}
+
 /* Conjunctions */
 
 enum class Conjunction {
@@ -112,9 +137,12 @@ fun matchConjunction(): ConceptMatcher {
 fun buildEnglishGrammarLexicon(lexicon: Lexicon) {
     lexicon.addMapping(WordAnd())
     lexicon.addMapping(WordIt())
+    lexicon.addMapping(WordHave())
+    lexicon.addMapping(WordWith())
     lexicon.addMapping(WordIgnore(EntryWord("a").and("an")))
     lexicon.addMapping(WordIgnore(EntryWord("the")))
 }
+
 class WordAnd(): WordHandler(EntryWord("and")) {
     override fun build(wordContext: WordContext): List<Demon> {
         wordContext.defHolder.value = buildConjunction(Conjunction.And.name)
@@ -126,6 +154,10 @@ class WordIt(): WordHandler(EntryWord("it")) {
     override fun build(wordContext: WordContext): List<Demon> {
         return listOf(FindObjectReferenceDemon(wordContext))
     }
+}
+
+class WordHave(): WordHandler(EntryWord("have").and("having")) {
+    //FIXME InDepth pp303 - having?
 }
 
 /* Suffix Daemons */
@@ -150,7 +182,7 @@ class SuffixEdDemon(wordContext: WordContext): Demon(wordContext) {
     }
 
     override fun description(): String {
-        return "ED"
+        return "Suffix ED"
     }
 }
 
@@ -165,6 +197,6 @@ class SuffixSDemon(wordContext: WordContext): Demon(wordContext) {
         }
     }
     override fun description(): String {
-        return "S"
+        return "Suffix S"
     }
 }

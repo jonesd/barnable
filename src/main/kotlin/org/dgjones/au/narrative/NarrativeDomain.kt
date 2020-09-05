@@ -1,10 +1,12 @@
 package org.dgjones.au.narrative
 
+import org.dgjones.au.domain.general.buildGeneralDomainLexicon
 import org.dgjones.au.parser.*
 
 fun buildInDepthUnderstandingLexicon(): Lexicon {
     val lexicon = Lexicon()
     buildEnglishGrammarLexicon(lexicon)
+    buildGeneralDomainLexicon(lexicon)
     buildNumberLexicon(lexicon)
 
     lexicon.addMapping(WordPerson(buildHuman("John", "", Gender.Male)))
@@ -26,10 +28,6 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     // the Mtrans from "told" to the Ingest of "eats"
     lexicon.addMapping(WordIgnore(EntryWord("that")))
     lexicon.addMapping(WordEats())
-
-    // Food
-    lexicon.addMapping(WordLobster())
-    lexicon.addMapping(WordSugar())
 
     lexicon.addMapping(WordPerson(buildHuman("", "", Gender.Female), "woman"))
     lexicon.addMapping(WordPerson(buildHuman("", "", Gender.Female), "man"))
@@ -54,6 +52,9 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     lexicon.addMapping(WordPerson(buildHuman("Bill", "", Gender.Male)))
     lexicon.addMapping(WordHungry())
     lexicon.addMapping(WordWalk())
+    lexicon.addMapping(WordKnock())
+
+    lexicon.addMapping(WordLunch())
 
     // Divorce2
     lexicon.addMapping(WordPerson(buildHuman("George", "", Gender.Male)))
@@ -346,6 +347,26 @@ class WordDrop(): WordHandler(EntryWord("drop").and("dropped")) {
     }
 }
 
+// InDepth pp307
+class WordKnock(): WordHandler(EntryWord("knock")) {
+    override fun build(wordContext: WordContext): List<Demon> {
+        val lexicalConcept = lexicalConcept(wordContext, "PROPEL") {
+            expectHead("actor", variableName = "actor", headValue = "Human", direction = SearchDirection.Before)
+            expectHead("thing", variableName = "thing", headValue = InDepthUnderstandingConcepts.PhysicalObject.name)
+            expectPrep("to", preps = setOf(Preposition.On), matcher = matchConceptByHead(setOf(
+                InDepthUnderstandingConcepts.Human.name, InDepthUnderstandingConcepts.PhysicalObject.name))
+            )
+            slot("instr", "PROPEL") {
+                slot("actor", Force.Gravity.name)
+                varReference("thing", "thing")
+                slot("kind", InDepthUnderstandingConcepts.Act.name)
+            }
+            slot("kind", "Act")
+        }
+        return lexicalConcept.demons
+    }
+}
+
 class WordIn(): WordHandler(EntryWord("in")) {
     override fun build(wordContext: WordContext): List<Demon> {
         wordContext.defHolder.value = buildPrep(Preposition.In.name)
@@ -454,6 +475,20 @@ class WordHungry(): WordHandler(EntryWord("hungry")) {
         wordContext.defHolder.value = Concept(SatisfactionGoal.`S-Hunger`.name)
             .with(Slot("kind", Concept(InDepthUnderstandingConcepts.Goal.name)))
         return listOf()
+    }
+}
+
+// InDepth
+class WordLunch(): WordHandler(EntryWord("lunch")) {
+    override fun build(wordContext: WordContext): List<Demon> {
+        val lexicalConcept = lexicalConcept(wordContext, "M-Meal") {
+            expectHead("eater-a", headValue = "Human", direction = SearchDirection.Before)
+            expectPrep("eater-b", preps = listOf(Preposition.With), matcher=matchConceptByHead(InDepthUnderstandingConcepts.Human.name))
+            slot("event", "EV-LUNCH") // FIXME find associated event
+
+            // FIXMEslot("kind", "Act")
+        }
+        return lexicalConcept.demons
     }
 }
 
