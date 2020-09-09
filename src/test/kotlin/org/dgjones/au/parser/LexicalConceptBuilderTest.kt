@@ -11,7 +11,7 @@ class LexicalConceptBuilderTest {
         val defHolder = ConceptHolder(9)
         var testElement = WordElement("one", "", "","")
         val workingMemory = WorkingMemory()
-        val sentenceContext = SentenceContext(TextSentence("test", listOf(testElement)), workingMemory)
+        val sentenceContext = SentenceContext(TextSentence("test", listOf(testElement)), workingMemory, EpisodicMemory())
         val wordContext = WordContext(0, WordElement("test", "", "",""), "test", defHolder, sentenceContext)
 
         val lexicalConcept = lexicalConcept(wordContext, "MTRANS") {
@@ -30,7 +30,7 @@ class LexicalConceptBuilderTest {
         val defHolder = ConceptHolder(9)
         var testElement = WordElement("one", "", "","")
         val workingMemory = WorkingMemory()
-        val sentenceContext = SentenceContext(TextSentence("test", listOf(testElement)), workingMemory)
+        val sentenceContext = SentenceContext(TextSentence("test", listOf(testElement)), workingMemory, EpisodicMemory())
         val wordContext = WordContext(0, WordElement("test", "", "",""), "test", defHolder, sentenceContext)
 
         val lexicalConcept = lexicalConcept(wordContext, "MTRANS") {
@@ -48,7 +48,7 @@ class LexicalConceptBuilderTest {
         val defHolder = ConceptHolder(9)
         var testElement = WordElement("one", "", "","")
         val workingMemory = WorkingMemory()
-        val sentenceContext = SentenceContext(TextSentence("test", listOf(testElement)), workingMemory)
+        val sentenceContext = SentenceContext(TextSentence("test", listOf(testElement)), workingMemory, EpisodicMemory())
         val wordContext = WordContext(0, WordElement("test", "", "",""), "test", defHolder, sentenceContext)
 
         val lexicalConcept = lexicalConcept(wordContext, "MTRANS") {

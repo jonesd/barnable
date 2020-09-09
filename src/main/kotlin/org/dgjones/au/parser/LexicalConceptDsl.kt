@@ -67,6 +67,10 @@ class LexicalRootBuilder(val wordContext: WordContext, val headName: String) {
 class LexicalConceptBuilder(val root: LexicalRootBuilder, conceptName: String) {
     val concept = Concept(conceptName)
 
+    fun ignoreHolder() {
+        root.wordContext.defHolder.addFlag(ParserFlags.Ignore)
+    }
+
     fun slot(slotName: String, slotValue: String) {
         concept.with(Slot(slotName, Concept(slotValue)))
     }
@@ -98,6 +102,40 @@ class LexicalConceptBuilder(val root: LexicalRootBuilder, conceptName: String) {
         }
         root.addDemon(demon)
     }
+
+    // Find matching human in episodic memory, and associate concept
+    // InDepth p185
+    fun checkCharacter(slotName: String, variableName: String? = null) {
+        val variableSlot = root.createVariable(slotName, variableName)
+        concept.with(variableSlot)
+        val saveCharacterDemon = SaveCharacterDemon(root.wordContext)
+        val checkCharacterDemon = CheckCharacterDemon(concept.valueName("firstName"), concept.valueName("lastName"), concept.valueName("gender"), root.wordContext) {
+            if (it != null) {
+                root.completeVariable(variableSlot, root.wordContext.context.workingMemory.createDefHolder(it))
+            } else {
+                println("Creating character ${concept.valueName("firstName")} in EP memory")
+                val human = buildHuman(concept.valueName("firstName"), concept.valueName("lastName"), concept.valueName("gender"))
+                root.wordContext.context.episodicMemory.addConcept(human)
+            }
+        }
+        root.addDemon(saveCharacterDemon)
+        root.addDemon(checkCharacterDemon)
+    }
+
+    // Find recent character with matching gender in Working Memory
+    // May be replaced by better value using knowledge layer
+    // InDepth p185
+    fun findCharacter(slotName: String, variableName: String? = null) {
+        val variableSlot = root.createVariable(slotName, variableName)
+        concept.with(variableSlot)
+        val demon = FindCharacterDemon(concept.valueName("gender"), root.wordContext) {
+            if (it != null) {
+                root.completeVariable(variableSlot, root.wordContext.context.workingMemory.createDefHolder(it))
+            }
+        }
+        root.addDemon(demon)
+    }
+
     fun varReference(slotName: String, variableName: String) {
         val variableSlot = root.createVariable(slotName, variableName)
         concept.with(variableSlot)

@@ -79,6 +79,24 @@ class MatchConceptByKindCollectionTest {
     }
 }
 
+class MatchConceptByValueNameTest {
+    @Test
+    fun `Can match by child value name`() {
+        assertTrue(matchConceptValueName("child", "childValue")(Concept("head").value("child", Concept("childValue"))))
+    }
+    @Test
+    fun `Match by kind needs full match`() {
+        assertFalse(matchConceptValueName("child", "childValue")(Concept("head").value("child", Concept("otherValue"))))
+    }
+    @Test
+    fun `Only matches on child`() {
+        assertFalse(matchConceptValueName("child", "childValue")(Concept("head").value("other", Concept("childValue"))))
+    }
+    @Test
+    fun `Fails for missing head`() {
+        assertFalse(matchConceptValueName("child", "childValue")(null))
+    }
+}
 
 class MatchAnyTest {
     @Test

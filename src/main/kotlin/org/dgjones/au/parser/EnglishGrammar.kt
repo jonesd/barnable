@@ -11,15 +11,23 @@ enum class SL {
     PrepObject
 }
 
-/* Prepositions */
+//class EnglishGrammar {
+    enum class Case {
+        Subjective,
+        Objective,
+        Possessive,
+        Vocative
+    }
 
-enum class Preposition {
-    In,
-    Into,
-    On,
-    To,
-    With
-}
+    /* Prepositions */
+    enum class Preposition {
+        In,
+        Into,
+        On,
+        To,
+        With
+    }
+//}
 
 fun withPrepObj(concept: Concept, prep: Concept) {
     concept.with(Slot(SL.PrepObject.name, prep))

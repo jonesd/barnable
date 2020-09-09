@@ -130,7 +130,7 @@ class NarrativeDomainTest {
         val workingMemory = textProcessor.runProcessor()
         println(workingMemory.concepts)
 
-        assertEquals(2 /*should be 1?*/, workingMemory.concepts.size)
+        assertEquals(1, workingMemory.concepts.size)
         var told = workingMemory.concepts[0]
         assertEquals("MTRANS", told.name)
         assertEquals("John", told.value("actor")?.valueName("firstName"))
@@ -161,6 +161,7 @@ class NarrativeDomainTest {
         val textProcessor = TextProcessor(textModel, lexicon)
         val workingMemory = textProcessor.runProcessor()
         println(workingMemory.concepts)
+        println(textProcessor.episodicMemory)
 
         assertEquals(1, workingMemory.concepts.size)
         val meal = workingMemory.concepts[0]
@@ -179,5 +180,17 @@ class NarrativeDomainTest {
 
         // FIXME implement
         assertEquals(3 /*should be 1?*/, workingMemory.concepts.size)
+    }
+
+    @Test
+    fun `John had lunch with his wife`() {
+        val textModel = NaiveTextModelBuilder("John had lunch with his wife").buildModel()
+        val textProcessor = TextProcessor(textModel, lexicon)
+        val workingMemory = textProcessor.runProcessor()
+        println(workingMemory.concepts)
+
+        // FIXME implement
+        assertEquals(3 /*should be 1?*/, workingMemory.concepts.size)
+
     }
 }

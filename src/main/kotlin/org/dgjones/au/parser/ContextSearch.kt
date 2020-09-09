@@ -16,11 +16,15 @@ fun matchConceptByHead(kinds: Collection<String>): ConceptMatcher {
 }
 
 fun matchConceptByKind(kind: String): ConceptMatcher {
-    return { c -> c?.valueName("kind") == kind }
+    return matchConceptValueName("kind", kind)
 }
 
 fun matchConceptByKind(kinds: Collection<String>): ConceptMatcher {
     return { c -> kinds.contains(c?.valueName("kind")) }
+}
+
+fun matchConceptValueName(slot: String, match: String): ConceptMatcher {
+    return { c -> c?.valueName(slot) == match }
 }
 
 fun matchAny(matchers: List<ConceptMatcher>): ConceptMatcher {

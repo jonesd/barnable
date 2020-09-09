@@ -25,12 +25,12 @@ fun LexicalConceptBuilder.human(firstName: String = "", lastName: String = "", g
         .with(Slot("gender", Concept(gender?.name ?: "")))
 }
 
-fun buildHuman(firstName: String = "", lastName: String = "", gender: Gender? = null): Concept {
+fun buildHuman(firstName: String? = "", lastName: String? = "", gender: String? = null): Concept {
     return Concept(InDepthUnderstandingConcepts.Human.name)
-        .with(Slot("firstName", Concept(firstName)))
-        .with(Slot("lastName", Concept(lastName)))
+        .with(Slot("firstName", Concept(firstName ?: "")))
+        .with(Slot("lastName", Concept(lastName ?: "")))
         //FIXME empty concept doesn't seem helpful
-        .with(Slot("gender", Concept(gender?.name ?: "")))
+        .with(Slot("gender", Concept(gender ?: "")))
 }
 enum class Gender {
     Male,
@@ -38,11 +38,20 @@ enum class Gender {
     Other
 }
 
+
 // Exercise 1
 class WordPerson(val human: Concept, word: String = human.valueName("firstName")?:"unknown"): WordHandler(EntryWord(word)) {
     override fun build(wordContext: WordContext): List<Demon> {
+        val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
+            // FIXME not sure about defaulting to ""
+            slot("firstName", human.valueName("firstName") ?: "")
+            slot("lastName", human.valueName("lastName") ?: "")
+            slot("gender", human.valueName("gender")?: "")
+            checkCharacter("instan")
+        }
+        return lexicalConcept.demons
         // Fixme - not sure about the load/reuse
-        return listOf(LoadCharacterDemon(human, wordContext), SaveCharacterDemon(wordContext))
+        // FIXMEreturn listOf(LoadCharacterDemon(human, wordContext), SaveCharacterDemon(wordContext))
     }
 }
 

@@ -9,7 +9,7 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     buildGeneralDomainLexicon(lexicon)
     buildNumberLexicon(lexicon)
 
-    lexicon.addMapping(WordPerson(buildHuman("John", "", Gender.Male)))
+    lexicon.addMapping(WordPerson(buildHuman("John", "", Gender.Male.name)))
     lexicon.addMapping(WordPickUp())
     lexicon.addMapping(WordIgnore(EntryWord("up")))
     lexicon.addMapping(WordBall())
@@ -17,20 +17,22 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     lexicon.addMapping(WordIn())
     lexicon.addMapping(WordBox())
 
-    lexicon.addMapping(WordPerson(buildHuman("Mary", "", Gender.Female)))
+    lexicon.addMapping(WordPerson(buildHuman("Mary", "", Gender.Female.name)))
     lexicon.addMapping(WordGive())
     lexicon.addMapping(WordBook())
     lexicon.addMapping(WordTree())
 
-    lexicon.addMapping(WordPerson(buildHuman("Fred", "", Gender.Male)))
+    lexicon.addMapping(WordPerson(buildHuman("Fred", "", Gender.Male.name)))
     lexicon.addMapping(WordTell())
     // FIXME not sure whether should ignore that - its a subordinate conjunction and should link
     // the Mtrans from "told" to the Ingest of "eats"
     lexicon.addMapping(WordIgnore(EntryWord("that")))
     lexicon.addMapping(WordEats())
 
-    lexicon.addMapping(WordPerson(buildHuman("", "", Gender.Female), "woman"))
-    lexicon.addMapping(WordPerson(buildHuman("", "", Gender.Female), "man"))
+    lexicon.addMapping(WordPerson(buildHuman("", "", Gender.Female.name), "woman"))
+    lexicon.addMapping(WordPerson(buildHuman("", "", Gender.Female.name), "man"))
+    lexicon.addMapping(WordHer())
+    lexicon.addMapping(WordHis())
 
     // Modifiers
     lexicon.addMapping(ModifierWord("red", "colour"))
@@ -43,13 +45,13 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     lexicon.addMapping(WordYesterday())
 
     // pronoun
-    lexicon.addMapping(WordPerson(buildHuman("Anne", "", Gender.Female)))
+    lexicon.addMapping(WordPerson(buildHuman("Anne", "", Gender.Female.name)))
     lexicon.addMapping(PronounWord("he", Gender.Male))
     lexicon.addMapping(PronounWord("she", Gender.Female))
     lexicon.addMapping(WordHome())
     lexicon.addMapping(WordGo())
     lexicon.addMapping(WordKiss())
-    lexicon.addMapping(WordPerson(buildHuman("Bill", "", Gender.Male)))
+    lexicon.addMapping(WordPerson(buildHuman("Bill", "", Gender.Male.name)))
     lexicon.addMapping(WordHungry())
     lexicon.addMapping(WordWalk())
     lexicon.addMapping(WordKnock())
@@ -57,7 +59,7 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     lexicon.addMapping(WordLunch())
 
     // Divorce2
-    lexicon.addMapping(WordPerson(buildHuman("George", "", Gender.Male)))
+    lexicon.addMapping(WordPerson(buildHuman("George", "", Gender.Male.name)))
 
     // Disambiguate
     lexicon.addMapping(WordMeasureQuantity())
@@ -116,7 +118,8 @@ enum class InDepthUnderstandingConcepts {
     Setting,
     Location,
     Goal,
-    Plan
+    Plan,
+    Ref
 }
 
 enum class TimeConcepts {
@@ -239,7 +242,7 @@ class WordHome(): WordHandler(EntryWord("home")) {
 }
 
 
-
+/*
 class LoadCharacterDemon(val human: Concept, wordContext: WordContext): Demon(wordContext) {
     override fun run() {
         if (!wordContext.isDefSet()) {
@@ -259,7 +262,7 @@ class LoadCharacterDemon(val human: Concept, wordContext: WordContext): Demon(wo
         }
     }
 }
-
+*/
 open class ConceptAccessor(val concept: Concept) {
 
 }
@@ -270,39 +273,6 @@ class Human(concept: Concept): ConceptAccessor(concept) {
     }
     fun firstName(): String? {
         return concept.valueName("firstName")
-    }
-}
-
-class SaveCharacterDemon(wordContext: WordContext): Demon(wordContext){
-    override fun run() {
-        val character = wordContext.def()
-        if (character != null && Human(character).isCompatible()) {
-            wordContext.context.mostRecentCharacter = character
-            if (wordContext.context.localCharacter != null) {
-                wordContext.context.localCharacter = character
-            }
-            active = false
-        } else {
-            println("SaveCharacter failed as def = $character")
-        }
-    }
-
-    override fun description(): String {
-        return "SaveCharacter ${wordContext.def()}"
-    }
-}
-
-class SaveObjectDemon(wordContext: WordContext): Demon(wordContext) {
-    override fun run() {
-        val o = wordContext.def()
-        if (o != null) {
-            wordContext.context.mostRecentObject = o
-            active = false
-        }
-    }
-
-    override fun description(): String {
-        return "SaveObject def=${wordContext.def()}"
     }
 }
 
@@ -599,6 +569,32 @@ class ModifierWord(word: String, val modifier: String, val value: String = word)
     }
 }
 
+class WordHer(): WordHandler(EntryWord("her")) {
+    override fun build(wordContext: WordContext): List<Demon> {
+        val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.Ref.name) {
+            ignoreHolder()
+            slot("case", Case.Possessive.name)
+            slot("gender", Gender.Female.name)
+            findCharacter("instan")
+            //FIXME expectHead("instan", )
+        }
+        return lexicalConcept.demons
+    }
+}
+
+// fIXME remove duplication of WordHis and WordHer
+class WordHis(): WordHandler(EntryWord("his")) {
+    override fun build(wordContext: WordContext): List<Demon> {
+        val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.Ref.name) {
+            ignoreHolder()
+            slot("case", Case.Possessive.name)
+            slot("gender", Gender.Male.name)
+            findCharacter("instan")
+        }
+        return lexicalConcept.demons
+    }
+}
+
 class WordMan(word: String): WordHandler(EntryWord(word)) {
     override fun build(wordContext: WordContext): List<Demon> {
         val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
@@ -613,6 +609,7 @@ class WordMan(word: String): WordHandler(EntryWord(word)) {
 class PronounWord(word: String, val genderMatch: Gender): WordHandler(EntryWord(word)) {
     override fun build(wordContext: WordContext): List<Demon> {
         // FIXME partial implementation - also why not use demon
+        wordContext.defHolder.addFlag(ParserFlags.Ignore)
         val localHuman = wordContext.context.localCharacter
         if (localHuman != null && localHuman.valueName("gender") == genderMatch.name) {
             wordContext.defHolder.value = localHuman

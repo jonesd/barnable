@@ -99,7 +99,7 @@ class SearchContextTest {
 
     private fun withSentenceContext(numberOfWords: Int): SentenceContext {
         val sentence = withSentence(numberOfWords)
-        return SentenceContext(sentence, WorkingMemory(), false)
+        return SentenceContext(sentence, WorkingMemory(), EpisodicMemory(),false)
     }
 
     private fun withSentence(numberOfWords: Int): TextSentence {

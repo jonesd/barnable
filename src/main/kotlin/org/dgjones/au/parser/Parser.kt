@@ -1,10 +1,13 @@
 package org.dgjones.au.parser
 
 import org.dgjones.au.narrative.Acts
+import org.dgjones.au.narrative.Human
+import org.dgjones.au.narrative.InDepthUnderstandingConcepts
 import org.dgjones.au.nlp.*
 
 class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
     val workingMemory = WorkingMemory()
+    val episodicMemory = EpisodicMemory()
     var agenda = Agenda()
     var qaMode = false
     var qaMemory = WorkingMemory()
@@ -17,11 +20,17 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
 
     fun processParagraph(paragraphModel: TextParagraph) {
         paragraphModel.sentences.forEach { processSentence(it) }
+        endParagraph()
+    }
+
+    private fun endParagraph() {
+        println("End of Paragraph - Working Memory - Clear Characters")
+        workingMemory.charactersRecent.clear()
     }
 
     fun processSentence(sentence: TextSentence) {
         agenda = Agenda()
-        val context = SentenceContext(sentence, workingMemory, qaMode)
+        val context = SentenceContext(sentence, workingMemory, episodicMemory, qaMode)
         println(sentence.text.toUpperCase())
         var index = 0
         do {
@@ -107,10 +116,12 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
 
     private fun endSentence(context: SentenceContext) {
         val memory = if (qaMode) qaMemory else workingMemory
-        promteDefsToWorkingMemory(context, memory)
+        promoteDefsToWorkingMemory(context, memory)
+        println(memory)
+        println(context.episodicMemory)
     }
 
-    private fun promteDefsToWorkingMemory(context: SentenceContext, memory: WorkingMemory) {
+    private fun promoteDefsToWorkingMemory(context: SentenceContext, memory: WorkingMemory) {
         val defs = context.wordContexts
             .filter { !it.defHolder.hasFlag(ParserFlags.Inside) }
             .filter { !it.defHolder.hasFlag(ParserFlags.Ignore) }
@@ -232,7 +243,7 @@ data class WordContext(val wordIndex: Int, val wordElement: WordElement, val wor
     }
 }
 
-class SentenceContext(val sentence: TextSentence, val workingMemory: WorkingMemory, val qaMode: Boolean = false) {
+class SentenceContext(val sentence: TextSentence, val workingMemory: WorkingMemory, val episodicMemory: EpisodicMemory, val qaMode: Boolean = false) {
     //var currentWord: String = ""
     //var nextWord: String = ""
     //var previousWord: String = ""
@@ -264,21 +275,15 @@ class WorkingMemory() {
     var totalVariables = 0
     val concepts = mutableListOf<Concept>()
 
-    val reasoningScripts: MutableList<ReasoningScript> = mutableListOf()
-    fun addReasoningScript(script: ReasoningScript) {
-        reasoningScripts.add(script)
-    }
-
     val charactersRecent = mutableListOf<Concept>()
-    val characters = mutableMapOf<String, Concept>()
-
-    fun findCharacter(firstName: String): Concept? {
-        //FIXME should be fancier...
-        return characters[firstName.toLowerCase()]
+    fun findCharacterByGender(matchGender: String): Concept? {
+        // Find most recent match. Rely on knowledge mechanisms
+        // to correct tentative match
+        // InDepth p182
+        return charactersRecent.firstOrNull { it -> it.valueName("gender") == matchGender }
     }
 
     fun addCharacter(human: Concept) {
-        characters[human.valueName("firstName", "unknown").toLowerCase()] = human
         markAsRecentCharacter(human)
     }
 
@@ -287,8 +292,11 @@ class WorkingMemory() {
         charactersRecent.add(0, human)
     }
 
-    fun createDefHolder(): ConceptHolder {
+    fun createDefHolder(concept: Concept? = null): ConceptHolder {
         val holder = ConceptHolder(totalConceptHolders)
+        if (concept != null) {
+            holder.value = concept
+        }
         totalConceptHolders += 1
         return holder
     }
@@ -297,6 +305,10 @@ class WorkingMemory() {
         val index = totalVariables;
         totalVariables += 1
         return index
+    }
+
+    override fun toString(): String {
+        return "WORKING MEMORY\ncharactersRecent="+charactersRecent
     }
 }
 
@@ -584,6 +596,49 @@ class ExpectDemon(val matcher: ConceptMatcher, val direction: SearchDirection, w
     }
 }
 
+/* Find matching character in episodic memory. Only runs once */
+class CheckCharacterDemon(val firstName: String?, val lastName: String?, val gender: String?, wordContext: WordContext, val action: (Concept?) -> Unit): Demon(wordContext) {
+    override fun run() {
+        val matchedCharacter = wordContext.context.episodicMemory.search(matchCharacter())
+        action(matchedCharacter)
+        active = false
+    }
+    private fun matchCharacter(): ConceptMatcher {
+        var matchers = mutableListOf<ConceptMatcher>()
+        matchers.add(matchConceptByHead(InDepthUnderstandingConcepts.Human.name))
+        if (firstName != null) {
+            matchers.add(matchConceptValueName("firstName", firstName))
+        }
+        if (lastName != null) {
+            matchers.add(matchConceptValueName("lastName", lastName))
+        }
+        if (gender != null) {
+            matchers.add(matchConceptValueName("gender", gender))
+        }
+        return matchAll(matchers)
+    }
+
+    override fun description(): String {
+        return "CheckCharacter from episodic firstName=$firstName lastName=$lastName gender=$gender"
+    }
+}
+
+// Search working memory for tentative character based on gender
+// InDepth p182
+class FindCharacterDemon(val gender: String?, wordContext: WordContext, val action: (Concept?) -> Unit): Demon(wordContext) {
+    override fun run() {
+        if (gender != null) {
+            val matchedCharacter = wordContext.context.workingMemory.findCharacterByGender(gender)
+            action(matchedCharacter)
+            active = false
+        }
+    }
+
+    override fun description(): String {
+        return "FindCharacter from working memory gender=$gender"
+    }
+}
+
 class FindObjectReferenceDemon(wordContext: WordContext): Demon(wordContext) {
     override fun run() {
         if (!wordContext.isDefSet()) {
@@ -596,33 +651,37 @@ class FindObjectReferenceDemon(wordContext: WordContext): Demon(wordContext) {
     }
 }
 
-open class DisambiguationDemon(val disambiguationHandler: DisambiguationHandler, wordContext: WordContext): Demon(wordContext) {
-    fun disambiguationCompleted() {
-        disambiguationHandler.disambigationMatchCompleted(this)
-        active = false
-    }
-}
-
-class DisambiguateUsingWord(val word: String, val matcher: ConceptMatcher, val direction: SearchDirection = SearchDirection.After, wordContext: WordContext, disambiguationHandler: DisambiguationHandler): DisambiguationDemon(disambiguationHandler, wordContext) {
+class SaveCharacterDemon(wordContext: WordContext): Demon(wordContext){
     override fun run() {
-        searchContext(matcher, matchPreviousWord = word, direction = direction, wordContext = wordContext) {
-            disambiguationCompleted()
+        val character = wordContext.def()
+        if (character != null && Human(character).isCompatible()) {
+            wordContext.context.workingMemory.markAsRecentCharacter(character)
+//            wordContext.context.mostRecentCharacter = character
+//            if (wordContext.context.localCharacter != null) {
+//                wordContext.context.localCharacter = character
+//            }
+            active = false
+        } else {
+            println("SaveCharacter failed as def = $character")
         }
     }
+
     override fun description(): String {
-        return "DisambiguateUsingWord word=$word"
+        return "SaveCharacter ${wordContext.def()}"
     }
 }
 
-class DisambiguateUsingMatch(val matcher: ConceptMatcher, val direction: SearchDirection = SearchDirection.After, wordContext: WordContext, disambiguationHandler: DisambiguationHandler): DisambiguationDemon(disambiguationHandler, wordContext) {
+class SaveObjectDemon(wordContext: WordContext): Demon(wordContext) {
     override fun run() {
-        searchContext(matcher, direction = direction, wordContext = wordContext) {
-            disambiguationCompleted()
+        val o = wordContext.def()
+        if (o != null) {
+            wordContext.context.mostRecentObject = o
+            active = false
         }
     }
+
     override fun description(): String {
-        return "DisambiguateUsingMatch"
+        return "SaveObject def=${wordContext.def()}"
     }
 }
-
 

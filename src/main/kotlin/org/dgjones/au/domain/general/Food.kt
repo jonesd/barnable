@@ -1,7 +1,6 @@
 package org.dgjones.au.domain.general
 
 import org.dgjones.au.narrative.PhysicalObjectKind
-import org.dgjones.au.narrative.SaveObjectDemon
 import org.dgjones.au.parser.*
 
 // FIXME generate food word handlers
