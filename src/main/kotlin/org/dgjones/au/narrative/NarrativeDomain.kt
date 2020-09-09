@@ -31,8 +31,8 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
 
     lexicon.addMapping(WordPerson(buildHuman("", "", Gender.Female.name), "woman"))
     lexicon.addMapping(WordPerson(buildHuman("", "", Gender.Female.name), "man"))
-    lexicon.addMapping(WordHer())
-    lexicon.addMapping(WordHis())
+    lexicon.addMapping(WordPronounPossessive("her", Gender.Female))
+    lexicon.addMapping(WordPronounPossessive("his", Gender.Male))
 
     // Modifiers
     lexicon.addMapping(ModifierWord("red", "colour"))
@@ -569,26 +569,12 @@ class ModifierWord(word: String, val modifier: String, val value: String = word)
     }
 }
 
-class WordHer(): WordHandler(EntryWord("her")) {
+class WordPronounPossessive(word: String, val gender: Gender): WordHandler(EntryWord(word)) {
     override fun build(wordContext: WordContext): List<Demon> {
         val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.Ref.name) {
             ignoreHolder()
             slot("case", Case.Possessive.name)
-            slot("gender", Gender.Female.name)
-            findCharacter("instan")
-            //FIXME expectHead("instan", )
-        }
-        return lexicalConcept.demons
-    }
-}
-
-// fIXME remove duplication of WordHis and WordHer
-class WordHis(): WordHandler(EntryWord("his")) {
-    override fun build(wordContext: WordContext): List<Demon> {
-        val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.Ref.name) {
-            ignoreHolder()
-            slot("case", Case.Possessive.name)
-            slot("gender", Gender.Male.name)
+            slot("gender", gender.name)
             findCharacter("instan")
         }
         return lexicalConcept.demons
