@@ -48,7 +48,13 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     lexicon.addMapping(WordPerson(buildHuman("Anne", "", Gender.Female.name)))
     lexicon.addMapping(PronounWord("he", Gender.Male))
     lexicon.addMapping(PronounWord("she", Gender.Female))
+
+    lexicon.addMapping(WordHusband())
+    lexicon.addMapping(WordWife())
+
+    // Locations
     lexicon.addMapping(WordHome())
+
     lexicon.addMapping(WordGo())
     lexicon.addMapping(WordKiss())
     lexicon.addMapping(WordPerson(buildHuman("Bill", "", Gender.Male.name)))
@@ -263,9 +269,8 @@ class LoadCharacterDemon(val human: Concept, wordContext: WordContext): Demon(wo
     }
 }
 */
-open class ConceptAccessor(val concept: Concept) {
 
-}
+open class ConceptAccessor(val concept: Concept)
 
 class Human(concept: Concept): ConceptAccessor(concept) {
     fun isCompatible(): Boolean {
@@ -354,21 +359,6 @@ class WordIn(): WordHandler(EntryWord("in")) {
             }
         }
         return listOf(addPrepObj)
-    }
-}
-
-class InsertAfterDemon(val matcher: ConceptMatcher, wordContext: WordContext, val action: (ConceptHolder) -> Unit): Demon(wordContext) {
-    override fun run() {
-        searchContext(matcher, matchNever(), direction = SearchDirection.After, wordContext = wordContext) {
-            if (it.value != null) {
-                active = false
-                action(it)
-            }
-        }
-    }
-
-    override fun description(): String {
-        return "InsertAfter $matcher"
     }
 }
 
@@ -615,3 +605,32 @@ class PronounWord(word: String, val genderMatch: Gender): WordHandler(EntryWord(
     }
 }
 
+class WordWife(): WordHandler(EntryWord("wife")) {
+    override fun build(wordContext: WordContext): List<Demon> {
+        val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
+            slot("gender", Gender.Female.name)
+            slot("relationship", "R-Marriage") {
+                possessiveRef("husband", gender = Gender.Male)
+                nextChar("wife", relRole = "Wife")
+                checkRelationship("instan")
+            }
+            innerInstan("instan", observeSlot = "wife")
+        }
+        return lexicalConcept.demons
+    }
+}
+
+class WordHusband(): WordHandler(EntryWord("husband")) {
+    override fun build(wordContext: WordContext): List<Demon> {
+        val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
+            slot("gender", Gender.Male.name)
+            slot("relationship", "R-Marriage") {
+                possessiveRef("wife", gender = Gender.Female)
+                nextChar("husband", relRole = "Husband")
+                checkRelationship("instan")
+            }
+            innerInstan("instan", observeSlot = "husband")
+        }
+        return lexicalConcept.demons
+    }
+}

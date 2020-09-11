@@ -22,6 +22,10 @@ class LexicalRootBuilder(val wordContext: WordContext, val headName: String) {
         variableSlots.add(slot)
         return slot
     }
+    fun completeVariable(variableSlot: Slot, value: Concept, wordContext: WordContext) {
+        val conceptHolder = wordContext.context.workingMemory.createDefHolder(value)
+        completeVariable(variableSlot, conceptHolder)
+    }
     fun completeVariable(variableSlot: Slot, valueHolder: ConceptHolder) {
         val variableName = variableSlot.value?.name ?: return
         completedConceptHolders.add(valueHolder)
@@ -130,10 +134,49 @@ class LexicalConceptBuilder(val root: LexicalRootBuilder, conceptName: String) {
         concept.with(variableSlot)
         val demon = FindCharacterDemon(concept.valueName("gender"), root.wordContext) {
             if (it != null) {
-                root.completeVariable(variableSlot, root.wordContext.context.workingMemory.createDefHolder(it))
+                root.completeVariable(variableSlot, it, root.wordContext)
             }
         }
         root.addDemon(demon)
+    }
+
+    fun possessiveRef(slotName: String, variableName: String? = null, gender: Gender) {
+        val variableSlot = root.createVariable(slotName, variableName)
+        concept.with(variableSlot)
+        val demon = PossessiveReference(gender, root.wordContext) {
+            if (it != null) {
+                root.completeVariable(variableSlot, it, root.wordContext)
+            }
+        }
+        root.addDemon(demon)
+    }
+
+    fun nextChar(slotName: String, variableName: String? = null, relRole: String? = null) {
+        val variableSlot = root.createVariable(slotName, variableName)
+        concept.with(variableSlot)
+        val demon = NextCharacterDemon(root.wordContext) {
+            if (it != null) {
+                root.completeVariable(variableSlot, it)
+            }
+        }
+        root.addDemon(demon)
+    }
+
+    fun innerInstan(slotName: String, variableName: String? = null, observeSlot: String) {
+        val variableSlot = root.createVariable(slotName, variableName)
+        concept.with(variableSlot)
+        val demon = InnerInstanceDemon(observeSlot, root.wordContext) {
+            if (it != null) {
+                root.completeVariable(variableSlot, it, root.wordContext)
+            }
+        }
+        root.addDemon(demon)
+    }
+
+    // InDepth p185
+    fun checkRelationship(slotName: String, variableName: String? = null) {
+        // FIXME implement checkRelationship
+        // throw NotImplementedError()
     }
 
     fun varReference(slotName: String, variableName: String) {

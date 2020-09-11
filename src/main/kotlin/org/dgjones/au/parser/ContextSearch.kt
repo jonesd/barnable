@@ -5,44 +5,6 @@ enum class SearchDirection {
     Before
 }
 
-typealias ConceptMatcher = (Concept?) -> Boolean
-
-fun matchConceptByHead(kind: String): ConceptMatcher {
-    return { c -> c?.name == kind }
-}
-
-fun matchConceptByHead(kinds: Collection<String>): ConceptMatcher {
-    return { c -> kinds.contains(c?.name)}
-}
-
-fun matchConceptByKind(kind: String): ConceptMatcher {
-    return matchConceptValueName("kind", kind)
-}
-
-fun matchConceptByKind(kinds: Collection<String>): ConceptMatcher {
-    return { c -> kinds.contains(c?.valueName("kind")) }
-}
-
-fun matchConceptValueName(slot: String, match: String): ConceptMatcher {
-    return { c -> c?.valueName(slot) == match }
-}
-
-fun matchAny(matchers: List<ConceptMatcher>): ConceptMatcher {
-    return { c -> matchers.any { it(c) }}
-}
-
-fun matchAll(matchers: List<ConceptMatcher>): ConceptMatcher {
-    return { c -> matchers.all { it(c) }}
-}
-
-fun matchNever(): ConceptMatcher {
-    return { c -> false}
-}
-
-fun matchAlways(): ConceptMatcher {
-    return { c -> true}
-}
-
 /* Fundamental search function to navigate the sentence for concepts or words. If a match is found, then the action is called with the result */
 fun searchContext(matcher: ConceptMatcher, abortSearch: ConceptMatcher = matchNever(), matchPreviousWord: String? = null, direction: SearchDirection = SearchDirection.Before, wordContext: WordContext, action: (ConceptHolder) -> Unit) {
     var index = wordContext.wordIndex

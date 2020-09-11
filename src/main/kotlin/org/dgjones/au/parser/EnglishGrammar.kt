@@ -1,7 +1,6 @@
 package org.dgjones.au.parser
 
 import org.dgjones.au.narrative.InDepthUnderstandingConcepts
-import org.dgjones.au.narrative.InsertAfterDemon
 
 enum class ParserKinds {
     Conjunction
