@@ -9,15 +9,25 @@ data class Concept(val name: String) {
     fun value(slotName: SL): Concept? {
         return value(slotName.name)
     }
+    fun value(slotName: Fields): Concept? {
+        return value(slotName.fieldName)
+    }
     fun valueName(slotName: String): String? {
         return value(slotName)?.name
     }
-    fun valueName(slotName: String, default: String = "unknown"): String {
-        return value(slotName)?.name ?: default
+    fun valueName(slotName: Fields): String? {
+        return value(slotName.fieldName)?.name
     }
-    fun valueName(slotName: SL): String? {
-        return valueName(slotName.name)
+    fun valueName(slotName: Fields, defaultValue: String): String {
+        return value(slotName.fieldName)?.name ?: defaultValue
     }
+
+//    fun valueName(slotName: String, default: String = "unknown"): String {
+//        return value(slotName)?.name ?: default
+//    }
+//    fun valueName(slotName: SL): String? {
+//        return valueName(slotName.name)
+//    }
     fun value(slotName: String, value: Concept?): Concept {
         var slot = slot(slotName)
         if (slot != null) {
@@ -57,6 +67,8 @@ data class Concept(val name: String) {
 }
 
 class Slot(val name: String, var value: Concept? = null) {
+    constructor(field: Fields, value: Concept? = null): this(field.fieldName, value)
+
     override fun toString(): String {
         return "$name $value}"
     }

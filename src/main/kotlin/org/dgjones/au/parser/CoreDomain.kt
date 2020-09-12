@@ -40,14 +40,14 @@ enum class Gender {
 
 
 // Exercise 1
-class WordPerson(val human: Concept, word: String = human.valueName("firstName")?:"unknown"): WordHandler(EntryWord(word)) {
+class WordPerson(val human: Concept, word: String = human.valueName(Human.FIRST_NAME)?:"unknown"): WordHandler(EntryWord(word)) {
     override fun build(wordContext: WordContext): List<Demon> {
         val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
             // FIXME not sure about defaulting to ""
-            slot("firstName", human.valueName("firstName") ?: "")
-            slot("lastName", human.valueName("lastName") ?: "")
-            slot("gender", human.valueName("gender")?: "")
-            checkCharacter("instan")
+            slot(Human.FIRST_NAME, human.valueName(Human.FIRST_NAME) ?: "")
+            slot(Human.LAST_NAME, human.valueName(Human.LAST_NAME) ?: "")
+            slot(Human.GENDER, human.valueName(Human.GENDER)?: "")
+            checkCharacter(CoreFields.INSTANCE.fieldName)
         }
         return lexicalConcept.demons
         // Fixme - not sure about the load/reuse
@@ -70,7 +70,7 @@ class WordBook(): WordHandler(EntryWord("book")) {
 
 class WordTree(): WordHandler(EntryWord("tree")) {
     override fun build(wordContext: WordContext): List<Demon> {
-        wordContext.defHolder.value =  buildPhysicalObject(PhysicalObjectKind.Plant.name, "tree")
+        wordContext.defHolder.value =  buildPhysicalObject(PhysicalObjectKind.Plant.name, word.word)
         return listOf(SaveObjectDemon(wordContext))
     }
 }

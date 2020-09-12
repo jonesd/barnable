@@ -45,6 +45,7 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     lexicon.addMapping(WordYesterday())
 
     // pronoun
+    lexicon.addMapping(WordPerson(buildHuman("Ann", "", Gender.Female.name)))
     lexicon.addMapping(WordPerson(buildHuman("Anne", "", Gender.Female.name)))
     lexicon.addMapping(PronounWord("he", Gender.Male))
     lexicon.addMapping(PronounWord("she", Gender.Female))
@@ -272,7 +273,7 @@ class LoadCharacterDemon(val human: Concept, wordContext: WordContext): Demon(wo
 
 open class ConceptAccessor(val concept: Concept)
 
-class Human(concept: Concept): ConceptAccessor(concept) {
+class HumanAccessor(concept: Concept): ConceptAccessor(concept) {
     fun isCompatible(): Boolean {
         return concept.name == InDepthUnderstandingConcepts.Human.name
     }
@@ -608,11 +609,11 @@ class PronounWord(word: String, val genderMatch: Gender): WordHandler(EntryWord(
 class WordWife(): WordHandler(EntryWord("wife")) {
     override fun build(wordContext: WordContext): List<Demon> {
         val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
-            slot("gender", Gender.Female.name)
-            slot("relationship", "R-Marriage") {
-                possessiveRef("husband", gender = Gender.Male)
+            slot(Human.GENDER, Gender.Female.name)
+            slot(Relationships.Name, Marriage.Concept.fieldName) {
+                possessiveRef(Marriage.Husband, gender = Gender.Male)
                 nextChar("wife", relRole = "Wife")
-                checkRelationship("instan")
+                checkRelationship(CoreFields.INSTANCE, waitForSlots = listOf("husband", "wife"))
             }
             innerInstan("instan", observeSlot = "wife")
         }
@@ -623,11 +624,11 @@ class WordWife(): WordHandler(EntryWord("wife")) {
 class WordHusband(): WordHandler(EntryWord("husband")) {
     override fun build(wordContext: WordContext): List<Demon> {
         val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
-            slot("gender", Gender.Male.name)
-            slot("relationship", "R-Marriage") {
-                possessiveRef("wife", gender = Gender.Female)
+            slot(Human.GENDER, Gender.Male.name)
+            slot(Relationships.Name, Marriage.Concept.fieldName) {
+                possessiveRef(Marriage.Wife, gender = Gender.Female)
                 nextChar("husband", relRole = "Husband")
-                checkRelationship("instan")
+                checkRelationship(CoreFields.INSTANCE, waitForSlots = listOf("husband", "wife"))
             }
             innerInstan("instan", observeSlot = "husband")
         }

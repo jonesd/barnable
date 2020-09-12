@@ -1,6 +1,9 @@
 package org.dgjones.au.narrative
 
 import org.dgjones.au.nlp.NaiveTextModelBuilder
+import org.dgjones.au.parser.CoreFields
+import org.dgjones.au.parser.Gender
+import org.dgjones.au.parser.Human
 import org.dgjones.au.parser.TextProcessor
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -112,12 +115,17 @@ class NarrativeDomainTest {
         println(workingMemory.concepts)
 
         assertEquals(2, workingMemory.concepts.size)
+
         val travel = textProcessor.workingMemory.concepts[0]
         assertEquals("John", travel.value("actor")?.valueName("firstName"))
         assertEquals("Home", travel.value("to")?.valueName("name"))
+
         val kissAttend = textProcessor.workingMemory.concepts[1]
-        assertEquals("John", kissAttend.value("actor")?.valueName("firstName"))
-        assertEquals("Anne", kissAttend.value("to")?.valueName("firstName"))
+        assertEquals("ATTEND", kissAttend.name)
+        assertEquals("John0", kissAttend.value("actor")?.valueName(CoreFields.INSTANCE))
+        assertEquals(Gender.Male.name, kissAttend.value("actor")?.valueName(Human.GENDER))
+        assertEquals("Anne0", kissAttend.value("to")?.valueName(CoreFields.INSTANCE))
+        assertEquals(Gender.Female.name, kissAttend.value("to")?.valueName(Human.GENDER))
 
         //FIXME more assertions
     }
@@ -183,14 +191,40 @@ class NarrativeDomainTest {
     }
 
     @Test
-    fun `John had lunch with his wife`() {
-        val textModel = NaiveTextModelBuilder("John had lunch with his wife").buildModel()
+    fun `John had lunch with his wife Ann`() {
+        val textModel = NaiveTextModelBuilder("John had lunch with his wife Ann.").buildModel()
         val textProcessor = TextProcessor(textModel, lexicon)
         val workingMemory = textProcessor.runProcessor()
         println(workingMemory.concepts)
 
         // FIXME implement
-        assertEquals(3 /*should be 1?*/, workingMemory.concepts.size)
+        assertEquals(1, workingMemory.concepts.size)
+        val meal = workingMemory.concepts[0]
+        assertEquals("M-Meal", meal.name)
+        assertEquals("John0", meal.value(MealFields.EATER_A)?.valueName(CoreFields.INSTANCE))
+        assertEquals("Ann0", meal.value(MealFields.EATER_B)?.valueName(CoreFields.INSTANCE))
+    }
 
+    @Test
+    fun `John and his wife Ann`() {
+        val textModel = NaiveTextModelBuilder("John and his wife Ann.").buildModel()
+        val textProcessor = TextProcessor(textModel, lexicon)
+        val workingMemory = textProcessor.runProcessor()
+        println(workingMemory.concepts)
+
+        // FIXME implement
+        assertEquals(2, workingMemory.concepts.size)
+
+        val john = workingMemory.concepts[0]
+        assertEquals(Human.CONCEPT.fieldName, john.name)
+        assertEquals("John", john.valueName(Human.FIRST_NAME))
+
+        val wife = workingMemory.concepts[1]
+        assertEquals(Human.CONCEPT.fieldName, wife.name)
+        val marriage = wife.value(Relationships.Name)
+        assertNotNull(marriage)
+        assertEquals(Gender.Male.name, marriage?.value(Marriage.Husband)?.valueName(Human.GENDER))
+        assertEquals("Ann", marriage?.value(Marriage.Wife)?.valueName(Human.FIRST_NAME))
+        assertEquals(Gender.Female.name, marriage?.value(Marriage.Wife)?.valueName(Human.GENDER))
     }
 }

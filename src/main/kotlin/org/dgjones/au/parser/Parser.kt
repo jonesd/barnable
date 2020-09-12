@@ -1,7 +1,6 @@
 package org.dgjones.au.parser
 
 import org.dgjones.au.narrative.Acts
-import org.dgjones.au.narrative.Human
 import org.dgjones.au.narrative.InDepthUnderstandingConcepts
 import org.dgjones.au.nlp.*
 
@@ -25,6 +24,7 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
 
     private fun endParagraph() {
         println("End of Paragraph - Working Memory - Clear Characters")
+        episodicMemory.dumpMemory()
         workingMemory.charactersRecent.clear()
     }
 
@@ -118,7 +118,7 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
         val memory = if (qaMode) qaMemory else workingMemory
         promoteDefsToWorkingMemory(context, memory)
         println(memory)
-        println(context.episodicMemory)
+        context.episodicMemory.dumpMemory()
     }
 
     private fun promoteDefsToWorkingMemory(context: SentenceContext, memory: WorkingMemory) {

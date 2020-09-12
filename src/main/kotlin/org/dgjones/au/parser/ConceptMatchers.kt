@@ -22,6 +22,10 @@ fun matchCase(match: Case): ConceptMatcher {
     return matchConceptValueName("case", match.name)
 }
 
+fun matchConceptValueName(slot: Fields, match: String): ConceptMatcher {
+    return { c -> c?.valueName(slot) == match }
+}
+
 fun matchConceptValueName(slot: String, match: String): ConceptMatcher {
     return { c -> c?.valueName(slot) == match }
 }
@@ -40,4 +44,21 @@ fun matchNever(): ConceptMatcher {
 
 fun matchAlways(): ConceptMatcher {
     return { c -> true}
+}
+
+class ConceptMatcherBuilder() {
+    var matchers = mutableListOf<ConceptMatcher>()
+    fun with(matcher: ConceptMatcher): ConceptMatcherBuilder {
+        matchers.add(matcher)
+        return this
+    }
+    fun matchSetField(valueName: Fields, match: String?): ConceptMatcherBuilder {
+        if (match != null && match.isNotBlank()) {
+            matchers.add(matchConceptValueName(valueName, match))
+        }
+        return this
+    }
+    fun matchAll(): ConceptMatcher {
+        return matchAll(matchers)
+    }
 }

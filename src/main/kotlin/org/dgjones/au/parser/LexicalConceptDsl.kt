@@ -10,6 +10,10 @@ class LexicalRootBuilder(val wordContext: WordContext, val headName: String) {
     val disambiguations = mutableListOf<Demon>()
     var totalSuccessfulDisambiguations = 0;
 
+    companion object {
+        const val VARIABLE_PREFIX = "*VAR."
+    }
+
     fun build(): LexicalConcept {
         return LexicalConcept(wordContext, root.build(), demons, disambiguations)
     }
@@ -17,7 +21,7 @@ class LexicalRootBuilder(val wordContext: WordContext, val headName: String) {
     // FIXME shouldn't associate this state that lives on beyond build() to builder
     // should create new holder instead
     fun createVariable(slotName: String, variableName: String? = null): Slot {
-        val name = "*VAR."+(variableName ?: wordContext.context.workingMemory.nextVariableIndex()) +"*"
+        val name = VARIABLE_PREFIX+(variableName ?: wordContext.context.workingMemory.nextVariableIndex()) +"*"
         val slot = Slot(slotName, Concept(name))
         variableSlots.add(slot)
         return slot
@@ -75,8 +79,14 @@ class LexicalConceptBuilder(val root: LexicalRootBuilder, conceptName: String) {
         root.wordContext.defHolder.addFlag(ParserFlags.Ignore)
     }
 
+    fun slot(slotName: Fields, slotValue: String) {
+        slot(slotName.fieldName, slotValue)
+    }
     fun slot(slotName: String, slotValue: String) {
         concept.with(Slot(slotName, Concept(slotValue)))
+    }
+    fun slot(slotName: Fields, slotValue: String, initializer: LexicalConceptBuilder.() -> Unit) {
+        slot(slotName.fieldName, slotValue, initializer)
     }
     fun slot(slotName: String, slotValue: String, initializer: LexicalConceptBuilder.() -> Unit) {
         val child = LexicalConceptBuilder(root, slotValue)
@@ -113,7 +123,7 @@ class LexicalConceptBuilder(val root: LexicalRootBuilder, conceptName: String) {
         val variableSlot = root.createVariable(slotName, variableName)
         concept.with(variableSlot)
         val saveCharacterDemon = SaveCharacterDemon(root.wordContext)
-        val checkCharacterDemon = CheckCharacterDemon(concept.valueName("firstName"), concept.valueName("lastName"), concept.valueName("gender"), root.wordContext) {
+        val checkCharacterDemon = CheckCharacterDemon(concept, root.wordContext) {
             if (it != null) {
                 root.completeVariable(variableSlot, root.wordContext.context.workingMemory.createDefHolder(it))
             } else {
@@ -140,8 +150,8 @@ class LexicalConceptBuilder(val root: LexicalRootBuilder, conceptName: String) {
         root.addDemon(demon)
     }
 
-    fun possessiveRef(slotName: String, variableName: String? = null, gender: Gender) {
-        val variableSlot = root.createVariable(slotName, variableName)
+    fun possessiveRef(slotName: Fields, variableName: String? = null, gender: Gender) {
+        val variableSlot = root.createVariable(slotName.fieldName, variableName)
         concept.with(variableSlot)
         val demon = PossessiveReference(gender, root.wordContext) {
             if (it != null) {
@@ -174,9 +184,15 @@ class LexicalConceptBuilder(val root: LexicalRootBuilder, conceptName: String) {
     }
 
     // InDepth p185
-    fun checkRelationship(slotName: String, variableName: String? = null) {
-        // FIXME implement checkRelationship
-        // throw NotImplementedError()
+    fun checkRelationship(slotName: Fields, variableName: String? = null, waitForSlots: List<String>) {
+        val variableSlot = root.createVariable(slotName.fieldName, variableName)
+        concept.with(variableSlot)
+        val demon = CheckRelationshipDemon(concept, waitForSlots, root.wordContext) {
+            if (it != null) {
+                root.completeVariable(variableSlot, it, root.wordContext)
+            }
+        }
+        root.addDemon(demon)
     }
 
     fun varReference(slotName: String, variableName: String) {
@@ -198,3 +214,9 @@ class LexicalConcept(val wordContext: WordContext, val head: Concept, val demons
         wordContext.defHolder.value = head
     }
 }
+
+fun isConceptEmptyOrUnresolved(concept: Concept?): Boolean {
+    return concept == null || concept.name == null || concept.name.isBlank() || concept.name.startsWith(LexicalRootBuilder.VARIABLE_PREFIX)
+}
+
+fun isConceptResolved(concept: Concept?): Boolean = !isConceptEmptyOrUnresolved(concept)
