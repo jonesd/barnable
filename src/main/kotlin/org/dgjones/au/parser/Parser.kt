@@ -2,7 +2,15 @@ package org.dgjones.au.parser
 
 import org.dgjones.au.narrative.Acts
 import org.dgjones.au.narrative.InDepthUnderstandingConcepts
+import org.dgjones.au.narrative.buildInDepthUnderstandingLexicon
 import org.dgjones.au.nlp.*
+
+fun runTextProcess(text: String, lexicon: Lexicon = buildInDepthUnderstandingLexicon()): TextProcessor {
+        val textModel = NaiveTextModelBuilder(text).buildModel()
+        val textProcessor = TextProcessor(textModel, lexicon)
+        val workingMemory = textProcessor.runProcessor()
+        return textProcessor
+}
 
 class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
     val workingMemory = WorkingMemory()

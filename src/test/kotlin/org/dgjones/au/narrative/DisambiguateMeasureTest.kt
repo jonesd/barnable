@@ -2,6 +2,7 @@ package org.dgjones.au.narrative
 
 import org.dgjones.au.nlp.NaiveTextModelBuilder
 import org.dgjones.au.parser.TextProcessor
+import org.dgjones.au.parser.runTextProcess
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
@@ -10,10 +11,7 @@ class DisambiguateMeasureTest {
 
     @Test
     fun `Two measures of sugar`() {
-        val textModel = NaiveTextModelBuilder("Two measures of sugar").buildModel()
-
-        val textProcessor = TextProcessor(textModel, lexicon)
-        textProcessor.runProcessor()
+        val textProcessor = runTextProcess("Two measures of sugar", lexicon)
 
         // FIXME think this should be Food sugar with amount, rather than Quantity of sugar
         assertEquals(1, textProcessor.workingMemory.concepts.size)
@@ -26,10 +24,7 @@ class DisambiguateMeasureTest {
 
     @Test
     fun `John measures the tree`() {
-        val textModel = NaiveTextModelBuilder("John measures the tree").buildModel()
-
-        val textProcessor = TextProcessor(textModel, lexicon)
-        textProcessor.runProcessor()
+        val textProcessor = runTextProcess("John measures the tree", lexicon)
 
         assertEquals(1, textProcessor.workingMemory.concepts.size)
         val toMeasure = textProcessor.workingMemory.concepts[0]

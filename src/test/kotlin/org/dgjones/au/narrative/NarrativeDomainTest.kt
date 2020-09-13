@@ -1,10 +1,7 @@
 package org.dgjones.au.narrative
 
 import org.dgjones.au.nlp.NaiveTextModelBuilder
-import org.dgjones.au.parser.CoreFields
-import org.dgjones.au.parser.Gender
-import org.dgjones.au.parser.Human
-import org.dgjones.au.parser.TextProcessor
+import org.dgjones.au.parser.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
@@ -13,10 +10,7 @@ class NarrativeDomainTest {
 
     @Test
     fun `Example execution`() {
-        val textModel = NaiveTextModelBuilder("John picked up the ball and dropped it in the box").buildModel()
-
-        val textProcessor = TextProcessor(textModel, lexicon)
-        textProcessor.runProcessor()
+        val textProcessor = runTextProcess("John picked up the ball and dropped it in the box", lexicon)
 
         assertEquals(2, textProcessor.workingMemory.concepts.size)
 
@@ -42,10 +36,7 @@ class NarrativeDomainTest {
 
     @Test
     fun `Exercise 1 John gave Mary a book`() {
-        val textModel = NaiveTextModelBuilder("John gave Mary a book").buildModel()
-
-        val textProcessor = TextProcessor(textModel, lexicon)
-        textProcessor.runProcessor()
+        val textProcessor = runTextProcess("John gave Mary a book", lexicon)
 
         assertEquals(1, textProcessor.workingMemory.concepts.size)
 
@@ -60,10 +51,7 @@ class NarrativeDomainTest {
 
     @Test
     fun `Exercise 2 Fred told Mary that John eats lobster`() {
-        val textModel = NaiveTextModelBuilder("Fred told Mary that John eats lobster").buildModel()
-
-        val textProcessor = TextProcessor(textModel, lexicon)
-        textProcessor.runProcessor()
+        val textProcessor = runTextProcess("Fred told Mary that John eats lobster", lexicon)
 
         assertEquals(1, textProcessor.workingMemory.concepts.size)
 
@@ -82,12 +70,9 @@ class NarrativeDomainTest {
 
     @Test
     fun `Colour modifier`() {
-        val textModel = NaiveTextModelBuilder("the red book").buildModel()
+        val textProcessor = runTextProcess("the red book", lexicon)
 
-        val textProcessor = TextProcessor(textModel, lexicon)
-        val workingMemory = textProcessor.runProcessor()
-
-        assertEquals(1, workingMemory.concepts.size)
+        assertEquals(1, textProcessor.workingMemory.concepts.size)
         val concept = textProcessor.workingMemory.concepts.first()
         assertEquals(PhysicalObjectKind.Book.name, concept.valueName("kind"))
         assertEquals("red", concept.valueName("colour"))
@@ -95,12 +80,9 @@ class NarrativeDomainTest {
 
     @Test
     fun `Age-Weight modifiers`() {
-        val textModel = NaiveTextModelBuilder("a thin old man").buildModel()
+        val textProcessor = runTextProcess("a thin old man", lexicon)
 
-        val textProcessor = TextProcessor(textModel, lexicon)
-        val workingMemory = textProcessor.runProcessor()
-
-        assertEquals(1, workingMemory.concepts.size)
+        assertEquals(1, textProcessor.workingMemory.concepts.size)
         val concept = textProcessor.workingMemory.concepts.first()
         assertEquals("GT-NORM", concept.valueName("age"))
         assertEquals("LT-NORM", concept.valueName("weight"))
@@ -108,13 +90,9 @@ class NarrativeDomainTest {
 
     @Test
     fun `Basic pronoun reference`() {
-        val textModel = NaiveTextModelBuilder("John went home. He kissed his wife Anne.").buildModel()
+        val textProcessor = runTextProcess("John went home. He kissed his wife Anne.", lexicon)
 
-        val textProcessor = TextProcessor(textModel, lexicon)
-        val workingMemory = textProcessor.runProcessor()
-        println(workingMemory.concepts)
-
-        assertEquals(2, workingMemory.concepts.size)
+        assertEquals(2, textProcessor.workingMemory.concepts.size)
 
         val travel = textProcessor.workingMemory.concepts[0]
         assertEquals("John", travel.value("actor")?.valueName("firstName"))
@@ -132,14 +110,10 @@ class NarrativeDomainTest {
 
     @Test
     fun `Basic pronoun reference 2`() {
-        val textModel = NaiveTextModelBuilder("John told Bill that he was hungry.").buildModel()
+        val textProcessor = runTextProcess("John told Bill that he was hungry.", lexicon)
 
-        val textProcessor = TextProcessor(textModel, lexicon)
-        val workingMemory = textProcessor.runProcessor()
-        println(workingMemory.concepts)
-
-        assertEquals(1, workingMemory.concepts.size)
-        var told = workingMemory.concepts[0]
+        assertEquals(1, textProcessor.workingMemory.concepts.size)
+        var told = textProcessor.workingMemory.concepts[0]
         assertEquals("MTRANS", told.name)
         assertEquals("John", told.value("actor")?.valueName("firstName"))
         assertEquals("Bill", told.value("to")?.valueName("firstName"))
@@ -149,14 +123,10 @@ class NarrativeDomainTest {
 
     @Test
     fun `Time modification`() {
-        val textModel = NaiveTextModelBuilder("John walked home yesterday").buildModel()
+        val textProcessor = runTextProcess("John walked home yesterday", lexicon)
 
-        val textProcessor = TextProcessor(textModel, lexicon)
-        val workingMemory = textProcessor.runProcessor()
-        println(workingMemory.concepts)
-
-        assertEquals(1 /*should be 1?*/, workingMemory.concepts.size)
-        var walk = workingMemory.concepts[0]
+        assertEquals(1 /*should be 1?*/, textProcessor.workingMemory.concepts.size)
+        var walk = textProcessor.workingMemory.concepts[0]
         assertEquals("PTRANS", walk.name)
         assertEquals("John", walk.value("actor")?.valueName("firstName"))
         assertEquals("Home", walk.value("to")?.valueName("name"))
@@ -165,14 +135,10 @@ class NarrativeDomainTest {
 
     @Test
     fun `John had lunch with George`() {
-        val textModel = NaiveTextModelBuilder("John had lunch with George").buildModel()
-        val textProcessor = TextProcessor(textModel, lexicon)
-        val workingMemory = textProcessor.runProcessor()
-        println(workingMemory.concepts)
-        println(textProcessor.episodicMemory)
+        val textProcessor = runTextProcess("John had lunch with George", lexicon)
 
-        assertEquals(1, workingMemory.concepts.size)
-        val meal = workingMemory.concepts[0]
+        assertEquals(1, textProcessor.workingMemory.concepts.size)
+        val meal = textProcessor.workingMemory.concepts[0]
         assertEquals("M-Meal", meal.name)
         assertEquals("John", meal.value("eater-a")?.valueName("firstName"))
         assertEquals("George", meal.value("eater-b")?.valueName("firstName"))
@@ -181,25 +147,19 @@ class NarrativeDomainTest {
 
     @Test
     fun `Word KNOCKED - John knocked a glass of water over`() {
-        val textModel = NaiveTextModelBuilder("John knocked a glass of water over").buildModel()
-        val textProcessor = TextProcessor(textModel, lexicon)
-        val workingMemory = textProcessor.runProcessor()
-        println(workingMemory.concepts)
+        val textProcessor = runTextProcess("John knocked a glass of water over", lexicon)
 
         // FIXME implement
-        assertEquals(3 /*should be 1?*/, workingMemory.concepts.size)
+        assertEquals(3 /*should be 1?*/, textProcessor.workingMemory.concepts.size)
     }
 
     @Test
     fun `John had lunch with his wife Ann`() {
-        val textModel = NaiveTextModelBuilder("John had lunch with his wife Ann.").buildModel()
-        val textProcessor = TextProcessor(textModel, lexicon)
-        val workingMemory = textProcessor.runProcessor()
-        println(workingMemory.concepts)
+        val textProcessor = runTextProcess("John had lunch with his wife Ann.", lexicon)
 
         // FIXME implement
-        assertEquals(1, workingMemory.concepts.size)
-        val meal = workingMemory.concepts[0]
+        assertEquals(1, textProcessor.workingMemory.concepts.size)
+        val meal = textProcessor.workingMemory.concepts[0]
         assertEquals("M-Meal", meal.name)
         assertEquals("John0", meal.value(MealFields.EATER_A)?.valueName(CoreFields.INSTANCE))
         assertEquals("Ann0", meal.value(MealFields.EATER_B)?.valueName(CoreFields.INSTANCE))
@@ -207,19 +167,16 @@ class NarrativeDomainTest {
 
     @Test
     fun `John and his wife Ann`() {
-        val textModel = NaiveTextModelBuilder("John and his wife Ann.").buildModel()
-        val textProcessor = TextProcessor(textModel, lexicon)
-        val workingMemory = textProcessor.runProcessor()
-        println(workingMemory.concepts)
+        val textProcessor = runTextProcess("John and his wife Ann.", lexicon)
 
         // FIXME implement
-        assertEquals(2, workingMemory.concepts.size)
+        assertEquals(2, textProcessor.workingMemory.concepts.size)
 
-        val john = workingMemory.concepts[0]
+        val john = textProcessor.workingMemory.concepts[0]
         assertEquals(Human.CONCEPT.fieldName, john.name)
         assertEquals("John", john.valueName(Human.FIRST_NAME))
 
-        val wife = workingMemory.concepts[1]
+        val wife = textProcessor.workingMemory.concepts[1]
         assertEquals(Human.CONCEPT.fieldName, wife.name)
         val marriage = wife.value(Relationships.Name)
         assertNotNull(marriage)
@@ -230,14 +187,10 @@ class NarrativeDomainTest {
 
     @Test
     fun `John Snicklefritz`() {
-        val textModel = NaiveTextModelBuilder("John Snicklefritz.").buildModel()
-        val textProcessor = TextProcessor(textModel, lexicon)
-        val workingMemory = textProcessor.runProcessor()
-        println(workingMemory.concepts)
+        val textProcessor = runTextProcess("John Snicklefritz.", lexicon)
 
-        // FIXME implement
-        assertEquals(1, workingMemory.concepts.size)
-        val human = workingMemory.concepts[0]
+        assertEquals(1, textProcessor.workingMemory.concepts.size)
+        val human = textProcessor.workingMemory.concepts[0]
         assertEquals(Human.CONCEPT.fieldName, human.name)
         assertEquals("John", human.valueName(Human.FIRST_NAME))
         assertEquals(Gender.Male.name, human.valueName(Human.GENDER))
@@ -247,14 +200,10 @@ class NarrativeDomainTest {
 
     @Test
     fun `Mr Snicklefritz`() {
-        val textModel = NaiveTextModelBuilder("Mr Snicklefritz.").buildModel()
-        val textProcessor = TextProcessor(textModel, lexicon)
-        val workingMemory = textProcessor.runProcessor()
-        println(workingMemory.concepts)
+        val textProcessor = runTextProcess("Mr Snicklefritz.", lexicon)
 
-        // FIXME implement
-        assertEquals(1, workingMemory.concepts.size)
-        val human = workingMemory.concepts[0]
+        assertEquals(1, textProcessor.workingMemory.concepts.size)
+        val human = textProcessor.workingMemory.concepts[0]
         assertEquals(Human.CONCEPT.fieldName, human.name)
         assertEquals("", human.valueName(Human.FIRST_NAME))
         assertEquals(Gender.Male.name, human.valueName(Human.GENDER))
@@ -264,14 +213,10 @@ class NarrativeDomainTest {
 
     @Test
     fun `Mrs Snicklefritz`() {
-        val textModel = NaiveTextModelBuilder("Mrs Snicklefritz.").buildModel()
-        val textProcessor = TextProcessor(textModel, lexicon)
-        val workingMemory = textProcessor.runProcessor()
-        println(workingMemory.concepts)
+        val textProcessor = runTextProcess("Mrs Snicklefritz.", lexicon)
 
-        // FIXME implement
-        assertEquals(1, workingMemory.concepts.size)
-        val human = workingMemory.concepts[0]
+        assertEquals(1, textProcessor.workingMemory.concepts.size)
+        val human = textProcessor.workingMemory.concepts[0]
         assertEquals(Human.CONCEPT.fieldName, human.name)
         assertEquals("", human.valueName(Human.FIRST_NAME))
         assertEquals(Gender.Female.name, human.valueName(Human.GENDER))
@@ -281,14 +226,11 @@ class NarrativeDomainTest {
 
     @Test
     fun `Miss Snicklefritz`() {
-        val textModel = NaiveTextModelBuilder("Mrs Snicklefritz.").buildModel()
-        val textProcessor = TextProcessor(textModel, lexicon)
-        val workingMemory = textProcessor.runProcessor()
-        println(workingMemory.concepts)
+        val textProcessor = runTextProcess("Miss Snicklefritz.", lexicon)
 
         // FIXME implement
-        assertEquals(1, workingMemory.concepts.size)
-        val human = workingMemory.concepts[0]
+        assertEquals(1, textProcessor.workingMemory.concepts.size)
+        val human = textProcessor.workingMemory.concepts[0]
         assertEquals(Human.CONCEPT.fieldName, human.name)
         assertEquals("", human.valueName(Human.FIRST_NAME))
         assertEquals(Gender.Female.name, human.valueName(Human.GENDER))
@@ -298,14 +240,11 @@ class NarrativeDomainTest {
 
     @Test
     fun `Ms Snicklefritz`() {
-        val textModel = NaiveTextModelBuilder("Mrs Snicklefritz.").buildModel()
-        val textProcessor = TextProcessor(textModel, lexicon)
-        val workingMemory = textProcessor.runProcessor()
-        println(workingMemory.concepts)
+        val textProcessor = runTextProcess("Ms Snicklefritz.", lexicon)
 
         // FIXME implement
-        assertEquals(1, workingMemory.concepts.size)
-        val human = workingMemory.concepts[0]
+        assertEquals(1, textProcessor.workingMemory.concepts.size)
+        val human = textProcessor.workingMemory.concepts[0]
         assertEquals(Human.CONCEPT.fieldName, human.name)
         assertEquals("", human.valueName(Human.FIRST_NAME))
         assertEquals(Gender.Female.name, human.valueName(Human.GENDER))
@@ -315,14 +254,10 @@ class NarrativeDomainTest {
 
     @Test
     fun `Mr John Snicklefritz`() {
-        val textModel = NaiveTextModelBuilder("Mr John Snicklefritz.").buildModel()
-        val textProcessor = TextProcessor(textModel, lexicon)
-        val workingMemory = textProcessor.runProcessor()
-        println(workingMemory.concepts)
+        val textProcessor = runTextProcess("Mr John Snicklefritz.", lexicon)
 
-        // FIXME implement
-        assertEquals(1, workingMemory.concepts.size)
-        val human = workingMemory.concepts[0]
+        assertEquals(1, textProcessor.workingMemory.concepts.size)
+        val human = textProcessor.workingMemory.concepts[0]
         assertEquals(Human.CONCEPT.fieldName, human.name)
         assertEquals("John", human.valueName(Human.FIRST_NAME))
         assertEquals(Gender.Male.name, human.valueName(Human.GENDER))

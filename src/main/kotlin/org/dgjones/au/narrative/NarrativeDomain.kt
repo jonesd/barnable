@@ -649,10 +649,10 @@ class WordHusband(): WordHandler(EntryWord("husband")) {
 class TitleWord(word: String, val gender: Gender): WordHandler(EntryWord(word)) {
     override fun build(wordContext: WordContext): List<Demon> {
         val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
-            // FIXME not sure about defaulting to ""
             slot(Human.FIRST_NAME, "")
             lastName(Human.LAST_NAME)
             slot(Human.GENDER, gender.name)
+            // FIXME include title
             checkCharacter(CoreFields.INSTANCE.fieldName)
         }
         return lexicalConcept.demons
