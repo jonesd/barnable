@@ -34,6 +34,13 @@ class NaiveTokenizerTest {
     }
 
     @Test
+    fun `ignore period for money word`() {
+        val words = NaiveTokenizer().splitTextIntoWords("one 1.78 three four")
+
+        assertEquals(listOf("one", "1.78", "three", "four"), words)
+    }
+
+    @Test
     fun `detect multiple sentences`() {
         val words = NaiveTokenizer().splitTextIntoWords("one two. three four. five")
 
