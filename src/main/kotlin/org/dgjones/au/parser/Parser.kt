@@ -479,13 +479,10 @@ class IgnoreDemon(wordContext: WordContext): Demon(wordContext) {
 
 class WordUnknown(word: String): WordHandler(EntryWord(word)) {
     override fun build(wordContext: WordContext): List<Demon> {
-        return listOf(UnknownDemon(wordContext))
+        val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.UnknownWord.name) {
+            ignoreHolder()
+            slot("word", wordContext.word)
+        }
+        return lexicalConcept.demons
     }
 }
-
-class UnknownDemon(wordContext: WordContext): Demon(wordContext) {
-    override fun description(): String {
-        return "Unknown word=${wordContext.word}"
-    }
-}
-

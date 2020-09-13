@@ -227,4 +227,106 @@ class NarrativeDomainTest {
         assertEquals("Ann", marriage?.value(Marriage.Wife)?.valueName(Human.FIRST_NAME))
         assertEquals(Gender.Female.name, marriage?.value(Marriage.Wife)?.valueName(Human.GENDER))
     }
+
+    @Test
+    fun `John Snicklefritz`() {
+        val textModel = NaiveTextModelBuilder("John Snicklefritz.").buildModel()
+        val textProcessor = TextProcessor(textModel, lexicon)
+        val workingMemory = textProcessor.runProcessor()
+        println(workingMemory.concepts)
+
+        // FIXME implement
+        assertEquals(1, workingMemory.concepts.size)
+        val human = workingMemory.concepts[0]
+        assertEquals(Human.CONCEPT.fieldName, human.name)
+        assertEquals("John", human.valueName(Human.FIRST_NAME))
+        assertEquals(Gender.Male.name, human.valueName(Human.GENDER))
+        //FIXME should be Snicklefritz
+        assertEquals("snicklefritz", human.valueName(Human.LAST_NAME))
+    }
+
+    @Test
+    fun `Mr Snicklefritz`() {
+        val textModel = NaiveTextModelBuilder("Mr Snicklefritz.").buildModel()
+        val textProcessor = TextProcessor(textModel, lexicon)
+        val workingMemory = textProcessor.runProcessor()
+        println(workingMemory.concepts)
+
+        // FIXME implement
+        assertEquals(1, workingMemory.concepts.size)
+        val human = workingMemory.concepts[0]
+        assertEquals(Human.CONCEPT.fieldName, human.name)
+        assertEquals("", human.valueName(Human.FIRST_NAME))
+        assertEquals(Gender.Male.name, human.valueName(Human.GENDER))
+        //FIXME should be Snicklefritz
+        assertEquals("snicklefritz", human.valueName(Human.LAST_NAME))
+    }
+
+    @Test
+    fun `Mrs Snicklefritz`() {
+        val textModel = NaiveTextModelBuilder("Mrs Snicklefritz.").buildModel()
+        val textProcessor = TextProcessor(textModel, lexicon)
+        val workingMemory = textProcessor.runProcessor()
+        println(workingMemory.concepts)
+
+        // FIXME implement
+        assertEquals(1, workingMemory.concepts.size)
+        val human = workingMemory.concepts[0]
+        assertEquals(Human.CONCEPT.fieldName, human.name)
+        assertEquals("", human.valueName(Human.FIRST_NAME))
+        assertEquals(Gender.Female.name, human.valueName(Human.GENDER))
+        //FIXME should be Snicklefritz
+        assertEquals("snicklefritz", human.valueName(Human.LAST_NAME))
+    }
+
+    @Test
+    fun `Miss Snicklefritz`() {
+        val textModel = NaiveTextModelBuilder("Mrs Snicklefritz.").buildModel()
+        val textProcessor = TextProcessor(textModel, lexicon)
+        val workingMemory = textProcessor.runProcessor()
+        println(workingMemory.concepts)
+
+        // FIXME implement
+        assertEquals(1, workingMemory.concepts.size)
+        val human = workingMemory.concepts[0]
+        assertEquals(Human.CONCEPT.fieldName, human.name)
+        assertEquals("", human.valueName(Human.FIRST_NAME))
+        assertEquals(Gender.Female.name, human.valueName(Human.GENDER))
+        //FIXME should be Snicklefritz
+        assertEquals("snicklefritz", human.valueName(Human.LAST_NAME))
+    }
+
+    @Test
+    fun `Ms Snicklefritz`() {
+        val textModel = NaiveTextModelBuilder("Mrs Snicklefritz.").buildModel()
+        val textProcessor = TextProcessor(textModel, lexicon)
+        val workingMemory = textProcessor.runProcessor()
+        println(workingMemory.concepts)
+
+        // FIXME implement
+        assertEquals(1, workingMemory.concepts.size)
+        val human = workingMemory.concepts[0]
+        assertEquals(Human.CONCEPT.fieldName, human.name)
+        assertEquals("", human.valueName(Human.FIRST_NAME))
+        assertEquals(Gender.Female.name, human.valueName(Human.GENDER))
+        //FIXME should be Snicklefritz
+        assertEquals("snicklefritz", human.valueName(Human.LAST_NAME))
+    }
+
+    @Test
+    fun `Mr John Snicklefritz`() {
+        val textModel = NaiveTextModelBuilder("Mr John Snicklefritz.").buildModel()
+        val textProcessor = TextProcessor(textModel, lexicon)
+        val workingMemory = textProcessor.runProcessor()
+        println(workingMemory.concepts)
+
+        // FIXME implement
+        assertEquals(1, workingMemory.concepts.size)
+        val human = workingMemory.concepts[0]
+        assertEquals(Human.CONCEPT.fieldName, human.name)
+        assertEquals("John", human.valueName(Human.FIRST_NAME))
+        assertEquals(Gender.Male.name, human.valueName(Human.GENDER))
+        //FIXME should be Snicklefritz
+        assertEquals("snicklefritz", human.valueName(Human.LAST_NAME))
+    }
 }

@@ -17,6 +17,15 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     lexicon.addMapping(WordIn())
     lexicon.addMapping(WordBox())
 
+    // Titles
+    lexicon.addMapping(TitleWord("Mr", Gender.Male))
+    lexicon.addMapping(TitleWord("Mr.", Gender.Male))
+    lexicon.addMapping(TitleWord("Mrs", Gender.Female))
+    lexicon.addMapping(TitleWord("Mrs.", Gender.Female))
+    lexicon.addMapping(TitleWord("Miss", Gender.Female))
+    lexicon.addMapping(TitleWord("Ms", Gender.Female))
+    lexicon.addMapping(TitleWord("Ms.", Gender.Female))
+
     lexicon.addMapping(WordPerson(buildHuman("Mary", "", Gender.Female.name)))
     lexicon.addMapping(WordGive())
     lexicon.addMapping(WordBook())
@@ -126,7 +135,8 @@ enum class InDepthUnderstandingConcepts {
     Location,
     Goal,
     Plan,
-    Ref
+    Ref,
+    UnknownWord
 }
 
 enum class TimeConcepts {
@@ -497,8 +507,8 @@ class WordMeasureObject(): WordHandler(EntryWord("measure")) {
 
     override fun disambiguationDemons(wordContext: WordContext, disambiguationHandler: DisambiguationHandler): List<Demon> {
         return listOf(
-            DisambiguateUsingMatch(matchConceptByHead(InDepthUnderstandingConcepts.Human.name), SearchDirection.Before, wordContext, disambiguationHandler),
-            DisambiguateUsingMatch(matchConceptByHead(InDepthUnderstandingConcepts.PhysicalObject.name), SearchDirection.After, wordContext, disambiguationHandler)
+            DisambiguateUsingMatch(matchConceptByHead(InDepthUnderstandingConcepts.Human.name), SearchDirection.Before, null, wordContext, disambiguationHandler),
+            DisambiguateUsingMatch(matchConceptByHead(InDepthUnderstandingConcepts.PhysicalObject.name), SearchDirection.After, null, wordContext, disambiguationHandler)
         )
     }
 }
@@ -566,7 +576,7 @@ class WordPronounPossessive(word: String, val gender: Gender): WordHandler(Entry
             ignoreHolder()
             slot("case", Case.Possessive.name)
             slot("gender", gender.name)
-            findCharacter("instan")
+            findCharacter(CoreFields.INSTANCE.fieldName)
         }
         return lexicalConcept.demons
     }
@@ -633,5 +643,25 @@ class WordHusband(): WordHandler(EntryWord("husband")) {
             innerInstan("instan", observeSlot = "husband")
         }
         return lexicalConcept.demons
+    }
+}
+
+class TitleWord(word: String, val gender: Gender): WordHandler(EntryWord(word)) {
+    override fun build(wordContext: WordContext): List<Demon> {
+        val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
+            // FIXME not sure about defaulting to ""
+            slot(Human.FIRST_NAME, "")
+            lastName(Human.LAST_NAME)
+            slot(Human.GENDER, gender.name)
+            checkCharacter(CoreFields.INSTANCE.fieldName)
+        }
+        return lexicalConcept.demons
+        // Fixme - not sure about the load/reuse
+        // FIXMEreturn listOf(LoadCharacterDemon(human, wordContext), SaveCharacterDemon(wordContext))
+    }
+    override fun disambiguationDemons(wordContext: WordContext, disambiguationHandler: DisambiguationHandler): List<Demon> {
+        return listOf(
+            DisambiguateUsingMatch(matchConceptByHead(listOf(InDepthUnderstandingConcepts.UnknownWord.name)), SearchDirection.After, 1, wordContext, disambiguationHandler)
+        )
     }
 }

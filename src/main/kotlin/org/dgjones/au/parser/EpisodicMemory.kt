@@ -16,6 +16,11 @@ class IndexedNameGenerator {
         return name + index
     }
 
+    fun episodicId(names: List<String?>): String {
+        val name = names.firstOrNull { it != null && it.isNotEmpty() }
+        return episodicId(name ?: "noname")
+    }
+
     fun episodicId(concept: Concept): String = episodicId(concept.name)
 }
 
@@ -82,7 +87,8 @@ class EpisodicMemory {
             }
         }
         val character = EpisodicConcept(InDepthUnderstandingConcepts.Human.name)
-        val episodicInstance = indexGenerator.episodicId(human?.valueName(Human.FIRST_NAME) ?: Human.CONCEPT.fieldName)
+        val episodicInstance = indexGenerator.episodicId(
+            listOf(human?.valueName(Human.FIRST_NAME) , human?.valueName(Human.LAST_NAME), Human.CONCEPT.fieldName))
         if (human != null) {
             character.with(Slot(Human.FIRST_NAME, Concept(human.valueName(Human.FIRST_NAME, ""))))
             character.with(Slot(Human.LAST_NAME, Concept(human.valueName(Human.LAST_NAME, ""))))

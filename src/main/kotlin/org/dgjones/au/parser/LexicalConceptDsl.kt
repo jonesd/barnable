@@ -20,6 +20,9 @@ class LexicalRootBuilder(val wordContext: WordContext, val headName: String) {
 
     // FIXME shouldn't associate this state that lives on beyond build() to builder
     // should create new holder instead
+    fun createVariable(slotName: Fields, variableName: String? = null): Slot {
+        return createVariable(slotName.fieldName, variableName)
+    }
     fun createVariable(slotName: String, variableName: String? = null): Slot {
         val name = VARIABLE_PREFIX+(variableName ?: wordContext.context.workingMemory.nextVariableIndex()) +"*"
         val slot = Slot(slotName, Concept(name))
@@ -176,6 +179,17 @@ class LexicalConceptBuilder(val root: LexicalRootBuilder, conceptName: String) {
         val variableSlot = root.createVariable(slotName, variableName)
         concept.with(variableSlot)
         val demon = InnerInstanceDemon(observeSlot, root.wordContext) {
+            if (it != null) {
+                root.completeVariable(variableSlot, it, root.wordContext)
+            }
+        }
+        root.addDemon(demon)
+    }
+
+    fun lastName(slotName: Fields, variableName: String? = null) {
+        val variableSlot = root.createVariable(slotName, variableName)
+        concept.with(variableSlot)
+        val demon = LastNameDemon(root.wordContext) {
             if (it != null) {
                 root.completeVariable(variableSlot, it, root.wordContext)
             }

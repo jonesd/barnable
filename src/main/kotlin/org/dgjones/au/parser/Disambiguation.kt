@@ -29,9 +29,9 @@ class DisambiguateUsingWord(val word: String, val matcher: ConceptMatcher, val d
     }
 }
 
-class DisambiguateUsingMatch(val matcher: ConceptMatcher, val direction: SearchDirection = SearchDirection.After, wordContext: WordContext, disambiguationHandler: DisambiguationHandler): DisambiguationDemon(disambiguationHandler, wordContext) {
+class DisambiguateUsingMatch(val matcher: ConceptMatcher, val direction: SearchDirection = SearchDirection.After, val distance: Int? = null, wordContext: WordContext, disambiguationHandler: DisambiguationHandler): DisambiguationDemon(disambiguationHandler, wordContext) {
     override fun run() {
-        searchContext(matcher, direction = direction, wordContext = wordContext) {
+        searchContext(matcher, direction = direction, distance = distance, wordContext = wordContext) {
             disambiguationCompleted()
         }
     }

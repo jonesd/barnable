@@ -1,12 +1,14 @@
 package org.dgjones.au.parser
 
+import kotlin.math.abs
+
 enum class SearchDirection {
     After,
     Before
 }
 
 /* Fundamental search function to navigate the sentence for concepts or words. If a match is found, then the action is called with the result */
-fun searchContext(matcher: ConceptMatcher, abortSearch: ConceptMatcher = matchNever(), matchPreviousWord: String? = null, direction: SearchDirection = SearchDirection.Before, wordContext: WordContext, action: (ConceptHolder) -> Unit) {
+fun searchContext(matcher: ConceptMatcher, abortSearch: ConceptMatcher = matchNever(), matchPreviousWord: String? = null, direction: SearchDirection = SearchDirection.Before, wordContext: WordContext, distance: Int? = null, action: (ConceptHolder) -> Unit) {
     var index = wordContext.wordIndex
     var found: ConceptHolder? = null
 
@@ -16,6 +18,10 @@ fun searchContext(matcher: ConceptMatcher, abortSearch: ConceptMatcher = matchNe
     fun updateFrom(existing: ConceptHolder?, wordContext: WordContext, index: Int): ConceptHolder? {
         if (existing?.value != null) {
             return existing
+        }
+        if (distance != null && abs(index - wordContext.wordIndex) > distance) {
+            // failed as outside distance range
+            return null
         }
         if (matchPreviousWord != null && !isMatchWithSentenceWord(index - 1)) {
             // failed to include match on provies sentence word

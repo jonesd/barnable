@@ -45,7 +45,8 @@ class WordPerson(val human: Concept, word: String = human.valueName(Human.FIRST_
         val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
             // FIXME not sure about defaulting to ""
             slot(Human.FIRST_NAME, human.valueName(Human.FIRST_NAME) ?: "")
-            slot(Human.LAST_NAME, human.valueName(Human.LAST_NAME) ?: "")
+            lastName(Human.LAST_NAME)
+            //slot(Human.LAST_NAME, human.valueName(Human.LAST_NAME) ?: "")
             slot(Human.GENDER, human.valueName(Human.GENDER)?: "")
             checkCharacter(CoreFields.INSTANCE.fieldName)
         }

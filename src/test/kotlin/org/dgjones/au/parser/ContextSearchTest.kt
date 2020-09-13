@@ -97,6 +97,32 @@ class SearchContextTest {
         assertTrue(called) {"search context provided concept"}
     }
 
+    @Test
+    fun `Can limit distance of match concept after`() {
+        val sentenceContext = withSentenceContext(3)
+        val currentWord = withWordContext(0, "zero", sentenceContext)
+        withWordContext(1, "one", sentenceContext)
+        withWordContext(2, "testHead", sentenceContext)
+        var called = false
+        searchContext(matcher, matchNever(), null, SearchDirection.After, currentWord, distance = 1) {
+            called = true
+        }
+        assertFalse(called) {"should not have been able to reach testHead"}
+    }
+
+    @Test
+    fun `Can limit distance of match concept befor`() {
+        val sentenceContext = withSentenceContext(3)
+        withWordContext(0, "testHead", sentenceContext)
+        withWordContext(1, "one", sentenceContext)
+        val currentWord = withWordContext(2, "two", sentenceContext)
+        var called = false
+        searchContext(matcher, matchNever(), null, SearchDirection.Before, currentWord, distance = 1) {
+            called = true
+        }
+        assertFalse(called) {"should not have been able to reach testHead"}
+    }
+
     private fun withSentenceContext(numberOfWords: Int): SentenceContext {
         val sentence = withSentence(numberOfWords)
         return SentenceContext(sentence, WorkingMemory(), EpisodicMemory(),false)
