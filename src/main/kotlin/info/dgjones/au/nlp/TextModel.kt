@@ -1,0 +1,20 @@
+package info.dgjones.au.nlp
+
+import info.dgjones.au.nlp.NaiveTokenizer
+
+class NaiveTextModelBuilder(val content: String) {
+    fun buildModel(): TextModel {
+        return NaiveTokenizer().tokenizeText(content)
+    }
+}
+
+data class TextModel(val content: String, val paragraphs: List<TextParagraph>)
+data class TextParagraph(val content: String, val sentences: List<TextSentence>)
+data class TextSentence(val text: String, val elements: List<WordElement>)
+
+data class WordElement(val token: String, val tag: String, val lemma: String, val chunk: String) {
+    val missingLemma = "O"
+
+    fun lemmaOrToken(): String = if (lemma == missingLemma) token else lemma
+}
+
