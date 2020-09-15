@@ -81,37 +81,12 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     lexicon.addMapping(WordMeasureQuantity())
     lexicon.addMapping(WordMeasureObject())
 
+    // FIXME lexicon.addMapping(WordWas())
+
     // FIXME only for QA
     lexicon.addMapping(WordWho())
 
     return lexicon
-}
-
-enum class SatisfactionGoal {
-    `S-Sex`,
-    `S-Hunger`,
-    `S-Thirst`
-}
-enum class DeltaGoal {
-    `D-Know`,
-    `D-Proximity`,
-    `D-ControlSomeone`,
-    `D-ControlSomething`
-}
-enum class EntertainmentGoal {
-    `E-Company`,
-    `E-Travel`,
-    `E-Exercise`
-}
-enum class AchievementGoal {
-    `A-Good-Job`,
-    `A-Skill`
-}
-enum class PreservationGoal {
-    `P-Health`,
-    `P-Comfort`,
-    `P-Appearance`,
-    `P-Finances`
 }
 
 enum class InDepthUnderstandingConcepts {
@@ -571,3 +546,39 @@ class TitleWord(word: String, val gender: Gender): WordHandler(EntryWord(word)) 
         )
     }
 }
+/* FIXME
+class WordWas(): WordHandler(EntryWord("was")) {
+    override fun build(wordContext: WordContext): List<Demon> {
+    wordContext.defHolder.value = buildPrep(Preposition.In.name)
+
+    val matcher = matchConceptByHead(setOf(InDepthUnderstandingConcepts.PhysicalObject.name, InDepthUnderstandingConcepts.Setting.name))
+    val addPrepObj = InsertAfterDemon(matcher, wordContext) {
+        if (wordContext.isDefSet()) {
+            val itValue = it.value
+            val holderValue = wordContext.defHolder.value
+            if (itValue != null && holderValue != null) {
+                withPrepObj(itValue, holderValue)
+                wordContext.defHolder.addFlag(ParserFlags.Inside)
+                println("Updated with prepobj concept=${it}")
+            }
+        }
+    }
+    return listOf(addPrepObj)
+    override fun build(wordContext: WordContext): List<Demon> {
+        val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
+            slot(Human.FIRST_NAME, "")
+            lastName(Human.LAST_NAME)
+            slot(Human.GENDER, gender.name)
+            // FIXME include title
+            checkCharacter(CoreFields.INSTANCE.fieldName)
+        }
+        return lexicalConcept.demons
+        // Fixme - not sure about the load/reuse
+        // FIXMEreturn listOf(LoadCharacterDemon(human, wordContext), SaveCharacterDemon(wordContext))
+    }
+    override fun disambiguationDemons(wordContext: WordContext, disambiguationHandler: DisambiguationHandler): List<Demon> {
+        return listOf(
+            DisambiguateUsingMatch(matchConceptByHead(listOf(InDepthUnderstandingConcepts.UnknownWord.name)), SearchDirection.After, 1, wordContext, disambiguationHandler)
+        )
+    }
+}*/
