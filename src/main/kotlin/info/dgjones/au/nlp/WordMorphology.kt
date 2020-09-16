@@ -112,4 +112,6 @@ class WordMorphologyBuilder(val root: String) {
     private fun isConsonant(c: Char): Boolean = !isVowel(c)
 }
 
-data class WordMorphology(val root: String, val suffix: String, val full: String)
+data class WordMorphology(val root: String, val suffix: String, val full: String) {
+    constructor(word: String): this(word, "", word)
+}

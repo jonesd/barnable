@@ -339,50 +339,7 @@ class Agenda() {
     }
 }
 
-class Lexicon() {
-    val wordMappings: MutableMap<String, MutableList<WordHandler>> = mutableMapOf()
-    val stemmer = StansStemmer()
 
-    fun addMapping(handler: WordHandler) {
-        handler.word.entries().forEach {
-            val key = it.toLowerCase()
-            wordMappings.putIfAbsent(key, mutableListOf<WordHandler>())
-            wordMappings[key]?.add(handler)
-        }
-    }
-
-    private fun wordHandlersFor(word: String): List<WordHandler> {
-        return wordMappings[word.toLowerCase()] ?: listOf<WordHandler>()
-    }
-
-    fun findWordHandler(word: String): WordHandlerWithSuffix? {
-        var activeWord = word
-        var wordHandlers = wordHandlersFor(activeWord)
-        if (wordHandlers.isEmpty()) {
-            activeWord = stemmer.stemWord(word)
-            wordHandlers = wordHandlersFor(activeWord)
-        }
-        // FIXME hacked up stemming
-        var suffix: String? = null
-        if (wordHandlers.isEmpty()) {
-            if (word.endsWith("ed", ignoreCase = true)) {
-                activeWord= word.substring(0, word.length - 2)
-                suffix = "ed"
-                wordHandlers = wordHandlersFor(activeWord)
-            } else if (wordHandlers.isEmpty() && word.endsWith("s", ignoreCase = true)) {
-                activeWord = word.substring(0, word.length - 1)
-                suffix = "s"
-                wordHandlers = wordHandlersFor(activeWord)
-            }
-        }
-        println("word = $word ==> $activeWord = wordHandlers")
-        return if (wordHandlers.isNotEmpty()) {
-            WordHandlerWithSuffix(wordHandlers, suffix)
-        } else {
-            null
-        }
-    }
-}
 
 open class WordHandler(val word: EntryWord) {
     open fun build(wordContext: WordContext): List<Demon> {

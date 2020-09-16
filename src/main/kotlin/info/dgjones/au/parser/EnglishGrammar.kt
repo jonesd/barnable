@@ -152,6 +152,7 @@ fun buildEnglishGrammarLexicon(lexicon: Lexicon) {
 
 class WordAnd(): WordHandler(EntryWord("and")) {
     override fun build(wordContext: WordContext): List<Demon> {
+        // FIXME should be expanded upon
         wordContext.defHolder.value = buildConjunction(Conjunction.And.name)
         return listOf(IgnoreDemon(wordContext))
     }
