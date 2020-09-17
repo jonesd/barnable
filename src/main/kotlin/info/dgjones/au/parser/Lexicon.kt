@@ -25,13 +25,16 @@ class Lexicon() {
 
     private fun addMorphologyMappings(handler: WordHandler) {
         // FIXME only using primary word...
-        val entries = WordMorphologyBuilder(handler.word.word).build()
+        val entries = wordMorphologies(handler.word.word)
         entries.forEach {
             val key = it.full.toLowerCase()
             morphologicalMappings.putIfAbsent(key, mutableListOf())
             morphologicalMappings[key]?.add(Pair(it, handler))
         }
     }
+
+    private fun wordMorphologies(word: String): List<WordMorphology> =
+        WordMorphologyBuilder(word).build()
 
     private fun addDirectMappings(handler: WordHandler) {
         handler.word.entries().forEach {
@@ -55,8 +58,41 @@ class Lexicon() {
     }
 
     // FIXME new implementation
-    fun lookupWord(word: String): List<LexicalItem> {
+
+    // Return all matches from the lexicon for the word, either exact or with suffixes.
+    // Expressions may be included, however, there are not necessarily matches for the remainder of the expression
+    fun lookupInitialWord(word: String): List<LexicalItem> {
         return directMatches(word) + morphologyMatches(word)
+    }
+
+    // Return all matches from the lexicon for the word, either exact or with suffixes.
+    // Expressions are NOT included in the resulting options
+    fun lookupOnlySingleWords(word: String): List<LexicalItem> {
+        return lookupInitialWord(word).filter { it.handler.word.expression.size == 1}
+    }
+
+    fun lookupNextEntry(list: List<String>): List<LexicalItem> {
+        if (list.isEmpty()) {
+            return listOf()
+        }
+        val word = list.first()
+        val firstWordMatches = lookupInitialWord(word)
+        return firstWordMatches.filter {
+            it.handler.word.expression.size == 1 || expressionMatchesRemainder(list, it)
+        }
+    }
+
+    // first word of expression has matched, confirm that remaining words also match
+    private fun expressionMatchesRemainder(list: List<String>, lexicalItem: LexicalItem): Boolean {
+        val expression = lexicalItem.handler.word.expression
+        return (1 until expression.size).all {
+            it < list.size && isExpressionSubsequentMatch(expression[it], list[it])
+        }
+    }
+
+    private fun isExpressionSubsequentMatch(expressionWord: String, sentenceWord: String):Boolean {
+        return expressionWord.equals(sentenceWord, ignoreCase = true)
+                || wordMorphologies(expressionWord).any { it.full.equals(sentenceWord, ignoreCase = true) }
     }
 
     fun findWordHandler(word: String): WordHandlerWithSuffix? {

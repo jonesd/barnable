@@ -8,11 +8,10 @@ class LexiconTest {
     @Test
     fun `can lookup simple word`() {
         val lexicon = Lexicon()
-        val handler = WordHandler(EntryWord("test"))
-        lexicon.addMapping(handler)
+        val handler = withWordMapping(lexicon, "test")
 
         // test
-        val lexicalItems = lexicon.lookupWord("test")
+        val lexicalItems = lexicon.lookupInitialWord("test")
 
         assertEquals(1, lexicalItems.size)
         assertEquals("test", lexicalItems.first().morphologies.first().full)
@@ -21,13 +20,11 @@ class LexiconTest {
 
     fun `can be multiple matching simple words`() {
         val lexicon = Lexicon()
-        val handler0 = WordHandler(EntryWord("test"))
-        lexicon.addMapping(handler0)
-        val handler1 = WordHandler(EntryWord("test"))
-        lexicon.addMapping(handler1)
+        val handler0 = withWordMapping(lexicon, "test")
+        val handler1 = withWordMapping(lexicon, "test")
 
         // test
-        val lexicalItems = lexicon.lookupWord("test")
+        val lexicalItems = lexicon.lookupInitialWord("test")
 
         assertEquals(2, lexicalItems.size)
         assertEquals("test", lexicalItems.first().morphologies.first().full)
@@ -39,11 +36,10 @@ class LexiconTest {
     @Test
     fun `returns empty list when no matches for word`() {
         val lexicon = Lexicon()
-        val handler = WordHandler(EntryWord("test"))
-        lexicon.addMapping(handler)
+        val handler = withWordMapping(lexicon, "test")
 
         // test
-        val lexicalItems = lexicon.lookupWord("otherWord")
+        val lexicalItems = lexicon.lookupInitialWord("otherWord")
 
         assertEquals(0, lexicalItems.size)
     }
@@ -51,16 +47,93 @@ class LexiconTest {
     @Test
     fun `can match single word by suffix`() {
         val lexicon = Lexicon()
-        val handler = WordHandler(EntryWord("test"))
-        lexicon.addMapping(handler)
+        val handler = withWordMapping(lexicon, "test")
 
         // test
-        val lexicalItems = lexicon.lookupWord("testing")
+        val lexicalItems = lexicon.lookupInitialWord("testing")
 
         assertEquals(1, lexicalItems.size)
         assertEquals(1, lexicalItems.first().morphologies.size)
         val morphologyWord0 = lexicalItems.first().morphologies.first()
         assertEquals(WordMorphology("test", "ing", "testing"), morphologyWord0)
         assertEquals(handler, lexicalItems.first().handler)
+    }
+
+    @Test
+    fun `maps a stream of input words to lexical expression`() {
+        val lexicon = Lexicon()
+        val handler0 = withWordMapping(lexicon, "one", listOf("one", "two"))
+
+        // test
+        val lexicalItems = lexicon.lookupNextEntry(listOf("one", "two", "three"))
+
+        assertEquals(1, lexicalItems.size)
+        val lexical0 = lexicalItems.first()
+        assertEquals(handler0, lexical0.handler)
+        println(lexical0.handler.word)
+    }
+
+    @Test
+    fun `maps a stream of input words to lexical expression supports morphologal for subsquent words of expression`() {
+        val lexicon = Lexicon()
+        val handler0 = withWordMapping(lexicon, "one", listOf("one", "two"))
+        val twoWithSuffix = "twoing"
+
+        // test
+        val sentence = listOf("one", twoWithSuffix, "three")
+        val lexicalItems = lexicon.lookupNextEntry(sentence)
+
+        assertEquals(1, lexicalItems.size)
+        val lexical0 = lexicalItems.first()
+        assertEquals(handler0, lexical0.handler)
+        println(lexical0.handler.word)
+    }
+
+    @Test
+    fun `maps a stream of input words to lexical items fails if subsequent input words do not match`() {
+        val lexicon = Lexicon()
+        val handler0 = withWordMapping(lexicon, "one", listOf("one", "two"))
+
+        // test
+        val lexicalItems = lexicon.lookupNextEntry(listOf("one", "other", "other2"))
+
+        assertEquals(0, lexicalItems.size)
+    }
+
+    @Test
+    fun `maps a stream of input words to lexical items`() {
+        val lexicon = Lexicon()
+        val handler0 = withWordMapping(lexicon, "one", listOf("one", "two"))
+        val handler1 = withWordMapping(lexicon, "one")
+
+        val handler2 = withWordMapping(lexicon, "one", listOf("one", "other"))
+
+        // test
+        val lexicalItems = lexicon.lookupNextEntry(listOf("one", "two", "three"))
+
+        assertEquals(2, lexicalItems.size)
+        val lexical0 = lexicalItems[0]
+        assertEquals(handler0, lexical0.handler)
+        val lexical1 = lexicalItems[1]
+        assertEquals(handler1, lexical1.handler)
+    }
+/*
+    @Test
+    fun `can match on precise phrase match`() {
+        val lexicon = Lexicon()
+        val handler = WordHandler(EntryWord("measure", listOf("measure", "to", "eat")))
+        lexicon.addMapping(handler)
+
+        // test
+        val lexicalItems = lexicon.lookupWord("testing")
+
+
+    }
+    */
+
+    private fun withWordMapping(lexicon: Lexicon, word: String, expression: List<String> = listOf(word)): WordHandler {
+        val handler = WordHandler(EntryWord(word, expression))
+        lexicon.addMapping(handler)
+        return handler
     }
 }
