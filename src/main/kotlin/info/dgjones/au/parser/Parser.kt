@@ -5,8 +5,12 @@ import info.dgjones.au.narrative.InDepthUnderstandingConcepts
 import info.dgjones.au.narrative.buildInDepthUnderstandingLexicon
 import info.dgjones.au.nlp.*
 
+fun buildTextModel(text: String): TextModel {
+    return NaiveTextModelBuilder(text).buildModel()
+}
+
 fun runTextProcess(text: String, lexicon: Lexicon = buildInDepthUnderstandingLexicon()): TextProcessor {
-        val textModel = NaiveTextModelBuilder(text).buildModel()
+        val textModel = buildTextModel(text)
         val textProcessor = TextProcessor(textModel, lexicon)
         val workingMemory = textProcessor.runProcessor()
         return textProcessor
@@ -140,7 +144,7 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
         memory.concepts.addAll(defs)
     }
 
-    private fun runWord(index: Int, word: String, wordHandlers: List<WordHandler>, suffix: String?, wordContext: WordContext) {
+    private fun runWord(wordIndex: Int, word: String, wordHandlers: List<WordHandler>, suffix: String?, wordContext: WordContext) {
         println("")
         println("${word.toUpperCase()} ==>")
 

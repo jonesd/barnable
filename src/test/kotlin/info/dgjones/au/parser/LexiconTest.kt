@@ -117,6 +117,8 @@ class LexiconTest {
         val lexical1 = lexicalItems[1]
         assertEquals(handler1, lexical1.handler)
     }
+
+    // FIXME what about word handler special overrides - past, extra....
 /*
     @Test
     fun `can match on precise phrase match`() {

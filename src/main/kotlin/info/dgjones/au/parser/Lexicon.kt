@@ -4,14 +4,12 @@ import info.dgjones.au.nlp.StansStemmer
 import info.dgjones.au.nlp.WordMorphology
 import info.dgjones.au.nlp.WordMorphologyBuilder
 
-//interface BaseWord {
-//    val word: String
-//}
-//
-//data class SimpleWord(override val word: String): BaseWord
-//data class WordSuffix(override val word: String, val root: String, val suffix: String): BaseWord
-
-
+/* Lexicon holds all the mappings from defined words to handlers for processing them.
+* Word mappings need to be registered with the lexicon as part of initializations.
+* During parsing of a text, the lexicon will provide matching word handlers for the words
+* at the current head of the text. Handlers primary word and versions with suffixes will be
+* found.
+* */
 class Lexicon() {
     val wordMappings: MutableMap<String, MutableList<WordHandler>> = mutableMapOf()
     val stemmer = StansStemmer()
@@ -19,45 +17,9 @@ class Lexicon() {
     val morphologicalMappings: MutableMap<String, MutableList<Pair<WordMorphology, WordHandler>>> = mutableMapOf()
 
     fun addMapping(handler: WordHandler) {
-        addDirectMappings(handler)
-        addMorphologyMappings(handler)
+        addDirectMappingsForInitialWord(handler)
+        addMorphologyMappingsForInitialWord(handler)
     }
-
-    private fun addMorphologyMappings(handler: WordHandler) {
-        // FIXME only using primary word...
-        val entries = wordMorphologies(handler.word.word)
-        entries.forEach {
-            val key = it.full.toLowerCase()
-            morphologicalMappings.putIfAbsent(key, mutableListOf())
-            morphologicalMappings[key]?.add(Pair(it, handler))
-        }
-    }
-
-    private fun wordMorphologies(word: String): List<WordMorphology> =
-        WordMorphologyBuilder(word).build()
-
-    private fun addDirectMappings(handler: WordHandler) {
-        handler.word.entries().forEach {
-            val key = it.toLowerCase()
-            wordMappings.putIfAbsent(key, mutableListOf<WordHandler>())
-            wordMappings[key]?.add(handler)
-        }
-    }
-
-    private fun wordHandlersFor(word: String): List<WordHandler> {
-        return wordMappings[word.toLowerCase()] ?: listOf<WordHandler>()
-    }
-
-    private fun directMatches(word: String): List<LexicalItem> {
-        return wordHandlersFor(word).map { LexicalItem(listOf(WordMorphology(word)), it) }
-    }
-
-    private fun morphologyMatches(word: String): List<LexicalItem> {
-        val morphologyMatches = morphologicalMappings[word.toLowerCase()] ?: listOf()
-        return morphologyMatches.map { LexicalItem(listOf(it.first), it.second) }
-    }
-
-    // FIXME new implementation
 
     // Return all matches from the lexicon for the word, either exact or with suffixes.
     // Expressions may be included, however, there are not necessarily matches for the remainder of the expression
@@ -80,6 +42,39 @@ class Lexicon() {
         return firstWordMatches.filter {
             it.handler.word.expression.size == 1 || expressionMatchesRemainder(list, it)
         }
+    }
+
+    private fun addMorphologyMappingsForInitialWord(handler: WordHandler) {
+        val entries = wordMorphologies(handler.word.word)
+        entries.forEach {
+            val key = it.full.toLowerCase()
+            morphologicalMappings.putIfAbsent(key, mutableListOf())
+            morphologicalMappings[key]?.add(Pair(it, handler))
+        }
+    }
+
+    private fun wordMorphologies(word: String): List<WordMorphology> =
+        WordMorphologyBuilder(word).build()
+
+    private fun addDirectMappingsForInitialWord(handler: WordHandler) {
+        handler.word.entries().forEach {
+            val key = it.toLowerCase()
+            wordMappings.putIfAbsent(key, mutableListOf<WordHandler>())
+            wordMappings[key]?.add(handler)
+        }
+    }
+
+    private fun wordHandlersFor(word: String): List<WordHandler> {
+        return wordMappings[word.toLowerCase()] ?: listOf<WordHandler>()
+    }
+
+    private fun directMatches(word: String): List<LexicalItem> {
+        return wordHandlersFor(word).map { LexicalItem(listOf(WordMorphology(word)), it) }
+    }
+
+    private fun morphologyMatches(word: String): List<LexicalItem> {
+        val morphologyMatches = morphologicalMappings[word.toLowerCase()] ?: listOf()
+        return morphologyMatches.map { LexicalItem(listOf(it.first), it.second) }
     }
 
     // first word of expression has matched, confirm that remaining words also match

@@ -6,8 +6,14 @@ class NaiveTextModelBuilder(val content: String) {
     }
 }
 
-data class TextModel(val content: String, val paragraphs: List<TextParagraph>)
+data class TextModel(val content: String, val paragraphs: List<TextParagraph>) {
+    fun initialSentence(): TextSentence {
+        return paragraphs[0].sentences[0]
+    }
+}
+
 data class TextParagraph(val content: String, val sentences: List<TextSentence>)
+
 data class TextSentence(val text: String, val elements: List<WordElement>)
 
 data class WordElement(val token: String, val tag: String, val lemma: String, val chunk: String) {
