@@ -74,7 +74,7 @@ class LexiconTest {
     }
 
     @Test
-    fun `maps a stream of input words to lexical expression supports morphologal for subsquent words of expression`() {
+    fun `maps a stream of input words to lexical expression supports morphological for subsequent words of expression`() {
         val lexicon = Lexicon()
         val handler0 = withWordMapping(lexicon, "one", listOf("one", "two"))
         val twoWithSuffix = "twoing"
@@ -114,8 +114,11 @@ class LexiconTest {
         assertEquals(2, lexicalItems.size)
         val lexical0 = lexicalItems[0]
         assertEquals(handler0, lexical0.handler)
+        assertEquals(listOf("one", "two"), lexical0.morphologies.map {it.full})
+
         val lexical1 = lexicalItems[1]
         assertEquals(handler1, lexical1.handler)
+        assertEquals(listOf("one"), lexical1.morphologies.map {it.full})
     }
 
     // FIXME what about word handler special overrides - past, extra....

@@ -39,8 +39,19 @@ class Lexicon() {
         }
         val word = list.first()
         val firstWordMatches = lookupInitialWord(word)
-        return firstWordMatches.filter {
-            it.handler.word.expression.size == 1 || expressionMatchesRemainder(list, it)
+        return firstWordMatches.map { populateAndMatchExpression(it, list) }.filterNotNull()
+    }
+
+    private fun populateAndMatchExpression(lexicalItem: LexicalItem, list: List<String>): LexicalItem? {
+        val expressionSize = lexicalItem.handler.word.expression.size
+        if (expressionSize == 1 ) {
+            return lexicalItem
+        }
+        val remainderMorphologies = expressionMatchesRemainder(list,  lexicalItem)
+        if (remainderMorphologies.size == expressionSize - 1) {
+            return LexicalItem(lexicalItem.morphologies + remainderMorphologies, lexicalItem.handler)
+        } else {
+            return null
         }
     }
 
@@ -77,8 +88,27 @@ class Lexicon() {
         return morphologyMatches.map { LexicalItem(listOf(it.first), it.second) }
     }
 
+    private fun expressionMatchesRemainder(list: List<String>, lexicalItem: LexicalItem): List<WordMorphology> {
+        val expression = lexicalItem.handler.word.expression
+        return (1 until expression.size).map {
+            if (it < list.size) expressionSubsequentMatch(expression[it], list[it]) else null
+        }.filterNotNull()
+    }
+
+    private fun expressionSubsequentMatch(expressionWord: String, sentenceWord: String):WordMorphology? {
+        if (expressionWord.equals(sentenceWord, ignoreCase = true)) {
+            return WordMorphology(expressionWord)
+        } else {
+            wordMorphologies(expressionWord).forEach {
+                if (it.full.equals(sentenceWord, ignoreCase = true)) {
+                    return it
+                }
+            }
+            return null
+        }
+    }
     // first word of expression has matched, confirm that remaining words also match
-    private fun expressionMatchesRemainder(list: List<String>, lexicalItem: LexicalItem): Boolean {
+    private fun isExpressionMatchesRemainder(list: List<String>, lexicalItem: LexicalItem): Boolean {
         val expression = lexicalItem.handler.word.expression
         return (1 until expression.size).all {
             it < list.size && isExpressionSubsequentMatch(expression[it], list[it])
