@@ -46,7 +46,7 @@ fun matchAlways(): ConceptMatcher {
     return { c -> true}
 }
 
-class ConceptMatcherBuilder() {
+class ConceptMatcherBuilder {
     var matchers = mutableListOf<ConceptMatcher>()
     fun with(matcher: ConceptMatcher): ConceptMatcherBuilder {
         matchers.add(matcher)

@@ -3,7 +3,7 @@ package info.dgjones.au.editorial
 import info.dgjones.au.parser.EntryWord
 import info.dgjones.au.parser.WordHandler
 
-class WordRecentHandler() : WordHandler(EntryWord("recent")) {
+class WordRecentHandler: WordHandler(EntryWord("recent")) {
     /*
     override fun createDemons(): List<Demon> {
         return listOf(
@@ -14,7 +14,7 @@ class WordRecentHandler() : WordHandler(EntryWord("recent")) {
     }*/
 }
 
-class WordHurtHandler() : WordHandler(EntryWord("hurt")) {
+class WordHurtHandler: WordHandler(EntryWord("hurt")) {
     /*
     override fun createDemons(): List<Demon> {
         return listOf(

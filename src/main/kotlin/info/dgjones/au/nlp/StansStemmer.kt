@@ -4,7 +4,7 @@ package info.dgjones.au.nlp
  http://docsdrive.com/pdfs/ansinet/itj/2006/685-688.pdf
  */
 
-class StansStemmer() {
+class StansStemmer {
     val steps = listOf(
         StemmingStep(1, listOf(
             StemmingRule("US", "US"),
@@ -50,7 +50,7 @@ class StansStemmer() {
 class StemmingStep(val step: Int, val rules: List<StemmingRule>) {
     fun run(input: String): String {
         rules.forEach {
-            var output = it.run(input)
+            val output = it.run(input)
             if (output != input) {
                 println("applied.$step ${it.from}->${it.to} for $input->$output")
                 return output
@@ -61,10 +61,10 @@ class StemmingStep(val step: Int, val rules: List<StemmingRule>) {
 }
 class StemmingRule(val from: String, val to: String) {
     fun run(input: String): String {
-        if (input.endsWith(from, ignoreCase = true)) {
-            return input.substring(0, input.length - from.length) + to.toLowerCase()
+        return if (input.endsWith(from, ignoreCase = true)) {
+            input.substring(0, input.length - from.length) + to.toLowerCase()
         } else {
-            return input
+            input
         }
     }
 }

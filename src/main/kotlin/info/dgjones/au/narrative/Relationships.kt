@@ -1,6 +1,5 @@
 package info.dgjones.au.narrative
 
-import info.dgjones.au.parser.CoreFields
 import info.dgjones.au.parser.Fields
 
 enum class Relationships(override val fieldName: String): Fields {

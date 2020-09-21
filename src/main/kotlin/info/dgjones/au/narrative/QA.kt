@@ -3,9 +3,9 @@ package info.dgjones.au.narrative
 import info.dgjones.au.parser.*
 
 
-class WordWho(): WordHandler(EntryWord("who")) {
+class WordWho: WordHandler(EntryWord("who")) {
     override fun build(wordContext: WordContext): List<Demon> {
-        return listOf(WhoDemon(wordContext));
+        return listOf(WhoDemon(wordContext))
     }
 }
 

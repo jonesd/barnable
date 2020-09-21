@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
-class WordMorphologyBuilderTest() {
+class WordMorphologyBuilderTest {
     @Nested
     inner class SuffixEd {
         @Test
@@ -105,7 +105,7 @@ class WordMorphologyBuilderTest() {
     @Nested
     inner class SuffixS {
         @Test
-        fun sForGeneralWordst() {
+        fun sForGeneralWords() {
             assertEquals("scoops", WordMorphologyBuilder("scoop").suffixS()?.full)
             assertEquals("cones", WordMorphologyBuilder("cone").suffixS()?.full)
             assertEquals("measures", WordMorphologyBuilder("measure").suffixS()?.full)

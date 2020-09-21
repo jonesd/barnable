@@ -8,7 +8,7 @@ class LexicalRootBuilder(val wordContext: WordContext, val headName: String) {
     val completedSlots = mutableListOf<Slot>()
     val completedConceptHolders = mutableListOf<ConceptHolder>()
     val disambiguations = mutableListOf<Demon>()
-    var totalSuccessfulDisambiguations = 0;
+    var totalSuccessfulDisambiguations = 0
 
     companion object {
         const val VARIABLE_PREFIX = "*VAR."

@@ -13,7 +13,7 @@ See: InDepth p180
  */
 open class DisambiguationDemon(val disambiguationHandler: DisambiguationHandler, wordContext: WordContext): Demon(wordContext) {
     fun disambiguationCompleted() {
-        disambiguationHandler.disambigationMatchCompleted(this)
+        disambiguationHandler.disambiguationMatchCompleted(this)
         active = false
     }
 }

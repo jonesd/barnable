@@ -1,6 +1,6 @@
 package info.dgjones.au.nlp
 
-class NaiveTokenizer() {
+class NaiveTokenizer {
     val stemmer = StansStemmer()
 
     val abbreviations = setOf("dr", "mr", "mrs",
@@ -20,14 +20,14 @@ class NaiveTokenizer() {
 
     private fun splitTextIntoWordElements(paragraphText: String): TextParagraph {
         val words = splitTextIntoWords(paragraphText)
-        var wordsBySentence = mutableListOf(mutableListOf<String>())
+        val wordsBySentence = mutableListOf(mutableListOf<String>())
         words.forEach {
             wordsBySentence.last().add(it)
             if (isWordMarksEndOfSentence(it)) {
                 wordsBySentence.add(mutableListOf())
             }
         }
-        var sentenceModels = wordsBySentence.mapNotNull { if (it.size > 0) createTextSentence(it) else null }
+        val sentenceModels = wordsBySentence.mapNotNull { if (it.size > 0) createTextSentence(it) else null }
         return TextParagraph(paragraphText, sentenceModels)
     }
 
@@ -37,7 +37,7 @@ class NaiveTokenizer() {
     }
 
     private fun isWordMarksEndOfSentence(it: String): Boolean {
-        return it.equals(".") || it.equals("?")
+        return it == "." || it == "?"
     }
 
     fun splitTextIntoWords(paragraphText: String): List<String> {
@@ -53,17 +53,17 @@ class NaiveTokenizer() {
         }
         val words2 = mutableListOf<String>()
         words.forEach {
-            if (it.endsWith(".") && !isAbbrevation(it)) {
+            if (it.endsWith(".") && !isAbbreviation(it)) {
                 words2.add(it.substringBeforeLast('.'))
                 words2.add(".")
             } else {
                 words2.add(it)
             }
         }
-        return words2.map { it.trim() }.filter { !it.isEmpty() }
+        return words2.map { it.trim() }.filter { it.isNotEmpty() }
     }
 
-    private fun isAbbrevation(unit: String): Boolean {
+    private fun isAbbreviation(unit: String): Boolean {
         val unitWithoutPeriod = unit.substringBeforeLast(".").toLowerCase()
         return abbreviations.contains(unitWithoutPeriod)
     }

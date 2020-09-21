@@ -1,10 +1,9 @@
 package info.dgjones.au.parser
 
-import info.dgjones.au.nlp.WordMorphology
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
-class TextSplitterTest() {
+class TextSplitterTest {
     @Test
     fun `Splits sentence down to individual word handlers`() {
         val lexicon = Lexicon()

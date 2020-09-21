@@ -1,6 +1,5 @@
 package info.dgjones.au.editorial
 
-import info.dgjones.au.editorial.EconomicQuantityNetwork
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 

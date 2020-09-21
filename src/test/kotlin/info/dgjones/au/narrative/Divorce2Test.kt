@@ -12,7 +12,7 @@ George was having lunch with another teacher and grading homework assignments wh
     
 When he got there, he found his wife Ann and another man in bed. George became extremely upset and felt like going out and getting plastered.
     
-At the bar he ran into an old college roomate David, who he hadn't seen in years. David offered to buy him a few drinks and soon they were both pretty drunk. When George found out that David was a layer, he told him all about his troubles and asked David to represent him in court. Since David owed George money he had never returned, he felt obligated to help out.
+At the bar he ran into an old college roommate David, who he hadn't seen in years. David offered to buy him a few drinks and soon they were both pretty drunk. When George found out that David was a layer, he told him all about his troubles and asked David to represent him in court. Since David owed George money he had never returned, he felt obligated to help out.
  
 Later, David wrote to Ann, informing her that George wanted a divorce. Her layer called back and told David that she intended to get the house, the children, and a lot of alimony. When George heard this, he was very worried. He didn't earn much at the junior high school. David told him not to worry, since the judge would award the case to George once he learned that Ann has been cheating him.
 
@@ -39,7 +39,6 @@ class Divorce2Test {
         val divorce2model = NaiveTextModelBuilder(DIVORCE2).buildModel()
 
         val firstSentence = divorce2model.paragraphs[0].sentences[0]
-        val textModel = NaiveTextModelBuilder(firstSentence.text).buildModel()
-        return textModel
+        return NaiveTextModelBuilder(firstSentence.text).buildModel()
     }
 }

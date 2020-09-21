@@ -10,7 +10,7 @@ import info.dgjones.au.nlp.WordMorphologyBuilder
 * at the current head of the text. Handlers primary word and versions with suffixes will be
 * found.
 * */
-class Lexicon() {
+class Lexicon {
     val wordMappings: MutableMap<String, MutableList<WordHandler>> = mutableMapOf()
     val stemmer = StansStemmer()
 
@@ -39,7 +39,7 @@ class Lexicon() {
         }
         val word = list.first()
         val firstWordMatches = lookupInitialWord(word)
-        return firstWordMatches.map { populateAndMatchExpression(it, list) }.filterNotNull()
+        return firstWordMatches.mapNotNull { populateAndMatchExpression(it, list) }
     }
 
     private fun populateAndMatchExpression(lexicalItem: LexicalItem, list: List<String>): LexicalItem? {
@@ -48,10 +48,10 @@ class Lexicon() {
             return lexicalItem
         }
         val remainderMorphologies = expressionMatchesRemainder(list,  lexicalItem)
-        if (remainderMorphologies.size == expressionSize - 1) {
-            return LexicalItem(lexicalItem.morphologies + remainderMorphologies, lexicalItem.handler)
+        return if (remainderMorphologies.size == expressionSize - 1) {
+            LexicalItem(lexicalItem.morphologies + remainderMorphologies, lexicalItem.handler)
         } else {
-            return null
+            null
         }
     }
 
@@ -70,7 +70,7 @@ class Lexicon() {
     private fun addDirectMappingsForInitialWord(handler: WordHandler) {
         handler.word.entries().forEach {
             val key = it.toLowerCase()
-            wordMappings.putIfAbsent(key, mutableListOf<WordHandler>())
+            wordMappings.putIfAbsent(key, mutableListOf())
             wordMappings[key]?.add(handler)
         }
     }
@@ -90,9 +90,9 @@ class Lexicon() {
 
     private fun expressionMatchesRemainder(list: List<String>, lexicalItem: LexicalItem): List<WordMorphology> {
         val expression = lexicalItem.handler.word.expression
-        return (1 until expression.size).map {
+        return (1 until expression.size).mapNotNull {
             if (it < list.size) expressionSubsequentMatch(expression[it], list[it]) else null
-        }.filterNotNull()
+        }
     }
 
     private fun expressionSubsequentMatch(expressionWord: String, sentenceWord: String):WordMorphology? {
@@ -138,5 +138,5 @@ class Lexicon() {
 }
 
 data class LexicalItem(val morphologies: List<WordMorphology>, val handler: WordHandler) {
-    fun textFragment(): String = morphologies.map { it.full }.joinToString(separator=" " )
+    fun textFragment(): String = morphologies.joinToString(separator = " ") { it.full }
 }

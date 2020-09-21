@@ -1,6 +1,5 @@
 package info.dgjones.au.narrative
 
-import info.dgjones.au.nlp.NaiveTextModelBuilder
 import info.dgjones.au.parser.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -113,7 +112,7 @@ class NarrativeDomainTest {
         val textProcessor = runTextProcess("John told Bill that he was hungry.", lexicon)
 
         assertEquals(1, textProcessor.workingMemory.concepts.size)
-        var told = textProcessor.workingMemory.concepts[0]
+        val told = textProcessor.workingMemory.concepts[0]
         assertEquals("MTRANS", told.name)
         assertEquals("John", told.value("actor")?.valueName("firstName"))
         assertEquals("Bill", told.value("to")?.valueName("firstName"))
@@ -126,7 +125,7 @@ class NarrativeDomainTest {
         val textProcessor = runTextProcess("John walked home yesterday", lexicon)
 
         assertEquals(1 /*should be 1?*/, textProcessor.workingMemory.concepts.size)
-        var walk = textProcessor.workingMemory.concepts[0]
+        val walk = textProcessor.workingMemory.concepts[0]
         assertEquals("PTRANS", walk.name)
         assertEquals("John", walk.value("actor")?.valueName("firstName"))
         assertEquals("Home", walk.value("to")?.valueName("name"))

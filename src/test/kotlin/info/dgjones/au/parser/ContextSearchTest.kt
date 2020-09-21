@@ -112,7 +112,7 @@ class SearchContextTest {
     }
 
     @Test
-    fun `Can limit distance of match concept befor`() {
+    fun `Can limit distance of match concept before`() {
         val sentenceContext = withSentenceContext(3)
         withWordContext(0, "testHead", sentenceContext)
         withWordContext(1, "one", sentenceContext)
@@ -138,7 +138,7 @@ class SearchContextTest {
 
     private fun withWordContext(wordIndex: Int, conceptHead: String, sentenceContext: SentenceContext): WordContext {
         val conceptHolder = ConceptHolder(wordIndex, Concept(conceptHead).value("index", Concept("index=$wordIndex")))
-        val wordContext = WordContext(wordIndex, "word"+wordIndex, conceptHolder, sentenceContext)
+        val wordContext = WordContext(wordIndex, "word$wordIndex", conceptHolder, sentenceContext)
         sentenceContext.pushWord(wordContext)
         return wordContext
     }

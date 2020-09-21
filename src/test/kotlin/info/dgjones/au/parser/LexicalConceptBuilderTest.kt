@@ -9,7 +9,7 @@ class LexicalConceptBuilderTest {
     @Test
     fun `create concept with simple concept hierarchy`() {
         val defHolder = ConceptHolder(9)
-        var testElement = WordElement("one", "", "","")
+        val testElement = WordElement("one", "", "","")
         val workingMemory = WorkingMemory()
         val sentenceContext = SentenceContext(TextSentence("test", listOf(testElement)), workingMemory, EpisodicMemory())
         val wordContext = WordContext(0, "test", defHolder, sentenceContext)
@@ -28,7 +28,7 @@ class LexicalConceptBuilderTest {
     @Test
     fun `create concept with expectDemon`() {
         val defHolder = ConceptHolder(9)
-        var testElement = WordElement("one", "", "","")
+        val testElement = WordElement("one", "", "","")
         val workingMemory = WorkingMemory()
         val sentenceContext = SentenceContext(TextSentence("test", listOf(testElement)), workingMemory, EpisodicMemory())
         val wordContext = WordContext(0, "test", defHolder, sentenceContext)
@@ -46,7 +46,7 @@ class LexicalConceptBuilderTest {
     @Test
     fun `create concept with shared variables`() {
         val defHolder = ConceptHolder(9)
-        var testElement = WordElement("one", "", "","")
+        val testElement = WordElement("one", "", "","")
         val workingMemory = WorkingMemory()
         val sentenceContext = SentenceContext(TextSentence("test", listOf(testElement)), workingMemory, EpisodicMemory())
         val wordContext = WordContext(0,"test", defHolder, sentenceContext)

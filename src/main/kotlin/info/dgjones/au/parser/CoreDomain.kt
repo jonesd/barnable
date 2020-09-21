@@ -52,7 +52,7 @@ class WordPerson(val human: Concept, word: String = human.valueName(Human.FIRST_
         }
         return lexicalConcept.demons
         // Fixme - not sure about the load/reuse
-        // FIXMEreturn listOf(LoadCharacterDemon(human, wordContext), SaveCharacterDemon(wordContext))
+        // FIXME return listOf(LoadCharacterDemon(human, wordContext), SaveCharacterDemon(wordContext))
     }
 }
 
@@ -62,14 +62,14 @@ fun buildPhysicalObject(kind: String, name: String): Concept {
         .with(Slot("name", Concept(name)))
 }
 
-class WordBook(): WordHandler(EntryWord("book")) {
+class WordBook: WordHandler(EntryWord("book")) {
     override fun build(wordContext: WordContext): List<Demon> {
         wordContext.defHolder.value =  buildPhysicalObject(PhysicalObjectKind.Book.name, word.word)
         return listOf(SaveObjectDemon(wordContext))
     }
 }
 
-class WordTree(): WordHandler(EntryWord("tree")) {
+class WordTree: WordHandler(EntryWord("tree")) {
     override fun build(wordContext: WordContext): List<Demon> {
         wordContext.defHolder.value =  buildPhysicalObject(PhysicalObjectKind.Plant.name, word.word)
         return listOf(SaveObjectDemon(wordContext))

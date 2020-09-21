@@ -4,7 +4,7 @@ import info.dgjones.au.parser.Concept
 import info.dgjones.au.parser.Slot
 
 enum class Acts {
-    ATRANS, // Transfer of Posession
+    ATRANS, // Transfer of Possession
     PROPEL, // Application of a physical Force
     PTRANS, // Transfer of physical location
     INGEST, // When an organism takes something from outside its environment and makes it internal

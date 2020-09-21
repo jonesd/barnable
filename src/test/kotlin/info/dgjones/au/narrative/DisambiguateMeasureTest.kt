@@ -1,7 +1,5 @@
 package info.dgjones.au.narrative
 
-import info.dgjones.au.nlp.NaiveTextModelBuilder
-import info.dgjones.au.parser.TextProcessor
 import info.dgjones.au.parser.runTextProcess
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test

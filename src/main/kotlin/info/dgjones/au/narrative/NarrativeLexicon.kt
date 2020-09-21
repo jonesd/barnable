@@ -123,7 +123,7 @@ enum class Force {
     Gravity
 }
 
-enum class PhysicalObjectKind() {
+enum class PhysicalObjectKind {
     PhysicalObject,
     Container,
     GameObject,
@@ -138,21 +138,21 @@ enum class PhysicalObjectKind() {
 // FIXME how to define this? force
 val gravity = Concept("gravity")
 
-class WordBall(): WordHandler(EntryWord("ball")) {
+class WordBall: WordHandler(EntryWord("ball")) {
     override fun build(wordContext: WordContext): List<Demon> {
         wordContext.defHolder.value = buildPhysicalObject(PhysicalObjectKind.GameObject.name, word.word)
         return listOf(SaveObjectDemon(wordContext))
     }
 }
 
-class WordBox(): WordHandler(EntryWord("box")) {
+class WordBox: WordHandler(EntryWord("box")) {
     override fun build(wordContext: WordContext): List<Demon> {
         wordContext.defHolder.value =  buildPhysicalObject(PhysicalObjectKind.Container.name, word.word)
         return listOf()
     }
 }
 
-class WordHome(): WordHandler(EntryWord("home")) {
+class WordHome: WordHandler(EntryWord("home")) {
     override fun build(wordContext: WordContext): List<Demon> {
         val lexicalConcept = lexicalConcept(wordContext, "Location") {
             slot("type", "Residence")
@@ -174,7 +174,7 @@ class HumanAccessor(concept: Concept): ConceptAccessor(concept) {
 }
 
 //FIXME should use pick and calculate picked...
-class WordPickUp(): WordHandler(EntryWord("picked", listOf("picked", "up"))/*.and("picked")*/) {
+class WordPickUp: WordHandler(EntryWord("picked", listOf("picked", "up"))/*.and("picked")*/) {
     override fun build(wordContext: WordContext): List<Demon> {
         val lexicalConcept = lexicalConcept(wordContext, "GRASP") {
             expectHead("actor", variableName = "actor", headValue = "Human", direction = SearchDirection.Before)
@@ -194,7 +194,7 @@ class WordPickUp(): WordHandler(EntryWord("picked", listOf("picked", "up"))/*.an
     }
 }
 
-class WordDrop(): WordHandler(EntryWord("drop")) {
+class WordDrop: WordHandler(EntryWord("drop")) {
     override fun build(wordContext: WordContext): List<Demon> {
         val lexicalConcept = lexicalConcept(wordContext, "PTRANS") {
             expectHead("actor", variableName = "actor", headValue = "Human", direction = SearchDirection.Before)
@@ -215,7 +215,7 @@ class WordDrop(): WordHandler(EntryWord("drop")) {
 }
 
 // InDepth pp307
-class WordKnock(): WordHandler(EntryWord("knock")) {
+class WordKnock: WordHandler(EntryWord("knock")) {
     override fun build(wordContext: WordContext): List<Demon> {
         val lexicalConcept = lexicalConcept(wordContext, "PROPEL") {
             expectHead("actor", variableName = "actor", headValue = "Human", direction = SearchDirection.Before)
@@ -234,7 +234,7 @@ class WordKnock(): WordHandler(EntryWord("knock")) {
     }
 }
 
-class WordIn(): WordHandler(EntryWord("in")) {
+class WordIn: WordHandler(EntryWord("in")) {
     override fun build(wordContext: WordContext): List<Demon> {
         wordContext.defHolder.value = buildPrep(Preposition.In.name)
 
@@ -254,7 +254,7 @@ class WordIn(): WordHandler(EntryWord("in")) {
     }
 }
 
-class WordGive(): WordHandler(EntryWord("give").and("gave")) {
+class WordGive: WordHandler(EntryWord("give").and("gave")) {
     override fun build(wordContext: WordContext): List<Demon> {
         val lexicalConcept = lexicalConcept(wordContext, "ATRANS") {
             expectHead("actor", variableName = "actor", headValue = "Human", direction = SearchDirection.Before)
@@ -267,7 +267,7 @@ class WordGive(): WordHandler(EntryWord("give").and("gave")) {
     }
 }
 
-class WordKiss(): WordHandler(EntryWord("kiss")) {
+class WordKiss: WordHandler(EntryWord("kiss")) {
     override fun build(wordContext: WordContext): List<Demon> {
         val lexicalConcept = lexicalConcept(wordContext, "ATTEND") {
             expectHead("actor", headValue = "Human", direction = SearchDirection.Before)
@@ -282,7 +282,7 @@ class WordKiss(): WordHandler(EntryWord("kiss")) {
     }
 }
 
-class WordTell(): WordHandler(EntryWord("tell").past("told")) {
+class WordTell: WordHandler(EntryWord("tell").past("told")) {
     override fun build(wordContext: WordContext): List<Demon> {
         val lexicalConcept = lexicalConcept(wordContext, "MTRANS") {
             expectHead("actor", variableName = "actor", headValue = "Human", direction = SearchDirection.Before)
@@ -295,7 +295,7 @@ class WordTell(): WordHandler(EntryWord("tell").past("told")) {
     }
 }
 
-class WordGo(): WordHandler(EntryWord("go").past("went")) {
+class WordGo: WordHandler(EntryWord("go").past("went")) {
     override fun build(wordContext: WordContext): List<Demon> {
         val lexicalConcept = lexicalConcept(wordContext, "PTRANS") {
             expectHead("actor", variableName = "actor", headValue = "Human", direction = SearchDirection.Before)
@@ -306,7 +306,7 @@ class WordGo(): WordHandler(EntryWord("go").past("went")) {
     }
 }
 
-class WordWalk(): WordHandler(EntryWord("walk")) {
+class WordWalk: WordHandler(EntryWord("walk")) {
     override fun build(wordContext: WordContext): List<Demon> {
         val lexicalConcept = lexicalConcept(wordContext, "PTRANS") {
             expectHead("actor", variableName = "actor", headValue = "Human", direction = SearchDirection.Before)
@@ -322,7 +322,7 @@ class WordWalk(): WordHandler(EntryWord("walk")) {
     }
 }
 
-class WordHungry(): WordHandler(EntryWord("hungry")) {
+class WordHungry: WordHandler(EntryWord("hungry")) {
     override fun build(wordContext: WordContext): List<Demon> {
         wordContext.defHolder.value = Concept(SatisfactionGoal.`S-Hunger`.name)
             .with(Slot("kind", Concept(InDepthUnderstandingConcepts.Goal.name)))
@@ -331,20 +331,20 @@ class WordHungry(): WordHandler(EntryWord("hungry")) {
 }
 
 // InDepth
-class WordLunch(): WordHandler(EntryWord("lunch")) {
+class WordLunch: WordHandler(EntryWord("lunch")) {
     override fun build(wordContext: WordContext): List<Demon> {
         val lexicalConcept = lexicalConcept(wordContext, "M-Meal") {
             expectHead("eater-a", headValue = "Human", direction = SearchDirection.Before)
             expectPrep("eater-b", preps = listOf(Preposition.With), matcher=matchConceptByHead(InDepthUnderstandingConcepts.Human.name))
             slot("event", "EV-LUNCH") // FIXME find associated event
 
-            // FIXMEslot("kind", "Act")
+            // FIXME slot("kind", "Act")
         }
         return lexicalConcept.demons
     }
 }
 
-class WordEats(): WordHandler(EntryWord("eats")) {
+class WordEats: WordHandler(EntryWord("eats")) {
     override fun build(wordContext: WordContext): List<Demon> {
         val lexicalConcept = lexicalConcept(wordContext, Acts.INGEST.name) {
             expectHead("actor", headValue = "Human", direction = SearchDirection.Before)
@@ -355,7 +355,7 @@ class WordEats(): WordHandler(EntryWord("eats")) {
     }
 }
 
-class WordMeasureQuantity() : WordHandler(EntryWord("measure")) {
+class WordMeasureQuantity : WordHandler(EntryWord("measure")) {
     override fun build(wordContext: WordContext): List<Demon> {
         val lexicalConcept = lexicalConcept(wordContext, "Quantity") {
             // FIXME also support "a measure of ..." = default to 1 unit
@@ -373,7 +373,7 @@ class WordMeasureQuantity() : WordHandler(EntryWord("measure")) {
     }
 }
 
-class WordMeasureObject(): WordHandler(EntryWord("measure")) {
+class WordMeasureObject: WordHandler(EntryWord("measure")) {
     override fun build(wordContext: WordContext): List<Demon> {
         // FIXME not sure how to model this...
         val lexicalConcept = lexicalConcept(wordContext, "ATRANS") {
@@ -394,7 +394,7 @@ class WordMeasureObject(): WordHandler(EntryWord("measure")) {
     }
 }
 
-class WordYesterday(): WordHandler(EntryWord("yesterday")) {
+class WordYesterday: WordHandler(EntryWord("yesterday")) {
     override fun build(wordContext: WordContext): List<Demon> {
         val demon = object : Demon(wordContext) {
             var actHolder: ConceptHolder? = null
@@ -497,7 +497,7 @@ class PronounWord(word: String, val genderMatch: Gender): WordHandler(EntryWord(
     }
 }
 
-class WordWife(): WordHandler(EntryWord("wife")) {
+class WordWife: WordHandler(EntryWord("wife")) {
     override fun build(wordContext: WordContext): List<Demon> {
         val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
             slot(Human.GENDER, Gender.Female.name)
@@ -512,7 +512,7 @@ class WordWife(): WordHandler(EntryWord("wife")) {
     }
 }
 
-class WordHusband(): WordHandler(EntryWord("husband")) {
+class WordHusband: WordHandler(EntryWord("husband")) {
     override fun build(wordContext: WordContext): List<Demon> {
         val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
             slot(Human.GENDER, Gender.Male.name)
@@ -538,7 +538,7 @@ class TitleWord(word: String, val gender: Gender): WordHandler(EntryWord(word)) 
         }
         return lexicalConcept.demons
         // Fixme - not sure about the load/reuse
-        // FIXMEreturn listOf(LoadCharacterDemon(human, wordContext), SaveCharacterDemon(wordContext))
+        // FIXME return listOf(LoadCharacterDemon(human, wordContext), SaveCharacterDemon(wordContext))
     }
     override fun disambiguationDemons(wordContext: WordContext, disambiguationHandler: DisambiguationHandler): List<Demon> {
         return listOf(
@@ -574,7 +574,7 @@ class WordWas(): WordHandler(EntryWord("was")) {
         }
         return lexicalConcept.demons
         // Fixme - not sure about the load/reuse
-        // FIXMEreturn listOf(LoadCharacterDemon(human, wordContext), SaveCharacterDemon(wordContext))
+        // FIXME return listOf(LoadCharacterDemon(human, wordContext), SaveCharacterDemon(wordContext))
     }
     override fun disambiguationDemons(wordContext: WordContext, disambiguationHandler: DisambiguationHandler): List<Demon> {
         return listOf(

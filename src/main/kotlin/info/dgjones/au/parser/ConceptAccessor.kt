@@ -10,7 +10,7 @@ fun buildConceptPathAccessor(concept: Concept, targetSlotName: String): ConceptS
 }
 
 class ConceptPathBuilder(private val root: Concept, private val targetSlotName: String) {
-    fun build(concept: Concept = root, path: List<String> = listOf<String>()): List<String>? {
+    fun build(concept: Concept = root, path: List<String> = listOf()): List<String>? {
         if (targetSlotName.isEmpty()) {
             return path
         }

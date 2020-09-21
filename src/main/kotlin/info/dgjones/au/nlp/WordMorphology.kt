@@ -5,12 +5,12 @@ class WordMorphologyBuilder(val root: String) {
         val VOWELS = setOf('a', 'e', 'i', 'o', 'u')
     }
     fun build(): List<WordMorphology> {
-        return listOf(
+        return listOfNotNull(
             suffixEd(),
             suffixIng(),
             suffixLy(),
             suffixS()
-        ).filterNotNull()
+        )
     }
 
     //     Used to form past tenses of (regular) verbs. In linguistics, it is used for the base form of any past form. See -t for a variant.
@@ -120,7 +120,7 @@ class WordMorphologyBuilder(val root: String) {
             full = root  + "s"
         } else if (root.length >= 3 && root.endsWith("fe", ignoreCase = true)) {
             full = root.dropLast(2) + "ves"
-        } else if (root.length >= 3 && root[root.length-2].equals('f').not() && root.endsWith("f", ignoreCase = true)) {
+        } else if (root.length >= 3 && (root[root.length - 2] == 'f').not() && root.endsWith("f", ignoreCase = true)) {
             full = root.dropLast(1) + "ves"
         }
         suffixSIrregular[root]?.let {

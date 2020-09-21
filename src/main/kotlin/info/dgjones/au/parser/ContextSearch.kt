@@ -24,7 +24,7 @@ fun searchContext(matcher: ConceptMatcher, abortSearch: ConceptMatcher = matchNe
             return null
         }
         if (matchPreviousWord != null && !isMatchWithSentenceWord(index - 1)) {
-            // failed to include match on provies sentence word
+            // failed to include match on previous sentence word
             return null
         }
         val defHolder = wordContext.context.defHolderAtWordIndex(index)

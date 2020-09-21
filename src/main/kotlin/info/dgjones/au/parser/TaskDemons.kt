@@ -163,7 +163,7 @@ class CheckRelationshipDemon(var parent: Concept, var dependentSlotNames: List<S
         val rootConcept =  wordContext.defHolder.value
         if (rootConcept != null) {
             if (isDependentSlotsComplete(parent, dependentSlotNames)) {
-                var instance = checkEpisodicRelationship(parent, wordContext.context.episodicMemory)
+                val instance = checkEpisodicRelationship(parent, wordContext.context.episodicMemory)
                 active = false
                 action(Concept(instance))
             }
@@ -175,7 +175,7 @@ class CheckRelationshipDemon(var parent: Concept, var dependentSlotNames: List<S
 }
 
 fun isDependentSlotsComplete(parent: Concept, childrenSlotNames: List<String>): Boolean {
-    // FIXME PERFORMACE try and cache the conceptAccessors
+    // FIXME PERFORMANCE try and cache the conceptAccessors
     return childrenSlotNames.all { conceptPathResolvedValue(parent, it) != null }
 }
 

@@ -98,12 +98,12 @@ class PrepDemon(val matcher: ConceptMatcher, val direction: SearchDirection = Se
     }
 }
 
-class WordWith(): WordHandler(EntryWord("with")) {
+class WordWith: WordHandler(EntryWord("with")) {
     override fun build(wordContext: WordContext): List<Demon> {
         wordContext.defHolder.value = buildPrep(Preposition.With.name)
 
         // FIXME implement InDepth pp304
-        // needs to match human befor and after
+        // needs to match human before and after
         val matcher = matchConceptByHead(setOf(InDepthUnderstandingConcepts.Human.name))
         val addPrepObj = InsertAfterDemon(matcher, wordContext) {
             if (wordContext.isDefSet()) {
@@ -150,7 +150,7 @@ fun buildEnglishGrammarLexicon(lexicon: Lexicon) {
     lexicon.addMapping(WordIgnore(EntryWord("the")))
 }
 
-class WordAnd(): WordHandler(EntryWord("and")) {
+class WordAnd: WordHandler(EntryWord("and")) {
     override fun build(wordContext: WordContext): List<Demon> {
         // FIXME should be expanded upon
         wordContext.defHolder.value = buildConjunction(Conjunction.And.name)
@@ -158,23 +158,23 @@ class WordAnd(): WordHandler(EntryWord("and")) {
     }
 }
 
-class WordIt(): WordHandler(EntryWord("it")) {
+class WordIt: WordHandler(EntryWord("it")) {
     override fun build(wordContext: WordContext): List<Demon> {
         return listOf(FindObjectReferenceDemon(wordContext))
     }
 }
 
-class WordHave(): WordHandler(EntryWord("have").and("having")) {
+class WordHave: WordHandler(EntryWord("have")) {
     //FIXME InDepth pp303 - having?
 }
 
 /* Suffix Daemons */
 
 fun buildSuffixDemon(suffix: String, wordContext: WordContext): Demon? {
-    when (suffix) {
-        "ed" -> return SuffixEdDemon(wordContext)
-        "s" -> return SuffixSDemon(wordContext)
-        else -> return null
+    return when (suffix) {
+        "ed" -> SuffixEdDemon(wordContext)
+        "s" -> SuffixSDemon(wordContext)
+        else -> null
     }
 }
 

@@ -172,7 +172,7 @@ class DisambiguationHandler(val wordContext: WordContext, val lexicalOptions: Li
             // FIXME what to do? let them all work in parallel?
             println("Disambiguation failed - multiple wordHandlers do not need disambiguation $noDisambiguationNeeded")
         } else {
-            disambiguationsByWordHandler.forEach { wordHandler, disambiguationDemons ->
+            disambiguationsByWordHandler.forEach { (wordHandler, disambiguationDemons) ->
                 spawnDemons(disambiguationDemons)
             }
         }
@@ -212,8 +212,8 @@ class DisambiguationHandler(val wordContext: WordContext, val lexicalOptions: Li
         println("Spawning demon: $demon")
     }
 
-    fun disambigationMatchCompleted(demon: Demon) {
-        disambiguationsByWordHandler.forEach { wordHandler, disambiguationDemons ->
+    fun disambiguationMatchCompleted(demon: Demon) {
+        disambiguationsByWordHandler.forEach { (wordHandler, disambiguationDemons) ->
             if (disambiguationDemons.contains(demon)) {
                 disambiguationDemons.remove(demon)
                 if (disambiguationDemons.isEmpty()) {
@@ -263,7 +263,7 @@ class SentenceContext(val sentence: TextSentence, val workingMemory: WorkingMemo
     }
 }
 
-class WorkingMemory() {
+class WorkingMemory {
     var totalConceptHolders = 0
     var totalVariables = 0
     val concepts = mutableListOf<Concept>()
@@ -273,7 +273,7 @@ class WorkingMemory() {
         // Find most recent match. Rely on knowledge mechanisms
         // to correct tentative match
         // InDepth p182
-        return charactersRecent.firstOrNull { it -> it.valueName("gender") == matchGender }
+        return charactersRecent.firstOrNull { it.valueName("gender") == matchGender }
     }
 
     fun addCharacter(human: Concept) {
@@ -295,23 +295,21 @@ class WorkingMemory() {
     }
 
     fun nextVariableIndex(): Int {
-        val index = totalVariables;
+        val index = totalVariables
         totalVariables += 1
         return index
     }
 
     override fun toString(): String {
-        return "WORKING MEMORY\ncharactersRecent="+charactersRecent
+        return "WORKING MEMORY\ncharactersRecent=$charactersRecent"
     }
 }
 
-open class ReasoningScript(val name: String) {
-
-}
+open class ReasoningScript(val name: String)
 
 class NoMentionOfCharacter(val characterName: String): Exception()
 
-class Agenda() {
+class Agenda {
 
     val demons = mutableListOf<Demon>()
 
@@ -401,11 +399,7 @@ data class ConceptHolder(val instanceNumber: Int, var value: Concept? = null) {
     }
 }
 
-class DemonProducer() {
-
-}
-
-enum class ParserFlags() {
+enum class ParserFlags {
     Inside, // Concept has been nested in another object
     Ignore // Concept has been processed and can be ignored
 }

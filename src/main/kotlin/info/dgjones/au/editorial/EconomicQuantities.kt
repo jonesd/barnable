@@ -11,7 +11,7 @@ class EconomicQuantityNetwork(name: String) {
     private val quantitiesMap = mutableMapOf<String, EconomicQuantity>()
     private val linksMap = mutableMapOf<Pair<String,String>, QuantityLink>()
 
-    private val directedGraph: Graph<String, DefaultEdge> = DefaultDirectedGraph<String, DefaultEdge>(DefaultEdge::class.java)
+    private val directedGraph: Graph<String, DefaultEdge> = DefaultDirectedGraph(DefaultEdge::class.java)
 
     fun findQuantity(name: String): EconomicQuantity {
         return quantities.find { it.name == name } ?: throw IllegalArgumentException("Not found: $name")
@@ -91,7 +91,7 @@ fun transformQuantityValue(value: QuantityValue, sign: LinkSign): QuantityValue 
 
 class Actor(val name: String) {
     override fun toString(): String {
-        return "$name"
+        return name
     }
 }
 
