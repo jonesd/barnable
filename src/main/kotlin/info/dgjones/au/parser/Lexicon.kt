@@ -107,34 +107,6 @@ class Lexicon {
             return null
         }
     }
-
-    fun findWordHandler(word: String): WordHandlerWithSuffix? {
-        var activeWord = word
-        var wordHandlers = wordHandlersFor(activeWord)
-        if (wordHandlers.isEmpty()) {
-            activeWord = stemmer.stemWord(word)
-            wordHandlers = wordHandlersFor(activeWord)
-        }
-        // FIXME hacked up stemming
-        var suffix: String? = null
-        if (wordHandlers.isEmpty()) {
-            if (word.endsWith("ed", ignoreCase = true)) {
-                activeWord= word.substring(0, word.length - 2)
-                suffix = "ed"
-                wordHandlers = wordHandlersFor(activeWord)
-            } else if (wordHandlers.isEmpty() && word.endsWith("s", ignoreCase = true)) {
-                activeWord = word.substring(0, word.length - 1)
-                suffix = "s"
-                wordHandlers = wordHandlersFor(activeWord)
-            }
-        }
-        println("word = $word ==> $activeWord = wordHandlers")
-        return if (wordHandlers.isNotEmpty()) {
-            WordHandlerWithSuffix(wordHandlers, suffix)
-        } else {
-            null
-        }
-    }
 }
 
 data class LexicalItem(val morphologies: List<WordMorphology>, val handler: WordHandler) {

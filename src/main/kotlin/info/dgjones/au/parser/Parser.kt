@@ -305,8 +305,6 @@ class WorkingMemory {
     }
 }
 
-open class ReasoningScript(val name: String)
-
 class NoMentionOfCharacter(val characterName: String): Exception()
 
 class Agenda {
@@ -322,8 +320,6 @@ class Agenda {
     }
 }
 
-
-
 open class WordHandler(val word: EntryWord) {
     open fun build(wordContext: WordContext): List<Demon> {
         return listOf()
@@ -332,8 +328,6 @@ open class WordHandler(val word: EntryWord) {
         return listOf()
     }
 }
-
-data class WordHandlerWithSuffix(val wordHandlers: List<WordHandler>, val suffix: String? = null)
 
 open class EntryWord(val word: String, val expression: List<String> = listOf(word)) {
     val pastWords = mutableListOf<String>()
