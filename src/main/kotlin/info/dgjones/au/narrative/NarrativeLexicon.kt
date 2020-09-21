@@ -194,7 +194,7 @@ class WordPickUp(): WordHandler(EntryWord("picked", listOf("picked", "up"))/*.an
     }
 }
 
-class WordDrop(): WordHandler(EntryWord("drop").and("dropped")) {
+class WordDrop(): WordHandler(EntryWord("drop")) {
     override fun build(wordContext: WordContext): List<Demon> {
         val lexicalConcept = lexicalConcept(wordContext, "PTRANS") {
             expectHead("actor", variableName = "actor", headValue = "Human", direction = SearchDirection.Before)

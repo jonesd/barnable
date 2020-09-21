@@ -102,4 +102,73 @@ class WordMorphologyBuilderTest() {
             assertEquals("gaily", WordMorphologyBuilder("gay").suffixLy()?.full)
         }
     }
+    @Nested
+    inner class SuffixS {
+        @Test
+        fun sForGeneralWordst() {
+            assertEquals("scoops", WordMorphologyBuilder("scoop").suffixS()?.full)
+            assertEquals("cones", WordMorphologyBuilder("cone").suffixS()?.full)
+            assertEquals("measures", WordMorphologyBuilder("measure").suffixS()?.full)
+        }
+        @Test
+        fun sForWordsEndingInIZSound() {
+            assertEquals("dishes", WordMorphologyBuilder("dish").suffixS()?.full)
+            assertEquals("dresses", WordMorphologyBuilder("dress").suffixS()?.full)
+            assertEquals("boxes", WordMorphologyBuilder("box").suffixS()?.full)
+            assertEquals("branches", WordMorphologyBuilder("branch").suffixS()?.full)
+        }
+        @Test
+        fun sForWordsEndingInConsonantY() {
+            assertEquals("cherries", WordMorphologyBuilder("cherry").suffixS()?.full)
+            assertEquals("puppies", WordMorphologyBuilder("puppy").suffixS()?.full)
+        }
+        @Test
+        fun sForWordsEndingInVowelY() {
+            assertEquals("days", WordMorphologyBuilder("day").suffixS()?.full)
+            assertEquals("monkeys", WordMorphologyBuilder("monkey").suffixS()?.full)
+        }
+        @Test
+        fun sForWordsEndingInVowelO() {
+            assertEquals("pistachios", WordMorphologyBuilder("pistachio").suffixS()?.full)
+            assertEquals("stereos", WordMorphologyBuilder("stereo").suffixS()?.full)
+        }
+        @Test
+        fun sForWordsEndingInConsonantO() {
+            //assertEquals("heroes", WordMorphologyBuilder("hero").suffixS()?.full)
+            assertEquals("pianos", WordMorphologyBuilder("piano").suffixS()?.full)
+        }
+        @Test
+        fun sForWordsEndingInF() {
+            assertEquals("wives", WordMorphologyBuilder("wife").suffixS()?.full)
+            assertEquals("knives", WordMorphologyBuilder("knife").suffixS()?.full)
+            assertEquals("loaves", WordMorphologyBuilder("loaf").suffixS()?.full)
+        }
+        @Test
+        fun sForWordsEndingInFF() {
+            assertEquals("cliffs", WordMorphologyBuilder("cliff").suffixS()?.full)
+            assertEquals("puffs", WordMorphologyBuilder("puff").suffixS()?.full)
+        }
+        @Test
+        fun sForIrregular() {
+            assertEquals("children", WordMorphologyBuilder("child").suffixS()?.full)
+            assertEquals("people", WordMorphologyBuilder("person").suffixS()?.full)
+            assertEquals("men", WordMorphologyBuilder("man").suffixS()?.full)
+            assertEquals("women", WordMorphologyBuilder("woman").suffixS()?.full)
+            assertEquals("teeth", WordMorphologyBuilder("tooth").suffixS()?.full)
+            assertEquals("feet", WordMorphologyBuilder("foot").suffixS()?.full)
+            assertEquals("mice", WordMorphologyBuilder("mouse").suffixS()?.full)
+            assertEquals("geese", WordMorphologyBuilder("goose").suffixS()?.full)
+            assertEquals("oxen", WordMorphologyBuilder("ox").suffixS()?.full)
+        }
+        @Test
+        fun sForSame() {
+            assertEquals("deer", WordMorphologyBuilder("deer").suffixS()?.full)
+            assertEquals("sheep", WordMorphologyBuilder("sheep").suffixS()?.full)
+            assertEquals("means", WordMorphologyBuilder("means").suffixS()?.full)
+            assertEquals("species", WordMorphologyBuilder("species").suffixS()?.full)
+            assertEquals("series", WordMorphologyBuilder("series").suffixS()?.full)
+            assertEquals("ice", WordMorphologyBuilder("ice").suffixS()?.full)
+        }
+
+    }
 }

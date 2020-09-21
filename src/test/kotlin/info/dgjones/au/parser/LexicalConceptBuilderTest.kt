@@ -12,7 +12,7 @@ class LexicalConceptBuilderTest {
         var testElement = WordElement("one", "", "","")
         val workingMemory = WorkingMemory()
         val sentenceContext = SentenceContext(TextSentence("test", listOf(testElement)), workingMemory, EpisodicMemory())
-        val wordContext = WordContext(0, WordElement("test", "", "",""), "test", defHolder, sentenceContext)
+        val wordContext = WordContext(0, "test", defHolder, sentenceContext)
 
         val lexicalConcept = lexicalConcept(wordContext, "MTRANS") {
             slot("actor", "human") {
@@ -31,7 +31,7 @@ class LexicalConceptBuilderTest {
         var testElement = WordElement("one", "", "","")
         val workingMemory = WorkingMemory()
         val sentenceContext = SentenceContext(TextSentence("test", listOf(testElement)), workingMemory, EpisodicMemory())
-        val wordContext = WordContext(0, WordElement("test", "", "",""), "test", defHolder, sentenceContext)
+        val wordContext = WordContext(0, "test", defHolder, sentenceContext)
 
         val lexicalConcept = lexicalConcept(wordContext, "MTRANS") {
             expectHead("actor", headValue = "Human", direction = SearchDirection.Before)
@@ -49,7 +49,7 @@ class LexicalConceptBuilderTest {
         var testElement = WordElement("one", "", "","")
         val workingMemory = WorkingMemory()
         val sentenceContext = SentenceContext(TextSentence("test", listOf(testElement)), workingMemory, EpisodicMemory())
-        val wordContext = WordContext(0, WordElement("test", "", "",""), "test", defHolder, sentenceContext)
+        val wordContext = WordContext(0,"test", defHolder, sentenceContext)
 
         val lexicalConcept = lexicalConcept(wordContext, "MTRANS") {
             expectHead("actor", "ACTOR", headValue = "Human", direction = SearchDirection.Before)

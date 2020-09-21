@@ -107,18 +107,6 @@ class Lexicon() {
             return null
         }
     }
-    // first word of expression has matched, confirm that remaining words also match
-    private fun isExpressionMatchesRemainder(list: List<String>, lexicalItem: LexicalItem): Boolean {
-        val expression = lexicalItem.handler.word.expression
-        return (1 until expression.size).all {
-            it < list.size && isExpressionSubsequentMatch(expression[it], list[it])
-        }
-    }
-
-    private fun isExpressionSubsequentMatch(expressionWord: String, sentenceWord: String):Boolean {
-        return expressionWord.equals(sentenceWord, ignoreCase = true)
-                || wordMorphologies(expressionWord).any { it.full.equals(sentenceWord, ignoreCase = true) }
-    }
 
     fun findWordHandler(word: String): WordHandlerWithSuffix? {
         var activeWord = word
@@ -149,4 +137,6 @@ class Lexicon() {
     }
 }
 
-data class LexicalItem(val morphologies: List<WordMorphology>, val handler: WordHandler)
+data class LexicalItem(val morphologies: List<WordMorphology>, val handler: WordHandler) {
+    fun textFragment(): String = morphologies.map { it.full }.joinToString(separator=" " )
+}

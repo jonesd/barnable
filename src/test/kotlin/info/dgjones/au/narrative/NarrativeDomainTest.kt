@@ -194,8 +194,7 @@ class NarrativeDomainTest {
         assertEquals(Human.CONCEPT.fieldName, human.name)
         assertEquals("John", human.valueName(Human.FIRST_NAME))
         assertEquals(Gender.Male.name, human.valueName(Human.GENDER))
-        //FIXME should be Snicklefritz
-        assertEquals("snicklefritz", human.valueName(Human.LAST_NAME))
+        assertEquals("Snicklefritz", human.valueName(Human.LAST_NAME))
     }
 
     @Test
@@ -207,8 +206,7 @@ class NarrativeDomainTest {
         assertEquals(Human.CONCEPT.fieldName, human.name)
         assertEquals("", human.valueName(Human.FIRST_NAME))
         assertEquals(Gender.Male.name, human.valueName(Human.GENDER))
-        //FIXME should be Snicklefritz
-        assertEquals("snicklefritz", human.valueName(Human.LAST_NAME))
+        assertEquals("Snicklefritz", human.valueName(Human.LAST_NAME))
     }
 
     @Test
@@ -220,8 +218,7 @@ class NarrativeDomainTest {
         assertEquals(Human.CONCEPT.fieldName, human.name)
         assertEquals("", human.valueName(Human.FIRST_NAME))
         assertEquals(Gender.Female.name, human.valueName(Human.GENDER))
-        //FIXME should be Snicklefritz
-        assertEquals("snicklefritz", human.valueName(Human.LAST_NAME))
+        assertEquals("Snicklefritz", human.valueName(Human.LAST_NAME))
     }
 
     @Test
@@ -234,8 +231,7 @@ class NarrativeDomainTest {
         assertEquals(Human.CONCEPT.fieldName, human.name)
         assertEquals("", human.valueName(Human.FIRST_NAME))
         assertEquals(Gender.Female.name, human.valueName(Human.GENDER))
-        //FIXME should be Snicklefritz
-        assertEquals("snicklefritz", human.valueName(Human.LAST_NAME))
+        assertEquals("Snicklefritz", human.valueName(Human.LAST_NAME))
     }
 
     @Test
@@ -248,8 +244,7 @@ class NarrativeDomainTest {
         assertEquals(Human.CONCEPT.fieldName, human.name)
         assertEquals("", human.valueName(Human.FIRST_NAME))
         assertEquals(Gender.Female.name, human.valueName(Human.GENDER))
-        //FIXME should be Snicklefritz
-        assertEquals("snicklefritz", human.valueName(Human.LAST_NAME))
+        assertEquals("Snicklefritz", human.valueName(Human.LAST_NAME))
     }
 
     @Test
@@ -261,7 +256,6 @@ class NarrativeDomainTest {
         assertEquals(Human.CONCEPT.fieldName, human.name)
         assertEquals("John", human.valueName(Human.FIRST_NAME))
         assertEquals(Gender.Male.name, human.valueName(Human.GENDER))
-        //FIXME should be Snicklefritz
-        assertEquals("snicklefritz", human.valueName(Human.LAST_NAME))
+        assertEquals("Snicklefritz", human.valueName(Human.LAST_NAME))
     }
 }

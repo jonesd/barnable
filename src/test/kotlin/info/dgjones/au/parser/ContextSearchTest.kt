@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test
 
 class SearchContextTest {
     val matcher = matchConceptByHead("testHead")
+
     @Test
     fun `Can match concept after`() {
         val sentenceContext = withSentenceContext(2)
@@ -137,7 +138,7 @@ class SearchContextTest {
 
     private fun withWordContext(wordIndex: Int, conceptHead: String, sentenceContext: SentenceContext): WordContext {
         val conceptHolder = ConceptHolder(wordIndex, Concept(conceptHead).value("index", Concept("index=$wordIndex")))
-        val wordContext = WordContext(wordIndex, sentenceContext.sentence.elements[wordIndex], "word"+wordIndex, conceptHolder, sentenceContext)
+        val wordContext = WordContext(wordIndex, "word"+wordIndex, conceptHolder, sentenceContext)
         sentenceContext.pushWord(wordContext)
         return wordContext
     }

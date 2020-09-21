@@ -44,38 +44,16 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
         agenda = Agenda()
         val context = SentenceContext(sentence, workingMemory, episodicMemory, qaMode)
         println(sentence.text.toUpperCase())
-        var index = 0
-        do {
-            val element = sentence.elements[index]
-            var word = element.token.toLowerCase()
-            val wordHandlerWithSuffix = lexicon.findWordHandler(word) ?: WordHandlerWithSuffix(listOf(WordUnknown(word)))
-            var expression = listOf(word)
-
-            // FIXME what about expression and single word with matching first word?
-            if (wordHandlerWithSuffix.wordHandlers[0].word.expression.size > 1) {
-                if (doesExpressionMatch(sentence.elements, index, wordHandlerWithSuffix.wordHandlers[0].word.expression)) {
-                    expression = wordHandlerWithSuffix.wordHandlers[0].word.expression
-                }
-            }
-            word = expression.joinToString(" ")
-            val wordContext = WordContext(context.wordContexts.size, element, word, workingMemory.createDefHolder(), context)
+        val splitter = TextSplitter(lexicon)
+        val wordUnits = splitter.split(sentence).units
+        wordUnits.forEachIndexed { index, wordUnit ->
+            val unitText = wordUnit[0].textFragment()
+            val wordContext = WordContext(index, unitText, workingMemory.createDefHolder(), context)
             context.pushWord(wordContext)
-
-            runWord(index, word, wordHandlerWithSuffix.wordHandlers, wordHandlerWithSuffix.suffix, wordContext)
+            runWord(wordUnit, wordContext)
             runDemons(context)
-            index += expression.size
-        } while (index < sentence.elements.size)
-        endSentence(context)
-    }
-
-    private fun doesExpressionMatch(elements: List<WordElement>, baseIndex: Int, expression: List<String>): Boolean {
-        var matched = true
-        expression.forEachIndexed { index, s ->
-            if (!elements[baseIndex + index].token.toLowerCase().equals(s)) {
-                matched = false
-            }
         }
-        return matched
+        endSentence(context)
     }
 
     fun processQuestion(sentence: TextSentence): String {
@@ -144,17 +122,17 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
         memory.concepts.addAll(defs)
     }
 
-    private fun runWord(wordIndex: Int, word: String, wordHandlers: List<WordHandler>, suffix: String?, wordContext: WordContext) {
+    private fun runWord(lexicalItems: List<LexicalItem>, wordContext: WordContext) {
         println("")
-        println("${word.toUpperCase()} ==>")
+        println("${lexicalItems[0].textFragment().toUpperCase()} ==>")
 
-        val disambiguationHandler = DisambiguationHandler(wordContext, wordHandlers, suffix, agenda).startDisambiguations()
+        val disambiguationHandler = DisambiguationHandler(wordContext, lexicalItems, agenda).startDisambiguations()
 
         println("Adding to *working-memory*")
         println("DEF.${wordContext.defHolder.instanceNumber} = ${wordContext.def()}")
         println("Current working memory")
         wordContext.context.wordContexts.forEachIndexed { index, wordContext ->
-            println("--- ${wordContext.word} ==> ${wordContext.defHolder?.value}")
+            println("--- ${wordContext.word} ==> ${wordContext.defHolder.value}")
         }
     }
 
@@ -177,14 +155,15 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
 /* Decide which one of the wordHandlers is going to be run. Use disambiguation demons associated with each wordHandler
  to resolve which one. The first wordHandler to resolve all of their disambiguation demons wins.
  */
-class DisambiguationHandler(val wordContext: WordContext, val wordHandlers: List<WordHandler>, val suffix: String?, val agenda: Agenda) {
-    var disambiguationsByWordHandler = mutableMapOf<WordHandler, MutableList<Demon>>()
-    var resolvedTo: WordHandler? = null
+class DisambiguationHandler(val wordContext: WordContext, val lexicalOptions: List<LexicalItem>, val agenda: Agenda) {
+    var disambiguationsByWordHandler = mutableMapOf<LexicalItem, MutableList<Demon>>()
+    var resolvedTo: LexicalItem? = null
 
     fun startDisambiguations() {
-        wordHandlers.forEach { wordHandler ->
+        lexicalOptions.forEach { lexicalItem ->
+            val wordHandler = lexicalItem.handler
             val disambiguationDemons = wordHandler.disambiguationDemons(wordContext, this)
-            disambiguationsByWordHandler[wordHandler] = disambiguationDemons.toMutableList()
+            disambiguationsByWordHandler[lexicalItem] = disambiguationDemons.toMutableList()
         }
         val noDisambiguationNeeded = disambiguationsByWordHandler.keys.filter { disambiguationsByWordHandler[it]?.isEmpty() ?: true }
         if (noDisambiguationNeeded.size == 1) {
@@ -199,28 +178,30 @@ class DisambiguationHandler(val wordContext: WordContext, val wordHandlers: List
         }
     }
 
-    private fun resolveTo(wordHandler: WordHandler) {
+    private fun resolveTo(lexicalItem: LexicalItem) {
         stopExtantDisambiguationDemons()
         if (disambiguationsByWordHandler.size > 1) {
-            println("Disambiguated ${wordHandler.word.word} to $wordHandler - building Demons...")
+            println("Disambiguated ${lexicalItem.textFragment()} to ${lexicalItem.handler} - building Demons...")
         }
-        resolvedTo = wordHandler
-        buildWordDemons(wordHandler)
+        resolvedTo = lexicalItem
+        buildWordDemons(lexicalItem)
     }
 
     private fun stopExtantDisambiguationDemons() {
         disambiguationsByWordHandler.values.flatten().forEach { it.deactivate() }
     }
 
-    private fun buildWordDemons(wordHandler: WordHandler){
-        val suffixDemon = if (suffix != null) buildSuffixDemon(suffix, wordContext) else null
-        val wordDemons = wordHandler.build(wordContext)
-        val allDemons = wordDemons.toMutableList()
-        if (suffixDemon != null) {
-            allDemons.add(suffixDemon)
-        }
+    private fun buildWordDemons(lexicalItem: LexicalItem){
+        val suffixDemons = buildSuffixDemons(lexicalItem)
+        val wordDemons = lexicalItem.handler.build(wordContext)
+        val allDemons = wordDemons + suffixDemons
         spawnDemons(allDemons)
     }
+
+    // Currently build a suffix demon for each suffix of the expression
+    // FIXME should we remove duplicates?
+    private fun buildSuffixDemons(lexicalItem: LexicalItem) =
+        lexicalItem.morphologies.map { it.suffix }.mapNotNull { buildSuffixDemon(it, wordContext) }
 
     private fun spawnDemons(demons: List<Demon>) {
         demons.forEach { spawnDemon(wordContext.wordIndex, it) }
@@ -243,7 +224,7 @@ class DisambiguationHandler(val wordContext: WordContext, val wordHandlers: List
     }
 }
 
-data class WordContext(val wordIndex: Int, val wordElement: WordElement, val word: String, val defHolder: ConceptHolder, val context: SentenceContext) {
+data class WordContext(val wordIndex: Int, val word: String, val defHolder: ConceptHolder, val context: SentenceContext) {
     var totalDemons = 0
 
     fun def() = defHolder.value

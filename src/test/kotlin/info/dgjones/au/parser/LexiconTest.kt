@@ -60,6 +60,27 @@ class LexiconTest {
     }
 
     @Test
+    fun `can match multiple variants of word by suffix`() {
+        val lexicon = Lexicon()
+        val handler0 = withWordMapping(lexicon, "test")
+        val handler1 = withWordMapping(lexicon, "test")
+
+        // test
+        val lexicalItems = lexicon.lookupInitialWord("testing")
+
+        assertEquals(2, lexicalItems.size)
+
+        val lexicalItem0 = lexicalItems[0]
+        assertEquals(1, lexicalItem0.morphologies.size)
+        val morphologyWord0 = lexicalItem0.morphologies.first()
+        assertEquals(WordMorphology("test", "ing", "testing"), morphologyWord0)
+        assertEquals(handler0, lexicalItem0.handler)
+
+        val lexicalItem1 = lexicalItems[1]
+        assertEquals(handler1, lexicalItem1.handler)
+    }
+
+    @Test
     fun `maps a stream of input words to lexical expression`() {
         val lexicon = Lexicon()
         val handler0 = withWordMapping(lexicon, "one", listOf("one", "two"))
@@ -140,5 +161,9 @@ class LexiconTest {
         val handler = WordHandler(EntryWord(word, expression))
         lexicon.addMapping(handler)
         return handler
+    }
+
+    private fun morphologyFullWords(item: LexicalItem): List<String> {
+        return item.morphologies.map { it.full }
     }
 }

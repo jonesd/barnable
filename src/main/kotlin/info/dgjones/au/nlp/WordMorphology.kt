@@ -8,7 +8,8 @@ class WordMorphologyBuilder(val root: String) {
         return listOf(
             suffixEd(),
             suffixIng(),
-            suffixLy()
+            suffixLy(),
+            suffixS()
         ).filterNotNull()
     }
 
@@ -107,6 +108,51 @@ class WordMorphologyBuilder(val root: String) {
         }
         return WordMorphology(root, "ly", full)
     }
+
+    fun suffixS(): WordMorphology? {
+        var full = root + "s"
+        if (root.endsWith("s", ignoreCase = true) || root.endsWith("x", ignoreCase = true)
+            || root.endsWith("sh", ignoreCase = true) || root.endsWith("ch", ignoreCase = true)) {
+            full = root + "es"
+        } else if (root.length >= 3 && isConsonant(root[root.length-2]) && root.last() == 'y') {
+            full = root.dropLast(1)  + "ies"
+        } else if (root.length >= 3 && isVowel(root[root.length-2]) && root.last() == 'y') {
+            full = root  + "s"
+        } else if (root.length >= 3 && root.endsWith("fe", ignoreCase = true)) {
+            full = root.dropLast(2) + "ves"
+        } else if (root.length >= 3 && root[root.length-2].equals('f').not() && root.endsWith("f", ignoreCase = true)) {
+            full = root.dropLast(1) + "ves"
+        }
+        suffixSIrregular[root]?.let {
+            full = it
+        }
+        // FIXME case insensitive
+        if (suffixSIdem.contains(root)) {
+            full = root
+        }
+        return WordMorphology(root, "s", full)
+    }
+
+    private val suffixSIrregular = mapOf(
+        "child" to "children",
+        "person" to "people",
+        "man" to "men",
+        "woman" to "women",
+        "tooth" to "teeth",
+        "foot" to "feet",
+        "mouse" to "mice",
+        "goose" to "geese",
+        "ox" to "oxen"
+    )
+    private val suffixSIdem = setOf(
+        "deer",
+        "sheep",
+        "fish",
+        "means",
+        "species",
+        "series",
+        "ice"
+    )
 
     private fun isVowel(c: Char): Boolean = VOWELS.contains(c.toLowerCase())
     private fun isConsonant(c: Char): Boolean = !isVowel(c)
