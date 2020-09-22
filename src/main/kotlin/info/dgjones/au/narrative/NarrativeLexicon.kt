@@ -40,8 +40,10 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
 
     lexicon.addMapping(WordPerson(buildHuman("", "", Gender.Female.name), "woman"))
     lexicon.addMapping(WordPerson(buildHuman("", "", Gender.Female.name), "man"))
-    lexicon.addMapping(WordPronounPossessive("her", Gender.Female))
-    lexicon.addMapping(WordPronounPossessive("his", Gender.Male))
+    lexicon.addMapping(WordPronoun("hers", Gender.Female, Case.Possessive))
+    lexicon.addMapping(WordPronoun("his", Gender.Male, Case.Possessive))
+    lexicon.addMapping(WordPronoun("her", Gender.Female, Case.Objective))
+    lexicon.addMapping(WordPronoun("him", Gender.Male, Case.Objective))
 
     // Modifiers
     lexicon.addMapping(ModifierWord("red", "colour"))
@@ -451,11 +453,11 @@ class ModifierWord(word: String, val modifier: String, val value: String = word)
     }
 }
 
-class WordPronounPossessive(word: String, val gender: Gender): WordHandler(EntryWord(word)) {
+class WordPronoun(word: String, val gender: Gender, val case: Case): WordHandler(EntryWord(word)) {
     override fun build(wordContext: WordContext): List<Demon> {
         val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.Ref.name) {
             ignoreHolder()
-            slot("case", Case.Possessive.name)
+            slot("case", case.name)
             slot("gender", gender.name)
             findCharacter(CoreFields.INSTANCE.fieldName)
         }

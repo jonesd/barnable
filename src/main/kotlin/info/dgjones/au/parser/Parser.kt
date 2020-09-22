@@ -125,15 +125,22 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
     private fun runWord(lexicalItems: List<LexicalItem>, wordContext: WordContext) {
         println("")
         println("${lexicalItems[0].textFragment().toUpperCase()} ==>")
+        if (lexicalItems[0].morphologies.size > 1) {
+            println("  Recognized phrase: ${lexicalItems[0].handler.word.expression.joinToString(" ").toUpperCase()}")
+        }
+        if (lexicalItems[0].morphologies[0].suffix.isNotEmpty()) {
+            println("  Recognized word: ${lexicalItems[0].handler.word.expression.joinToString(" ").toUpperCase()}")
+            println("  Recognized suffix: ${lexicalItems[0].morphologies[0].suffix.toUpperCase()}")
+        }
 
         val disambiguationHandler = DisambiguationHandler(wordContext, lexicalItems, agenda).startDisambiguations()
 
         println("Adding to *working-memory*")
         println("DEF.${wordContext.defHolder.instanceNumber} = ${wordContext.def()}")
         println("Current working memory")
-        wordContext.context.wordContexts.forEachIndexed { index, wordContext ->
-            println("--- ${wordContext.word} ==> ${wordContext.defHolder.value}")
-        }
+        //wordContext.context.wordContexts.forEachIndexed { index, wordContext ->
+        //    println("--- ${wordContext.word} ==> ${wordContext.defHolder.value}")
+        //}
     }
 
     // Run each active demon. Repeat again if any were fired
