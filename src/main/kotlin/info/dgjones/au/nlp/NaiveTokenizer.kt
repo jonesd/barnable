@@ -33,7 +33,7 @@ class NaiveTokenizer {
 
     private fun createTextSentence(words: MutableList<String>): TextSentence {
         val text = words.joinToString(" ")
-        return TextSentence(text, words.map { WordElement(it, "", stemmer.stemWord(it), "") })
+        return TextSentence(text, words.map { WordElement(it, "", it /*stemmer.stemWord(it)*/, "") })
     }
 
     private fun isWordMarksEndOfSentence(it: String): Boolean {

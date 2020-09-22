@@ -1,6 +1,5 @@
 package info.dgjones.au.parser
 
-import info.dgjones.au.nlp.StansStemmer
 import info.dgjones.au.nlp.WordMorphology
 import info.dgjones.au.nlp.WordMorphologyBuilder
 
@@ -12,7 +11,6 @@ import info.dgjones.au.nlp.WordMorphologyBuilder
 * */
 class Lexicon {
     val wordMappings: MutableMap<String, MutableList<WordHandler>> = mutableMapOf()
-    val stemmer = StansStemmer()
 
     val morphologicalMappings: MutableMap<String, MutableList<Pair<WordMorphology, WordHandler>>> = mutableMapOf()
 
