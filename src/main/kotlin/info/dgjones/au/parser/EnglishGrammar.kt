@@ -1,124 +1,42 @@
 package info.dgjones.au.parser
 
+import info.dgjones.au.domain.general.TimeConcepts
+import info.dgjones.au.domain.general.TimeFields
+import info.dgjones.au.grammar.buildGrammarPropositionLexicon
 import info.dgjones.au.narrative.InDepthUnderstandingConcepts
+
+enum class GrammarFields(override val fieldName: String): Fields {
+    Aspect("aspect"),
+    Case("case"),
+    Voice("voice")
+}
 
 enum class ParserKinds {
     Conjunction
 }
 
-enum class SL {
-    PrepObject
+enum class Case {
+    Subjective,
+    Objective,
+    Possessive,
+    Vocative
 }
 
-//class EnglishGrammar {
-    enum class Case {
-        Subjective,
-        Objective,
-        Possessive,
-        Vocative
-    }
-
-    /* Prepositions */
-    enum class Preposition {
-        In,
-        Into,
-        On,
-        To,
-        With
-    }
-//}
-
-fun withPrepObj(concept: Concept, prep: Concept) {
-    concept.with(Slot(SL.PrepObject.name, prep))
-}
-fun buildPrep(preposition: String): Concept {
-    return Concept("prep")
-        .with(Slot("is", Concept(preposition)))
+enum class Aspect {
+    Progressive
 }
 
-fun matchPrepIn(preps: Collection<String>): ConceptMatcher {
-    return { c -> preps.contains(c?.value(SL.PrepObject)?.valueName("is")) }
+enum class Voice {
+    // https://en.wiktionary.org/wiki/active_voice#English
+    // Fred kicked the ball.
+    Active,
+
+    // https://en.wiktionary.org/wiki/passive_voice#English
+    // The ball was kicked by Fred
+    Passive
 }
 
-fun LexicalConceptBuilder.expectPrep(slotName: String, variableName: String? = null, preps: Collection<Preposition>, matcher: ConceptMatcher, direction: SearchDirection = SearchDirection.After) {
-    val variableSlot = root.createVariable(slotName, variableName)
-    concept.with(variableSlot)
-    val matchers = matchAll(listOf(
-        matchPrepIn(preps.map { it.name }),
-        matcher
-    ))
-    val demon = PrepDemon(matchers, SearchDirection.After, root.wordContext) {
-        root.completeVariable(variableSlot, it)
-    }
-    root.addDemon(demon)
-}
-
-class PrepDemon(val matcher: ConceptMatcher, val direction: SearchDirection = SearchDirection.Before, wordContext: WordContext, val action: (ConceptHolder) -> Unit): Demon(wordContext) {
-    var found: ConceptHolder? = null
-
-    override fun run() {
-        if (direction == SearchDirection.Before) {
-            (wordContext.wordIndex - 1 downTo 0).forEach {
-                found = updateFrom(found, wordContext, it)
-            }
-        } else {
-            (wordContext.wordIndex + 1 until wordContext.context.wordContexts.size).forEach {
-                found = updateFrom(found, wordContext, it)
-            }
-        }
-        val foundConcept = found
-        if (foundConcept?.value != null) {
-            action(foundConcept)
-            println("Prep found concept=$foundConcept for match=$matcher")
-            active = false
-        }
-    }
-
-    private fun updateFrom(existing: ConceptHolder?, wordContext: WordContext, index: Int): ConceptHolder? {
-        if (existing != null) {
-            return existing
-        }
-        var defHolder = wordContext.context.defHolderAtWordIndex(index)
-        var value = defHolder.value
-        // if (isConjunction(value)) {
-        //    return null
-        //}
-        if (matcher(value)) {
-            return defHolder
-        }
-        return null
-    }
-
-    // private fun isConjunction(concept: Concept?): Boolean {
-    //    return matchConceptByKind(ParserKinds.Conjunction.name)(concept)
-    //}
-
-    override fun description(): String {
-        return "PrepDemon $matcher"
-    }
-}
-
-class WordWith: WordHandler(EntryWord("with")) {
-    override fun build(wordContext: WordContext): List<Demon> {
-        wordContext.defHolder.value = buildPrep(Preposition.With.name)
-
-        // FIXME implement InDepth pp304
-        // needs to match human before and after
-        val matcher = matchConceptByHead(setOf(InDepthUnderstandingConcepts.Human.name))
-        val addPrepObj = InsertAfterDemon(matcher, wordContext) {
-            if (wordContext.isDefSet()) {
-                val itValue = it.value
-                val holderValue = wordContext.defHolder.value
-                if (itValue != null && holderValue != null) {
-                    withPrepObj(itValue, holderValue)
-                    wordContext.defHolder.addFlag(ParserFlags.Inside)
-                    println("Updated with prepobj concept=${it}")
-                }
-            }
-        }
-        return listOf(addPrepObj)
-    }
-}
+/* Prepositions */
 
 /* Conjunctions */
 
@@ -145,9 +63,9 @@ fun buildEnglishGrammarLexicon(lexicon: Lexicon) {
     lexicon.addMapping(WordAnd())
     lexicon.addMapping(WordIt())
     lexicon.addMapping(WordHave())
-    lexicon.addMapping(WordWith())
     lexicon.addMapping(WordIgnore(EntryWord("a").and("an")))
     lexicon.addMapping(WordIgnore(EntryWord("the")))
+    buildGrammarPropositionLexicon(lexicon)
 }
 
 class WordAnd: WordHandler(EntryWord("and")) {
@@ -165,6 +83,10 @@ class WordIt: WordHandler(EntryWord("it")) {
 }
 
 class WordHave: WordHandler(EntryWord("have")) {
+    override fun build(wordContext: WordContext): List<Demon> {
+        println("FIXME implement have")
+        return super.build(wordContext)
+    }
     //FIXME InDepth pp303 - having?
 }
 
@@ -174,6 +96,8 @@ fun buildSuffixDemon(suffix: String, wordContext: WordContext): Demon? {
     return when (suffix) {
         "ed" -> SuffixEdDemon(wordContext)
         "s" -> SuffixSDemon(wordContext)
+        "ing" -> SuffixIngDemon(wordContext)
+        //FIXME implement other suffixes....
         else -> null
     }
 }
@@ -182,8 +106,8 @@ class SuffixEdDemon(wordContext: WordContext): Demon(wordContext) {
     override fun run() {
         val def = wordContext.def()
         if (def != null) {
-            if (def.value("time") == null) {
-                def.value("time", Concept("past"))
+            if (def.value(TimeFields.TIME) == null) {
+                def.value(TimeFields.TIME.fieldName, Concept(TimeConcepts.Past.name))
                 active = false
             }
         }
@@ -208,3 +132,24 @@ class SuffixSDemon(wordContext: WordContext): Demon(wordContext) {
         return "Suffix S"
     }
 }
+
+class SuffixIngDemon(wordContext: WordContext): Demon(wordContext) {
+    override fun run() {
+        val def = wordContext.def()
+        // Progressive Detection
+        val previousWord = wordContext.previousWord()
+        if (previousWord != null && formsOfBe.contains(previousWord.toLowerCase())) {
+            def?.let {
+                it.with(Slot(GrammarFields.Aspect, Concept(Aspect.Progressive.name)) )
+                active = false
+            }
+        } else {
+            active = false
+        }
+    }
+    override fun description(): String {
+        return "Suffix ING"
+    }
+}
+
+private val formsOfBe = setOf("be", "am", "are", "is", "was", "were", "being", "been")

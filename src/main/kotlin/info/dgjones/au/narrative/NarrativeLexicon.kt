@@ -1,6 +1,11 @@
 package info.dgjones.au.narrative
 
+import info.dgjones.au.domain.general.TimeConcepts
+import info.dgjones.au.domain.general.TimeFields
 import info.dgjones.au.domain.general.buildGeneralDomainLexicon
+import info.dgjones.au.domain.general.WordYesterday
+import info.dgjones.au.grammar.Preposition
+import info.dgjones.au.grammar.expectPrep
 import info.dgjones.au.parser.*
 
 fun buildInDepthUnderstandingLexicon(): Lexicon {
@@ -14,7 +19,6 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     lexicon.addMapping(WordIgnore(EntryWord("up")))
     lexicon.addMapping(WordBall())
     lexicon.addMapping(WordDrop())
-    lexicon.addMapping(WordIn())
     lexicon.addMapping(WordBox())
 
     // Titles
@@ -30,6 +34,8 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     lexicon.addMapping(WordGive())
     lexicon.addMapping(WordBook())
     lexicon.addMapping(WordTree())
+
+    lexicon.addMapping(WordWas())
 
     lexicon.addMapping(WordPerson(buildHuman("Fred", "", Gender.Male.name)))
     lexicon.addMapping(WordTell())
@@ -69,6 +75,7 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
 
     lexicon.addMapping(WordGo())
     lexicon.addMapping(WordKiss())
+    lexicon.addMapping(WordKick())
     lexicon.addMapping(WordPerson(buildHuman("Bill", "", Gender.Male.name)))
     lexicon.addMapping(WordHungry())
     lexicon.addMapping(WordWalk())
@@ -103,23 +110,10 @@ enum class InDepthUnderstandingConcepts {
     UnknownWord
 }
 
-enum class TimeConcepts {
-    Yesterday,
-    Tomorrow,
-    Afternoon,
-    Morning,
-    Evening,
-    Monday,
-    Tuesday,
-    Wednesday,
-    Thursday,
-    Friday,
-    Saturday,
-    Sunday
-}
 enum class BodyParts {
     Legs,
-    Fingers
+    Fingers,
+    Foot
 }
 enum class Force {
     Gravity
@@ -236,23 +230,22 @@ class WordKnock: WordHandler(EntryWord("knock")) {
     }
 }
 
-class WordIn: WordHandler(EntryWord("in")) {
+class WordKick: WordHandler(EntryWord("kick")) {
     override fun build(wordContext: WordContext): List<Demon> {
-        wordContext.defHolder.value = buildPrep(Preposition.In.name)
-
-        val matcher = matchConceptByHead(setOf(InDepthUnderstandingConcepts.PhysicalObject.name, InDepthUnderstandingConcepts.Setting.name))
-        val addPrepObj = InsertAfterDemon(matcher, wordContext) {
-            if (wordContext.isDefSet()) {
-                val itValue = it.value
-                val holderValue = wordContext.defHolder.value
-                if (itValue != null && holderValue != null) {
-                    withPrepObj(itValue, holderValue)
-                    wordContext.defHolder.addFlag(ParserFlags.Inside)
-                    println("Updated with prepobj concept=${it}")
-                }
+        val lexicalConcept = lexicalConcept(wordContext, "PROPEL") {
+            expectActor("actor", variableName = "actor")
+            expectThing("thing", variableName = "thing", headValues = listOf(InDepthUnderstandingConcepts.PhysicalObject.name))
+            expectPrep("to", preps = setOf(Preposition.To), matcher = matchConceptByHead(setOf(
+                InDepthUnderstandingConcepts.Human.name, InDepthUnderstandingConcepts.PhysicalObject.name))
+            )
+            slot("instr", "MOVE") {
+                slot("actor", BodyParts.Foot.name)
+                varReference("thing", "thing")
+                slot("kind", InDepthUnderstandingConcepts.Act.name)
             }
+            slot("kind", "Act")
         }
-        return listOf(addPrepObj)
+        return lexicalConcept.demons
     }
 }
 
@@ -396,37 +389,6 @@ class WordMeasureObject: WordHandler(EntryWord("measure")) {
     }
 }
 
-class WordYesterday: WordHandler(EntryWord("yesterday")) {
-    override fun build(wordContext: WordContext): List<Demon> {
-        val demon = object : Demon(wordContext) {
-            var actHolder: ConceptHolder? = null
-
-            override fun run() {
-                if (wordContext.isDefSet()) {
-                    active = false
-                } else {
-                    val actConcept = actHolder?.value
-                    if (actConcept != null) {
-                        wordContext.defHolder.value = Concept(TimeConcepts.Yesterday.name)
-                        wordContext.defHolder.addFlag(ParserFlags.Inside)
-                        actConcept.with(Slot("time", wordContext.def()))
-                        active = false
-                    }
-                }
-            }
-
-            override fun description(): String {
-                return "Yesterday"
-            }
-        }
-        val actDemon = ExpectDemon(matchConceptByKind(InDepthUnderstandingConcepts.Act.name), SearchDirection.Before, wordContext) {
-            demon.actHolder = it
-        }
-
-        return listOf(demon, actDemon)
-    }
-}
-
 class ModifierWord(word: String, val modifier: String, val value: String = word): WordHandler(EntryWord(word)) {
     override fun build(wordContext: WordContext): List<Demon> {
         val demon = object : Demon(wordContext) {
@@ -548,39 +510,51 @@ class TitleWord(word: String, val gender: Gender): WordHandler(EntryWord(word)) 
         )
     }
 }
-/* FIXME
+
+/*
+Verb
+
+was
+
+    first-person singular simple past indicative of be.
+
+        I was castigated and scorned.
+
+    third-person singular simple past indicative of be.
+
+    It was a really humongous slice of cake.
+
+(now colloquial) Used in phrases with existential there when the semantic subject is (usually third-person) plural.
+
+    There was three of them there.
+
+(now colloquial or nonstandard) second-person singular simple past indicative of be.
+(colloquial, nonstandard) first-person plural simple past indicative of be
+
+https://en.wiktionary.org/wiki/was#English
+*/
 class WordWas(): WordHandler(EntryWord("was")) {
     override fun build(wordContext: WordContext): List<Demon> {
-    wordContext.defHolder.value = buildPrep(Preposition.In.name)
-
-    val matcher = matchConceptByHead(setOf(InDepthUnderstandingConcepts.PhysicalObject.name, InDepthUnderstandingConcepts.Setting.name))
-    val addPrepObj = InsertAfterDemon(matcher, wordContext) {
-        if (wordContext.isDefSet()) {
-            val itValue = it.value
-            val holderValue = wordContext.defHolder.value
-            if (itValue != null && holderValue != null) {
-                withPrepObj(itValue, holderValue)
-                wordContext.defHolder.addFlag(ParserFlags.Inside)
-                println("Updated with prepobj concept=${it}")
+        wordContext.defHolder.value = Concept("word")
+        wordContext.defHolder.addFlag(ParserFlags.Ignore)
+        val matcher = matchAny(
+            listOf(
+                matchConceptByKind(InDepthUnderstandingConcepts.Act.name),
+                matchConceptValueName(GrammarFields.Aspect, Aspect.Progressive.name)
+            )
+        )
+        val wasDisambiguation = InsertAfterDemon(matcher, wordContext) {
+            it.value?.let { concept ->
+                if (concept.valueName(GrammarFields.Aspect) == Aspect.Progressive.name) {
+                    // Do nothing
+                } else if (concept.valueName(TimeFields.TIME) == TimeConcepts.Past.name) {
+                    // FIXME should Past also match yesterday, etc....
+                    wordContext.def()?.with(Slot(GrammarFields.Voice, Concept(Voice.Passive.name)))
+                } else {
+                    concept.with(Slot(TimeFields.TIME, Concept(TimeConcepts.Past.name)))
+                }
             }
         }
+        return listOf(wasDisambiguation)
     }
-    return listOf(addPrepObj)
-    override fun build(wordContext: WordContext): List<Demon> {
-        val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
-            slot(Human.FIRST_NAME, "")
-            lastName(Human.LAST_NAME)
-            slot(Human.GENDER, gender.name)
-            // FIXME include title
-            checkCharacter(CoreFields.INSTANCE.fieldName)
-        }
-        return lexicalConcept.demons
-        // Fixme - not sure about the load/reuse
-        // FIXME return listOf(LoadCharacterDemon(human, wordContext), SaveCharacterDemon(wordContext))
-    }
-    override fun disambiguationDemons(wordContext: WordContext, disambiguationHandler: DisambiguationHandler): List<Demon> {
-        return listOf(
-            DisambiguateUsingMatch(matchConceptByHead(listOf(InDepthUnderstandingConcepts.UnknownWord.name)), SearchDirection.After, 1, wordContext, disambiguationHandler)
-        )
-    }
-}*/
+}

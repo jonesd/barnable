@@ -6,9 +6,6 @@ data class Concept(val name: String) {
     fun value(slotName: String): Concept? {
         return slot(slotName)?.value
     }
-    fun value(slotName: SL): Concept? {
-        return value(slotName.name)
-    }
     fun value(slotName: Fields): Concept? {
         return value(slotName.fieldName)
     }

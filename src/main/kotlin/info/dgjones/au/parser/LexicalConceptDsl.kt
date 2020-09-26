@@ -41,9 +41,9 @@ class LexicalRootBuilder(val wordContext: WordContext, val headName: String) {
         completeVariableSlots.forEach { it.value = valueHolder.value }
         completedSlots.addAll(completeVariableSlots)
         variableSlots.removeAll(completeVariableSlots)
-        if (variableSlots.isEmpty()) {
+        //if (variableSlots.isEmpty()) {
             completedConceptHolders.forEach { it.addFlag(ParserFlags.Inside)  }
-        }
+        //}
     }
     fun disambiguationResult(result: Boolean) {
         this.totalSuccessfulDisambiguations += 1
@@ -115,6 +115,23 @@ class LexicalConceptBuilder(val root: LexicalRootBuilder, conceptName: String) {
         val variableSlot = root.createVariable(slotName, variableName)
         concept.with(variableSlot)
         val demon = ExpectDemon(matchConceptByKind(kinds), direction, root.wordContext) {
+            root.completeVariable(variableSlot, it)
+        }
+        root.addDemon(demon)
+    }
+    fun expectActor(slotName: String, variableName: String? = null) {
+        val variableSlot = root.createVariable(slotName, variableName)
+        concept.with(variableSlot)
+        val demon = ExpectActor(root.wordContext) {
+            root.completeVariable(variableSlot, it)
+        }
+        root.addDemon(demon)
+    }
+
+    fun expectThing(slotName: String, variableName: String? = null, headValues: List<String>) {
+        val variableSlot = root.createVariable(slotName, variableName)
+        concept.with(variableSlot)
+        val demon = ExpectThing(headValues,root.wordContext) {
             root.completeVariable(variableSlot, it)
         }
         root.addDemon(demon)

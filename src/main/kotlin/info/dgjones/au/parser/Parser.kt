@@ -138,9 +138,9 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
         println("Adding to *working-memory*")
         println("DEF.${wordContext.defHolder.instanceNumber} = ${wordContext.def()}")
         println("Current working memory")
-        //wordContext.context.wordContexts.forEachIndexed { index, wordContext ->
-        //    println("--- ${wordContext.word} ==> ${wordContext.defHolder.value}")
-        //}
+        wordContext.context.wordContexts.forEachIndexed { index, wordContext ->
+            println("--- ${wordContext.word} ==> ${wordContext.defHolder.value}")
+        }
     }
 
     // Run each active demon. Repeat again if any were fired
@@ -233,6 +233,9 @@ class DisambiguationHandler(val wordContext: WordContext, val lexicalOptions: Li
 
 data class WordContext(val wordIndex: Int, val word: String, val defHolder: ConceptHolder, val context: SentenceContext) {
     var totalDemons = 0
+
+    fun previousWord() =
+        if (wordIndex > 0) context.wordContexts[wordIndex - 1].word else null
 
     fun def() = defHolder.value
     fun isDefSet() = def() != null
