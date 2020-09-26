@@ -1,4 +1,6 @@
-package info.dgjones.au.parser
+package info.dgjones.au.concept
+
+import info.dgjones.au.grammar.Case
 
 typealias ConceptMatcher = (Concept?) -> Boolean
 
@@ -39,11 +41,11 @@ fun matchAll(matchers: List<ConceptMatcher>): ConceptMatcher {
 }
 
 fun matchNever(): ConceptMatcher {
-    return { c -> false}
+    return { _ -> false}
 }
 
 fun matchAlways(): ConceptMatcher {
-    return { c -> true}
+    return { _ -> true}
 }
 
 class ConceptMatcherBuilder {

@@ -1,18 +1,39 @@
-package info.dgjones.au.parser
+package info.dgjones.au.domain.general
 
-import info.dgjones.au.narrative.*
+import info.dgjones.au.concept.*
+import info.dgjones.au.narrative.InDepthUnderstandingConcepts
+import info.dgjones.au.parser.*
 
-/* Physical Objects */
-
-fun LexicalConceptBuilder.physicalObject(name: String, kind: String, initializer: LexicalConceptBuilder.() -> Unit)  {
-    val child = LexicalConceptBuilder(root, PhysicalObjectKind.PhysicalObject.name)
-    child.slot("name", name)
-    child.slot("kind", kind)
-    child.apply(initializer)
-    val c = child.build()
+enum class Human(override val fieldName: String): Fields {
+    CONCEPT("Human"),
+    FIRST_NAME("firstName"),
+    LAST_NAME("lastName"),
+    GENDER("gender");
 }
 
-/* Humans */
+enum class Gender {
+    Male,
+    Female,
+    Other
+}
+
+fun characterMatcher(human: Concept): ConceptMatcher =
+    characterMatcher(human.valueName(Human.FIRST_NAME), human.valueName(Human.LAST_NAME), human.valueName(Human.GENDER))
+
+fun characterMatcher(firstName: String?, lastName: String?, gender: String?): ConceptMatcher =
+    ConceptMatcherBuilder()
+        .with(matchConceptByHead(InDepthUnderstandingConcepts.Human.name))
+        .matchSetField(Human.FIRST_NAME, firstName)
+        .matchSetField(Human.LAST_NAME, lastName)
+        .matchSetField(Human.GENDER, gender)
+        .matchAll()
+
+fun characterMatcherWithInstance(human: Concept): ConceptMatcher =
+    ConceptMatcherBuilder()
+        .with(characterMatcher(human))
+        .matchSetField(CoreFields.INSTANCE, human.valueName(CoreFields.INSTANCE))
+        .matchAll()
+
 
 fun LexicalConceptBuilder.human(firstName: String = "", lastName: String = "", gender: Gender? = null, initializer: LexicalConceptBuilder.() -> Unit): Concept {
     val child = LexicalConceptBuilder(root, InDepthUnderstandingConcepts.Human.name)
@@ -32,14 +53,19 @@ fun buildHuman(firstName: String? = "", lastName: String? = "", gender: String? 
         //FIXME empty concept doesn't seem helpful
         .with(Slot("gender", Concept(gender ?: "")))
 }
-enum class Gender {
-    Male,
-    Female,
-    Other
+
+// Word Senses
+
+fun buildGeneralHumanLexicon(lexicon: Lexicon) {
+    lexicon.addMapping(WordPerson(buildHuman("Fred", "", Gender.Male.name)))
+    lexicon.addMapping(WordPerson(buildHuman("John", "", Gender.Male.name)))
+    lexicon.addMapping(WordPerson(buildHuman("Mary", "", Gender.Female.name)))
+    lexicon.addMapping(WordPerson(buildHuman("Ann", "", Gender.Female.name)))
+    lexicon.addMapping(WordPerson(buildHuman("Anne", "", Gender.Female.name)))
+    lexicon.addMapping(WordPerson(buildHuman("Bill", "", Gender.Male.name)))
+    lexicon.addMapping(WordPerson(buildHuman("George", "", Gender.Male.name)))
 }
 
-
-// Exercise 1
 class WordPerson(val human: Concept, word: String = human.valueName(Human.FIRST_NAME)?:"unknown"): WordHandler(EntryWord(word)) {
     override fun build(wordContext: WordContext): List<Demon> {
         val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
@@ -53,25 +79,5 @@ class WordPerson(val human: Concept, word: String = human.valueName(Human.FIRST_
         return lexicalConcept.demons
         // Fixme - not sure about the load/reuse
         // FIXME return listOf(LoadCharacterDemon(human, wordContext), SaveCharacterDemon(wordContext))
-    }
-}
-
-fun buildPhysicalObject(kind: String, name: String): Concept {
-    return Concept(PhysicalObjectKind.PhysicalObject.name)
-        .with(Slot("kind", Concept(kind)))
-        .with(Slot("name", Concept(name)))
-}
-
-class WordBook: WordHandler(EntryWord("book")) {
-    override fun build(wordContext: WordContext): List<Demon> {
-        wordContext.defHolder.value =  buildPhysicalObject(PhysicalObjectKind.Book.name, word.word)
-        return listOf(SaveObjectDemon(wordContext))
-    }
-}
-
-class WordTree: WordHandler(EntryWord("tree")) {
-    override fun build(wordContext: WordContext): List<Demon> {
-        wordContext.defHolder.value =  buildPhysicalObject(PhysicalObjectKind.Plant.name, word.word)
-        return listOf(SaveObjectDemon(wordContext))
     }
 }

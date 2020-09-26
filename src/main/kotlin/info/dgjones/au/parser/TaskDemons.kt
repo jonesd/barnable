@@ -1,7 +1,9 @@
 package info.dgjones.au.parser
 
-import info.dgjones.au.grammar.Preposition
-import info.dgjones.au.grammar.matchPrepIn
+import info.dgjones.au.concept.*
+import info.dgjones.au.domain.general.Gender
+import info.dgjones.au.domain.general.Human
+import info.dgjones.au.grammar.*
 import info.dgjones.au.narrative.HumanAccessor
 import info.dgjones.au.narrative.InDepthUnderstandingConcepts
 
@@ -183,7 +185,7 @@ fun isDependentSlotsComplete(parent: Concept, childrenSlotNames: List<String>): 
 
 fun conceptPathResolvedValue(parent: Concept?, slotName: String): Concept? {
     parent?.let {
-        buildConceptPathAccessor(parent, slotName)?.invoke()?.let {concept ->
+        buildConceptPathAccessor(parent, slotName)?.invoke()?.let { concept ->
             if (isConceptResolved(concept)) {
                 return concept
             }

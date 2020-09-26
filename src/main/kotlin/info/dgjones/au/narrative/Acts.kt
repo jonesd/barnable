@@ -1,7 +1,7 @@
 package info.dgjones.au.narrative
 
-import info.dgjones.au.parser.Concept
-import info.dgjones.au.parser.Slot
+import info.dgjones.au.concept.Concept
+import info.dgjones.au.concept.Slot
 
 enum class Acts {
     ATRANS, // Transfer of Possession

@@ -1,5 +1,7 @@
 package info.dgjones.au.parser
 
+import info.dgjones.au.concept.ConceptMatcher
+
 /*
 Disambiguation is the process of deciding which word sense is selected when a word/expression has two or more meanings in
 the Lexicon. There are two ways that can be accomplished:

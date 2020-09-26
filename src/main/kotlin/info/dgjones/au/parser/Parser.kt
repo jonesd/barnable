@@ -1,5 +1,7 @@
 package info.dgjones.au.parser
 
+import info.dgjones.au.concept.Concept
+import info.dgjones.au.grammar.buildSuffixDemon
 import info.dgjones.au.narrative.Acts
 import info.dgjones.au.narrative.InDepthUnderstandingConcepts
 import info.dgjones.au.narrative.buildInDepthUnderstandingLexicon

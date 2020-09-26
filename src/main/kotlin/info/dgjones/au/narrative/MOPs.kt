@@ -1,6 +1,6 @@
 package info.dgjones.au.narrative
 
-import info.dgjones.au.parser.Fields
+import info.dgjones.au.concept.Fields
 
 enum class MealFields(override val fieldName: String): Fields {
     MEAL("MopMeal"),

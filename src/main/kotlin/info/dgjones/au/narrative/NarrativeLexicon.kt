@@ -1,11 +1,8 @@
 package info.dgjones.au.narrative
 
-import info.dgjones.au.domain.general.TimeConcepts
-import info.dgjones.au.domain.general.TimeFields
-import info.dgjones.au.domain.general.buildGeneralDomainLexicon
-import info.dgjones.au.domain.general.WordYesterday
-import info.dgjones.au.grammar.Preposition
-import info.dgjones.au.grammar.expectPrep
+import info.dgjones.au.concept.*
+import info.dgjones.au.domain.general.*
+import info.dgjones.au.grammar.*
 import info.dgjones.au.parser.*
 
 fun buildInDepthUnderstandingLexicon(): Lexicon {
@@ -14,7 +11,6 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     buildGeneralDomainLexicon(lexicon)
     buildNumberLexicon(lexicon)
 
-    lexicon.addMapping(WordPerson(buildHuman("John", "", Gender.Male.name)))
     lexicon.addMapping(WordPickUp())
     lexicon.addMapping(WordIgnore(EntryWord("up")))
     lexicon.addMapping(WordBall())
@@ -30,14 +26,10 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     lexicon.addMapping(TitleWord("Ms", Gender.Female))
     lexicon.addMapping(TitleWord("Ms.", Gender.Female))
 
-    lexicon.addMapping(WordPerson(buildHuman("Mary", "", Gender.Female.name)))
     lexicon.addMapping(WordGive())
-    lexicon.addMapping(WordBook())
-    lexicon.addMapping(WordTree())
 
     lexicon.addMapping(WordWas())
 
-    lexicon.addMapping(WordPerson(buildHuman("Fred", "", Gender.Male.name)))
     lexicon.addMapping(WordTell())
     // FIXME not sure whether should ignore that - its a subordinate conjunction and should link
     // the Mtrans from "told" to the Ingest of "eats"
@@ -62,8 +54,6 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     lexicon.addMapping(WordYesterday())
 
     // pronoun
-    lexicon.addMapping(WordPerson(buildHuman("Ann", "", Gender.Female.name)))
-    lexicon.addMapping(WordPerson(buildHuman("Anne", "", Gender.Female.name)))
     lexicon.addMapping(PronounWord("he", Gender.Male))
     lexicon.addMapping(PronounWord("she", Gender.Female))
 
@@ -76,7 +66,6 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     lexicon.addMapping(WordGo())
     lexicon.addMapping(WordKiss())
     lexicon.addMapping(WordKick())
-    lexicon.addMapping(WordPerson(buildHuman("Bill", "", Gender.Male.name)))
     lexicon.addMapping(WordHungry())
     lexicon.addMapping(WordWalk())
     lexicon.addMapping(WordKnock())
@@ -84,7 +73,6 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     lexicon.addMapping(WordLunch())
 
     // Divorce2
-    lexicon.addMapping(WordPerson(buildHuman("George", "", Gender.Male.name)))
 
     // Disambiguate
     lexicon.addMapping(WordMeasureQuantity())
@@ -330,7 +318,7 @@ class WordLunch: WordHandler(EntryWord("lunch")) {
     override fun build(wordContext: WordContext): List<Demon> {
         val lexicalConcept = lexicalConcept(wordContext, "M-Meal") {
             expectHead("eater-a", headValue = "Human", direction = SearchDirection.Before)
-            expectPrep("eater-b", preps = listOf(Preposition.With), matcher=matchConceptByHead(InDepthUnderstandingConcepts.Human.name))
+            expectPrep("eater-b", preps = listOf(Preposition.With), matcher= matchConceptByHead(InDepthUnderstandingConcepts.Human.name))
             slot("event", "EV-LUNCH") // FIXME find associated event
 
             // FIXME slot("kind", "Act")

@@ -1,5 +1,6 @@
 package info.dgjones.au.grammar
 
+import info.dgjones.au.concept.*
 import info.dgjones.au.narrative.InDepthUnderstandingConcepts
 import info.dgjones.au.parser.*
 
@@ -45,6 +46,37 @@ fun LexicalConceptBuilder.expectPrep(slotName: String, variableName: String? = n
     root.addDemon(demon)
 }
 
+// Word Senses
+
+fun buildGrammarPropositionLexicon(lexicon: Lexicon) {
+    lexicon.addMapping(PrepositionWord(Preposition.With, setOf(InDepthUnderstandingConcepts.Human.name)))
+    lexicon.addMapping(PrepositionWord(Preposition.In, setOf(InDepthUnderstandingConcepts.PhysicalObject.name, InDepthUnderstandingConcepts.Setting.name)))
+    lexicon.addMapping(PrepositionWord(Preposition.By, setOf(InDepthUnderstandingConcepts.Setting.name)))
+}
+
+class PrepositionWord(val preposition: Preposition, val matchConcepts: Set<String>): WordHandler(EntryWord(preposition.name.toLowerCase())) {
+    override fun build(wordContext: WordContext): List<Demon> {
+        wordContext.defHolder.value = buildPrep(preposition)
+        wordContext.defHolder.addFlag(ParserFlags.Ignore)
+
+        val matcher = matchConceptByHead(matchConcepts)
+        val addPrepObj = InsertAfterDemon(matcher, wordContext) {
+            if (wordContext.isDefSet()) {
+                val itValue = it.value
+                val holderValue = wordContext.defHolder.value
+                if (itValue != null && holderValue != null) {
+                    withPreposition(itValue, preposition)
+                    wordContext.defHolder.addFlag(ParserFlags.Inside)
+                    println("Updated with preposition=$preposition concept=${it}")
+                }
+            }
+        }
+        return listOf(addPrepObj)
+    }
+}
+
+// Demons
+
 class PrepDemon(val matcher: ConceptMatcher, val direction: SearchDirection = SearchDirection.Before, wordContext: WordContext, val action: (ConceptHolder) -> Unit): Demon(wordContext) {
     var found: ConceptHolder? = null
 
@@ -89,53 +121,3 @@ class PrepDemon(val matcher: ConceptMatcher, val direction: SearchDirection = Se
         return "PrepDemon $matcher"
     }
 }
-
-fun buildGrammarPropositionLexicon(lexicon: Lexicon) {
-    lexicon.addMapping(PrepositionWord(Preposition.With, setOf(InDepthUnderstandingConcepts.Human.name)))
-    lexicon.addMapping(PrepositionWord(Preposition.In, setOf(InDepthUnderstandingConcepts.PhysicalObject.name, InDepthUnderstandingConcepts.Setting.name)))
-    lexicon.addMapping(PrepositionWord(Preposition.By, setOf(InDepthUnderstandingConcepts.Setting.name)))
-}
-
-class PrepositionWord(val preposition: Preposition, val matchConcepts: Set<String>): WordHandler(EntryWord(preposition.name.toLowerCase())) {
-    override fun build(wordContext: WordContext): List<Demon> {
-        wordContext.defHolder.value = buildPrep(preposition)
-        wordContext.defHolder.addFlag(ParserFlags.Ignore)
-
-        val matcher = matchConceptByHead(matchConcepts)
-        val addPrepObj = InsertAfterDemon(matcher, wordContext) {
-            if (wordContext.isDefSet()) {
-                val itValue = it.value
-                val holderValue = wordContext.defHolder.value
-                if (itValue != null && holderValue != null) {
-                    withPreposition(itValue, preposition)
-                    wordContext.defHolder.addFlag(ParserFlags.Inside)
-                    println("Updated with preposition=$preposition concept=${it}")
-                }
-            }
-        }
-        return listOf(addPrepObj)
-    }
-}
-
-/* FIXME remove
-class WordWith: WordHandler(EntryWord("with")) {
-    override fun build(wordContext: WordContext): List<Demon> {
-        val preposition = Preposition.With
-        wordContext.defHolder.value = buildPrep(preposition)
-
-        val matcher = matchConceptByHead(setOf(InDepthUnderstandingConcepts.Human.name))
-        val addPrepObj = InsertAfterDemon(matcher, wordContext) {
-            if (wordContext.isDefSet()) {
-                val itValue = it.value
-                val holderValue = wordContext.defHolder.value
-                if (itValue != null && holderValue != null) {
-                    withPreposition(itValue, preposition)
-                    wordContext.defHolder.addFlag(ParserFlags.Inside)
-                    println("Updated with prepobj concept=${it}")
-                }
-            }
-        }
-        return listOf(addPrepObj)
-    }
-}
-*/

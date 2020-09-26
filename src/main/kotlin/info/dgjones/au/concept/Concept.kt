@@ -1,4 +1,4 @@
-package info.dgjones.au.parser
+package info.dgjones.au.concept
 
 data class Concept(val name: String) {
     private val slots = mutableMapOf<String, Slot>()

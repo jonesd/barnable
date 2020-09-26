@@ -1,5 +1,7 @@
 package info.dgjones.au.narrative
 
+import info.dgjones.au.concept.CoreFields
+import info.dgjones.au.domain.general.*
 import info.dgjones.au.parser.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test

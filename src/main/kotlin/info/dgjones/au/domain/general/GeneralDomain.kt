@@ -5,4 +5,6 @@ import info.dgjones.au.parser.Lexicon
 fun buildGeneralDomainLexicon(lexicon: Lexicon) {
     buildGeneralFoodLexicon(lexicon)
     buildGeneralLiquidLexicon(lexicon)
+    buildGeneralHumanLexicon(lexicon)
+    buildGeneralPhysicalObjectsLexicon(lexicon)
 }

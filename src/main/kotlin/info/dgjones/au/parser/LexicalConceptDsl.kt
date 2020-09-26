@@ -1,5 +1,9 @@
 package info.dgjones.au.parser
 
+import info.dgjones.au.concept.*
+import info.dgjones.au.domain.general.Gender
+import info.dgjones.au.domain.general.buildHuman
+
 class LexicalRootBuilder(val wordContext: WordContext, val headName: String) {
     val root = LexicalConceptBuilder(this, headName)
 

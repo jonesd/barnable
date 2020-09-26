@@ -1,4 +1,4 @@
-package info.dgjones.au.parser
+package info.dgjones.au.concept
 
 fun buildConceptPathAccessor(concept: Concept, targetSlotName: String): ConceptSlotAccessor? {
     val path = ConceptPathBuilder(concept, targetSlotName).build(concept)

@@ -1,5 +1,11 @@
 package info.dgjones.au.parser
 
+import info.dgjones.au.concept.Concept
+import info.dgjones.au.concept.ConceptMatcher
+import info.dgjones.au.concept.CoreFields
+import info.dgjones.au.concept.Slot
+import info.dgjones.au.domain.general.Human
+import info.dgjones.au.domain.general.characterMatcher
 import info.dgjones.au.narrative.InDepthUnderstandingConcepts
 import info.dgjones.au.narrative.Marriage
 
