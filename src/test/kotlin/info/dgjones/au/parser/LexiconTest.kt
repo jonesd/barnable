@@ -142,6 +142,33 @@ class LexiconTest {
         assertEquals(listOf("one"), lexical1.morphologies.map {it.full})
     }
 
+    @Test
+    fun `no suffix words should only match entry word`() {
+        val lexicon = Lexicon()
+        val handlerMrs = withWordMapping(lexicon, "mrs", noSuffix = true)
+        val handlerMr = withWordMapping(lexicon, "mr", noSuffix = true)
+
+        // test
+        val lexicalItems = lexicon.lookupInitialWord("mrs")
+
+        assertEquals(1, lexicalItems.size)
+        assertEquals(1, lexicalItems.first().morphologies.size)
+        val morphologyWord0 = lexicalItems.first().morphologies.first()
+        assertEquals(WordMorphology("mrs", "", "mrs"), morphologyWord0)
+        assertEquals(handlerMrs, lexicalItems.first().handler)
+    }
+
+    @Test
+    fun `should not generate suffixes for noSuffix word`() {
+        val lexicon = Lexicon()
+        val handlerMr = withWordMapping(lexicon, "mr", noSuffix = true)
+
+        // test
+        val lexicalItems = lexicon.lookupInitialWord("mrs")
+
+        assertEquals(0, lexicalItems.size)
+    }
+
     // FIXME what about word handler special overrides - past, extra....
 /*
     @Test
@@ -157,8 +184,8 @@ class LexiconTest {
     }
     */
 
-    private fun withWordMapping(lexicon: Lexicon, word: String, expression: List<String> = listOf(word)): WordHandler {
-        val handler = WordHandler(EntryWord(word, expression))
+    private fun withWordMapping(lexicon: Lexicon, word: String, expression: List<String> = listOf(word), noSuffix:Boolean = false): WordHandler {
+        val handler = WordHandler(EntryWord(word, expression, noSuffix = noSuffix))
         lexicon.addMapping(handler)
         return handler
     }

@@ -40,8 +40,15 @@ class WordMorphologyBuilder(val root: String) {
         } else if (root.length >= 3 && isConsonant(root[root.length-2]) && root.last()== 'y') {
             full = root.dropLast(1) + "ied"
         }
+        suffixEdIrregular[root]?.let {
+            full = it
+        }
         return WordMorphology(root, "ed", full)
     }
+
+    private val suffixEdIrregular = mapOf(
+        "have" to "had"
+    )
 
     // 1.Used to form gerunds, a type of verbal nouns, from verbs.
     //        [ forging Trying]

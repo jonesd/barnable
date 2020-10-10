@@ -140,10 +140,10 @@ class NarrativeDomainTest {
 
         assertEquals(1, textProcessor.workingMemory.concepts.size)
         val meal = textProcessor.workingMemory.concepts[0]
-        assertEquals("M-Meal", meal.name)
-        assertEquals("John", meal.value("eater-a")?.valueName("firstName"))
-        assertEquals("George", meal.value("eater-b")?.valueName("firstName"))
-        assertEquals("EV-LUNCH", meal.valueName("event"))
+        assertEquals("MopMeal", meal.name)
+        assertEquals("John", meal.value("eaterA")?.valueName("firstName"))
+        assertEquals("George", meal.value("eaterB")?.valueName("firstName"))
+        assertEquals("EventEatMeal", meal.valueName("event"))
     }
 
     @Test
@@ -161,9 +161,9 @@ class NarrativeDomainTest {
         // FIXME implement
         assertEquals(1, textProcessor.workingMemory.concepts.size)
         val meal = textProcessor.workingMemory.concepts[0]
-        assertEquals("M-Meal", meal.name)
-        assertEquals("John0", meal.value(MealFields.EATER_A)?.valueName(CoreFields.INSTANCE))
-        assertEquals("Ann0", meal.value(MealFields.EATER_B)?.valueName(CoreFields.INSTANCE))
+        assertEquals(MopMeal.MopMeal.name, meal.name)
+        assertEquals("John0", meal.value(MopMealFields.EATER_A)?.valueName(CoreFields.INSTANCE))
+        assertEquals("Ann0", meal.value(MopMealFields.EATER_B)?.valueName(CoreFields.INSTANCE))
     }
 
     @Test

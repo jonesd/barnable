@@ -8,7 +8,7 @@ enum class Human(override val fieldName: String): Fields {
     CONCEPT("Human"),
     FIRST_NAME("firstName"),
     LAST_NAME("lastName"),
-    GENDER("gender");
+    GENDER("gender")
 }
 
 enum class Gender {
@@ -77,7 +77,5 @@ class WordPerson(val human: Concept, word: String = human.valueName(Human.FIRST_
             checkCharacter(CoreFields.INSTANCE.fieldName)
         }
         return lexicalConcept.demons
-        // Fixme - not sure about the load/reuse
-        // FIXME return listOf(LoadCharacterDemon(human, wordContext), SaveCharacterDemon(wordContext))
     }
 }

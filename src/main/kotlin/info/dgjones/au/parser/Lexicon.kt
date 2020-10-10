@@ -54,6 +54,9 @@ class Lexicon {
     }
 
     private fun addMorphologyMappingsForInitialWord(handler: WordHandler) {
+        if (handler.word.noSuffix) {
+            return
+        }
         val entries = wordMorphologies(handler.word.word)
         entries.forEach {
             val key = it.full.toLowerCase()

@@ -1,17 +1,18 @@
 package info.dgjones.au.parser
 
-import info.dgjones.au.concept.Concept
-import info.dgjones.au.concept.ConceptMatcher
-import info.dgjones.au.concept.CoreFields
-import info.dgjones.au.concept.Slot
+import info.dgjones.au.concept.*
 import info.dgjones.au.domain.general.Human
 import info.dgjones.au.domain.general.characterMatcher
 import info.dgjones.au.narrative.InDepthUnderstandingConcepts
 import info.dgjones.au.narrative.Marriage
+import info.dgjones.au.narrative.MopMeal
+import info.dgjones.au.narrative.MopMealFields
 
 typealias EpisodicInstance = String
 
 typealias EpisodicConcept = Concept
+
+typealias EpisodicConceptMap = MutableMap<EpisodicInstance, EpisodicConcept>
 
 class IndexedNameGenerator {
     val nextIndexes = mutableMapOf<String, Int>()
@@ -30,11 +31,14 @@ class IndexedNameGenerator {
     fun episodicId(concept: Concept): String = episodicId(concept.name)
 }
 
+
 class EpisodicMemory {
     val indexGenerator = IndexedNameGenerator()
 
     val relationships = mutableMapOf<EpisodicInstance, EpisodicConcept>()
-    val characters = mutableMapOf<EpisodicInstance, Concept>()
+    val characters = mutableMapOf<EpisodicInstance, EpisodicConcept>()
+    val mops = mutableMapOf<EpisodicInstance, EpisodicConcept>()
+    val events = mutableMapOf<EpisodicInstance, EpisodicConcept>()
 
     val concepts = mutableListOf<EpisodicConcept>()
 
@@ -67,6 +71,37 @@ class EpisodicMemory {
     // FIXME Recency for access - should move used element to head of list
     // FIXME use a linked list
 
+    fun initializeCharacterSlotFrom(concept: Concept, field: Fields, episodicConcept: EpisodicConcept) {
+        val conceptValue = concept.value(field)
+        val episodicValue = if (isConceptResolved(conceptValue)) checkOrCreateCharacter(conceptValue) else null
+        println("EP Character ${field.fieldName} <== $episodicValue")
+        episodicConcept.with(Slot(field, episodicValue))
+    }
+
+    fun initializeEventSlotFrom(concept: Concept, field: Fields, episodicConcept: EpisodicConcept) {
+        val conceptValue = concept.value(field)
+        // FIXME should we be creating event instances? val episodicValue =  checkOrCreateEvent(if (isConceptResolved(conceptValue)) conceptValue else null)
+        val episodicValue =  if (isConceptResolved(conceptValue)) conceptValue else null
+        println("EP Event ${field.fieldName} <== $episodicValue")
+        episodicConcept.with(Slot(field, episodicValue))
+    }
+
+    // FIXME support multiple Mops of the same type!
+    fun findExistingEpisodicMop(concept: Concept?): EpisodicConcept? {
+        concept?.name?.let { conceptHead ->
+            return mops.values.firstOrNull(matchConceptByHead(conceptHead))
+        }
+        return null
+    }
+
+    fun createBareEpisodicConceptFrom(concept: Concept, map: EpisodicConceptMap): EpisodicConcept {
+        val episodicConcept = EpisodicConcept(concept.name)
+        val episodicId = indexGenerator.episodicId(concept)
+        episodicConcept.with(Slot(CoreFields.INSTANCE, EpisodicConcept(episodicId)))
+        map[episodicId] = episodicConcept
+        return episodicConcept
+    }
+
     fun checkOrCreateRelationship(concept: Concept): EpisodicInstance {
         // FIXME always assume it is new
         // FIXME should be general - not marriage...
@@ -85,6 +120,36 @@ class EpisodicMemory {
         return episodicId
     }
 
+    fun episodicRoleCheck(episodicConcept: EpisodicConcept, slotUpdate: Slot) {
+        when (episodicConcept.name) {
+            MopMeal.MopMeal.name -> updateMopMeal(episodicConcept, slotUpdate)
+            InDepthUnderstandingConcepts.Human.name -> updateCharacter(episodicConcept, slotUpdate)
+            else -> {
+                println("EP WARNING! Unhandled episodicConcept update ${episodicConcept.name}")
+            }
+        }
+    }
+
+    fun updateMopMeal(episodicConcept: EpisodicConcept, slotUpdate: Slot) {
+        //FIXME may need to use deepcopy...
+        println("EP UpdateMopMeal ${episodicConcept.name} $slotUpdate")
+        when (slotUpdate.name) {
+            MopMealFields.Event.fieldName -> slotUpdate.copyValue(episodicConcept)
+            MopMealFields.EATER_A.fieldName -> episodicConcept.value(MopMealFields.EATER_A, checkOrCreateCharacter(slotUpdate.value))
+            MopMealFields.EATER_B.fieldName -> episodicConcept.value(MopMealFields.EATER_B, checkOrCreateCharacter(slotUpdate.value))
+            else -> println("EP UpdateMopMeal - no slot match for update $slotUpdate")
+        }
+    }
+
+    fun updateCharacter(episodicConcept: EpisodicConcept, slotUpdate: Slot) {
+        //FIXME may need to use deepcopy...
+        when (slotUpdate.name) {
+            Human.FIRST_NAME.fieldName -> slotUpdate.copyValue(episodicConcept)
+            Human.LAST_NAME.fieldName -> slotUpdate.copyValue(episodicConcept)
+            Human.GENDER.fieldName -> slotUpdate.copyValue(episodicConcept)
+            else -> println("EP UpdateCharacter - no slot match for update $slotUpdate")
+        }
+        }
     fun checkOrCreateCharacter(human: Concept?): EpisodicConcept {
         if (human != null) {
             val episodicCharacter = findEpisodicCharacter(human)
@@ -93,14 +158,14 @@ class EpisodicMemory {
             }
         }
         val character = EpisodicConcept(InDepthUnderstandingConcepts.Human.name)
-        val episodicInstance = indexGenerator.episodicId(
-            listOf(human?.valueName(Human.FIRST_NAME) , human?.valueName(Human.LAST_NAME), Human.CONCEPT.fieldName))
         if (human != null) {
-            character.with(Slot(Human.FIRST_NAME, Concept(human.valueName(Human.FIRST_NAME, ""))))
-            character.with(Slot(Human.LAST_NAME, Concept(human.valueName(Human.LAST_NAME, ""))))
-            character.with(Slot(Human.GENDER, Concept(human.valueName(Human.GENDER, ""))))
-            character.with(Slot(CoreFields.INSTANCE, Concept(episodicInstance)))
+            character.with(human.duplicateResolvedSlot(Human.FIRST_NAME))
+            character.with(human.duplicateResolvedSlot(Human.LAST_NAME))
+            character.with(human.duplicateResolvedSlot(Human.GENDER))
         }
+        val episodicInstance = indexGenerator.episodicId(
+            listOf(character.valueName(Human.FIRST_NAME), character.valueName(Human.LAST_NAME), Human.CONCEPT.fieldName))
+        character.with(Slot(CoreFields.INSTANCE, Concept(episodicInstance)))
         characters[episodicInstance] = character
         return character
     }
@@ -117,6 +182,7 @@ class EpisodicMemory {
     fun dumpMemory() {
         println("Episodic Characters = ${characters.values}")
         println("Episodic Relationships = ${relationships.values}")
+        println("Episodic MOPs = ${mops.values}")
     }
 }
 

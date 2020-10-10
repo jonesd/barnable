@@ -1,10 +1,8 @@
-package info.dgjones.au.parser
+package info.dgjones.au.concept
 
-import info.dgjones.au.concept.Concept
-import info.dgjones.au.concept.matchConceptByHead
-import info.dgjones.au.concept.matchNever
 import info.dgjones.au.nlp.TextSentence
 import info.dgjones.au.nlp.WordElement
+import info.dgjones.au.parser.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 

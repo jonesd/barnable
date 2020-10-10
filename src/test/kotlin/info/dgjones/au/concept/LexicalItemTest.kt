@@ -1,6 +1,9 @@
-package info.dgjones.au.parser
+package info.dgjones.au.concept
 
 import info.dgjones.au.nlp.WordMorphology
+import info.dgjones.au.parser.EntryWord
+import info.dgjones.au.parser.LexicalItem
+import info.dgjones.au.parser.WordIgnore
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
@@ -34,7 +37,8 @@ class LexicalItemTest {
                 WordMorphology("is"),
                 WordMorphology("need", "ed", "needed")
             ),
-            WordIgnore(EntryWord("test")))
+            WordIgnore(EntryWord("test"))
+        )
 
         assertEquals("testing is needed", lexicalItem.textFragment())
     }

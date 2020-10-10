@@ -37,11 +37,16 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     lexicon.addMapping(WordEats())
 
     lexicon.addMapping(WordPerson(buildHuman("", "", Gender.Female.name), "woman"))
-    lexicon.addMapping(WordPerson(buildHuman("", "", Gender.Female.name), "man"))
+    lexicon.addMapping(WordPerson(buildHuman("", "", Gender.Male.name), "man"))
+
+
     lexicon.addMapping(WordPronoun("hers", Gender.Female, Case.Possessive))
     lexicon.addMapping(WordPronoun("his", Gender.Male, Case.Possessive))
     lexicon.addMapping(WordPronoun("her", Gender.Female, Case.Objective))
     lexicon.addMapping(WordPronoun("him", Gender.Male, Case.Objective))
+    // FIXME why aren't these WordPronoun?
+    lexicon.addMapping(PronounWord("he", Gender.Male))
+    lexicon.addMapping(PronounWord("she", Gender.Female))
 
     // Modifiers
     lexicon.addMapping(ModifierWord("red", "colour"))
@@ -52,10 +57,6 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     lexicon.addMapping(ModifierWord("young", "age", "LT-NORM"))
 
     lexicon.addMapping(WordYesterday())
-
-    // pronoun
-    lexicon.addMapping(PronounWord("he", Gender.Male))
-    lexicon.addMapping(PronounWord("she", Gender.Female))
 
     lexicon.addMapping(WordHusband())
     lexicon.addMapping(WordWife())
@@ -316,11 +317,11 @@ class WordHungry: WordHandler(EntryWord("hungry")) {
 // InDepth
 class WordLunch: WordHandler(EntryWord("lunch")) {
     override fun build(wordContext: WordContext): List<Demon> {
-        val lexicalConcept = lexicalConcept(wordContext, "M-Meal") {
-            expectHead("eater-a", headValue = "Human", direction = SearchDirection.Before)
-            expectPrep("eater-b", preps = listOf(Preposition.With), matcher= matchConceptByHead(InDepthUnderstandingConcepts.Human.name))
-            slot("event", "EV-LUNCH") // FIXME find associated event
-
+        val lexicalConcept = lexicalConcept(wordContext, MopMeal.MopMeal.name) {
+            expectHead(MopMealFields.EATER_A.fieldName, headValue = "Human", direction = SearchDirection.Before)
+            expectPrep(MopMealFields.EATER_B.fieldName, preps = listOf(Preposition.With), matcher= matchConceptByHead(InDepthUnderstandingConcepts.Human.name))
+            slot(MopMealFields.Event, MopMeal.EventEatMeal.name) // FIXME find associated event
+            checkMop(CoreFields.INSTANCE.fieldName)
             // FIXME slot("kind", "Act")
         }
         return lexicalConcept.demons
@@ -479,7 +480,7 @@ class WordHusband: WordHandler(EntryWord("husband")) {
     }
 }
 
-class TitleWord(word: String, val gender: Gender): WordHandler(EntryWord(word)) {
+class TitleWord(word: String, val gender: Gender): WordHandler(EntryWord(word, noSuffix = true)) {
     override fun build(wordContext: WordContext): List<Demon> {
         val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
             slot(Human.FIRST_NAME, "")
@@ -489,8 +490,6 @@ class TitleWord(word: String, val gender: Gender): WordHandler(EntryWord(word)) 
             checkCharacter(CoreFields.INSTANCE.fieldName)
         }
         return lexicalConcept.demons
-        // Fixme - not sure about the load/reuse
-        // FIXME return listOf(LoadCharacterDemon(human, wordContext), SaveCharacterDemon(wordContext))
     }
     override fun disambiguationDemons(wordContext: WordContext, disambiguationHandler: DisambiguationHandler): List<Demon> {
         return listOf(

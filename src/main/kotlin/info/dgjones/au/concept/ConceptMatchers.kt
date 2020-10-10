@@ -55,7 +55,7 @@ class ConceptMatcherBuilder {
         return this
     }
     fun matchSetField(valueName: Fields, match: String?): ConceptMatcherBuilder {
-        if (match != null && match.isNotBlank()) {
+        if (match != null && isConceptValueResolved(match) /* FIXME?match != null && match.isNotBlank()*/) {
             matchers.add(matchConceptValueName(valueName, match))
         }
         return this

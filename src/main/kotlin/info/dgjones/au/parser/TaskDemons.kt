@@ -6,6 +6,7 @@ import info.dgjones.au.domain.general.Human
 import info.dgjones.au.grammar.*
 import info.dgjones.au.narrative.HumanAccessor
 import info.dgjones.au.narrative.InDepthUnderstandingConcepts
+import info.dgjones.au.narrative.checkOrCreateMop
 
 class ExpectDemon(val matcher: ConceptMatcher, val direction: SearchDirection, wordContext: WordContext, val action: (ConceptHolder) -> Unit): Demon(wordContext) {
     var found: ConceptHolder? = null
@@ -56,11 +57,22 @@ class ExpectDemon(val matcher: ConceptMatcher, val direction: SearchDirection, w
 class CheckCharacterDemon(val human: Concept, wordContext: WordContext, val action: (Concept?) -> Unit): Demon(wordContext) {
     override fun run() {
         val matchedCharacter = wordContext.context.episodicMemory.checkOrCreateCharacter(human)
-        action(matchedCharacter.value(CoreFields.INSTANCE))
+        action(matchedCharacter)
         active = false
     }
     override fun description(): String {
         return "CheckCharacter from episodic with ${human.valueName(Human.FIRST_NAME)} ${human.valueName(Human.GENDER)}"
+    }
+}
+
+class CheckMopDemon(val mop: Concept, wordContext: WordContext, val action: (Concept?) -> Unit): Demon(wordContext) {
+    override fun run() {
+        val matchedMop = wordContext.context.episodicMemory.checkOrCreateMop(mop)
+        action(matchedMop)
+        active = false
+    }
+    override fun description(): String {
+        return "CheckMOP from episodic with ${mop.name}"
     }
 }
 
@@ -278,7 +290,7 @@ class ExpectActor(wordContext: WordContext, val action: (ConceptHolder) -> Unit)
         }
     }
     override fun description(): String {
-        return "Seach backwards for a Human Actor.\nOn encountering a Voice=Passive then switch to forward search for 'by' Human Actor."
+        return "Search backwards for a Human Actor.\nOn encountering a Voice=Passive then switch to forward search for 'by' Human Actor."
     }
 }
 
@@ -305,5 +317,16 @@ class ExpectThing(val headValues: List<String>, wordContext: WordContext, val ac
     }
     override fun description(): String {
         return "Search forwards for the object of an Act.\nOn encountering a By preposition then switch to backword search for object."
+    }
+}
+
+class EpisodicRoleCheck(val mop: Concept, wordContext: WordContext, val action: (Concept?) -> Unit): Demon(wordContext) {
+    override fun run() {
+        val matchedMop = wordContext.context.episodicMemory.checkOrCreateMop(mop)
+        action(matchedMop)
+        active = false
+    }
+    override fun description(): String {
+        return "CheckMOP from episodic with ${mop.name}"
     }
 }

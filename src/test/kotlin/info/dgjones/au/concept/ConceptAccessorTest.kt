@@ -1,4 +1,4 @@
-package info.dgjones.au.parser
+package info.dgjones.au.concept
 
 import info.dgjones.au.concept.Concept
 import info.dgjones.au.concept.Slot

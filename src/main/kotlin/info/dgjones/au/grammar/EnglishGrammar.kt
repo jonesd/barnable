@@ -44,6 +44,7 @@ enum class Voice {
 fun buildEnglishGrammarLexicon(lexicon: Lexicon) {
     buildGrammarConjunctionLexicon(lexicon)
     buildGrammarPropositionLexicon(lexicon)
+    buildGrammarPunctuationLexicon(lexicon)
 
     lexicon.addMapping(WordIt())
     lexicon.addMapping(WordHave())

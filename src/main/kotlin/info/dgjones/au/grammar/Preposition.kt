@@ -4,6 +4,11 @@ import info.dgjones.au.concept.*
 import info.dgjones.au.narrative.InDepthUnderstandingConcepts
 import info.dgjones.au.parser.*
 
+/*
+"A word, normally non-inflecting, that is typically employed to connect a following noun or pronoun, in an adjectival or
+adverbial sense, with some other word. Examples of prepositions in English are in, from and during."
+https://en.wiktionary.org/wiki/Appendix:Glossary#preposition
+ */
 enum class Preposition {
     By,
     In,
@@ -41,7 +46,7 @@ fun LexicalConceptBuilder.expectPrep(slotName: String, variableName: String? = n
     )
     )
     val demon = PrepDemon(matchers, SearchDirection.After, root.wordContext) {
-        root.completeVariable(variableSlot, it)
+        root.completeVariable(variableSlot, it, this.episodicConcept)
     }
     root.addDemon(demon)
 }

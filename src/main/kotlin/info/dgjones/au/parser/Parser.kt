@@ -1,8 +1,8 @@
 package info.dgjones.au.parser
 
 import info.dgjones.au.concept.Concept
+import info.dgjones.au.concept.lexicalConcept
 import info.dgjones.au.grammar.buildSuffixDemon
-import info.dgjones.au.narrative.Acts
 import info.dgjones.au.narrative.InDepthUnderstandingConcepts
 import info.dgjones.au.narrative.buildInDepthUnderstandingLexicon
 import info.dgjones.au.nlp.*
@@ -58,6 +58,14 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
         endSentence(context)
     }
 
+    fun processQuestion(sentence: TextSentence): MutableList<Concept> {
+        qaMode = true
+        qaMemory = WorkingMemory()
+        processSentence(sentence)
+        return qaMemory.concepts
+    }
+
+    /* FIXME extract
     fun processQuestion(sentence: TextSentence): String {
         qaMode = true
         qaMemory = WorkingMemory()
@@ -104,7 +112,7 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
                  }
          }
          return null
-     }
+     }*/
 
     private fun endSentence(context: SentenceContext) {
         val memory = if (qaMode) qaMemory else workingMemory
@@ -341,7 +349,7 @@ open class WordHandler(val word: EntryWord) {
     }
 }
 
-open class EntryWord(val word: String, val expression: List<String> = listOf(word)) {
+open class EntryWord(val word: String, val expression: List<String> = listOf(word), val noSuffix: Boolean = false) {
     val pastWords = mutableListOf<String>()
     val extras = mutableListOf<String>()
 

@@ -1,5 +1,6 @@
 package info.dgjones.au.narrative
 
+import info.dgjones.au.concept.lexicalConcept
 import info.dgjones.au.parser.*
 
 //FIXME introduce more flexible approach to quantity/numbers

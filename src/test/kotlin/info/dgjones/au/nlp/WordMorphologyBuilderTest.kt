@@ -29,6 +29,10 @@ class WordMorphologyBuilderTest {
             assertEquals("admitted", WordMorphologyBuilder("admit").suffixEd()?.full)
             assertEquals("begged", WordMorphologyBuilder("beg").suffixEd()?.full)
         }
+        @Test
+        fun edForIrregular() {
+            assertEquals("had", WordMorphologyBuilder("have").suffixEd()?.full)
+        }
     }
     @Nested
     inner class SuffixIng {
