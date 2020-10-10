@@ -18,7 +18,7 @@ class WordWho: WordHandler(EntryWord("who")) {
     override fun build(wordContext: WordContext): List<Demon> {
         val lexicalConcept = lexicalConcept(wordContext, "WhoAnswer") {
             expectHead("actor", headValue = "Human", direction = SearchDirection.After)
-            //FIXME hack for first test...
+            // FIXME brittle hack for first test... perhaps this should be event matching
             expectHead("act", headValue = MopMeal.MopMeal.name, direction = SearchDirection.After)
         }
         return lexicalConcept.demons

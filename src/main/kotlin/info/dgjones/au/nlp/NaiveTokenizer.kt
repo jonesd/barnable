@@ -1,12 +1,13 @@
 package info.dgjones.au.nlp
 
 class NaiveTokenizer {
-    val stemmer = StansStemmer()
-
-    val abbreviations = setOf("dr", "mr", "mrs",
+    private val abbreviations = setOf("dr", "mr", "mrs",
     "ave", "blvd", "cyn", "dr", "ln", "rd", "st",
     "no", "tel", "temp", "vet", "vs", "misc", "min", "max", "est", "dept",
     "apt", "appt", "approx")
+
+    private val endOfLineMarkers = setOf('.', '!', '?')
+    private val endOfClauseMarkers = setOf(',', ';', ':')
 
     fun tokenizeText(documentText: String): TextModel {
         val paragraphsText = splitIntoParagraphs(documentText)
@@ -37,25 +38,27 @@ class NaiveTokenizer {
     }
 
     private fun isWordMarksEndOfSentence(it: String): Boolean {
-        return it == "." || it == "?"
+        return it.length == 1 && endOfLineMarkers.contains(it.first())
     }
 
     fun splitTextIntoWords(paragraphText: String): List<String> {
         val units = paragraphText.split("""(?U)\s+""".toRegex())
         val words = mutableListOf<String>()
-        units.forEach {
-            if (it.endsWith(",")) {
-                words.add(it.substringBeforeLast(','))
-                words.add(",")
+        units.filter { it.isNotEmpty() }.forEach {
+            if (endOfClauseMarkers.contains(it.last())) {
+                words.add(it.dropLast(1))
+                words.add(it.last().toString())
             } else {
                 words.add(it)
             }
         }
         val words2 = mutableListOf<String>()
         words.forEach {
-            if (it.endsWith(".") && !isAbbreviation(it)) {
-                words2.add(it.substringBeforeLast('.'))
-                words2.add(".")
+            if (it.endsWith(".") && isAbbreviation(it)) {
+                words2.add(it)
+            } else if (endOfLineMarkers.contains(it.last())) {
+                words2.add(it.dropLast(1))
+                words2.add(it.last().toString())
             } else {
                 words2.add(it)
             }
@@ -70,7 +73,7 @@ class NaiveTokenizer {
 
     // Splits text into paragraphs for the simple case of end-of-line markers indicating
     // a paragraph break.
-    fun splitIntoParagraphs(text: String): List<String> {
+    private fun splitIntoParagraphs(text: String): List<String> {
         return text.lines().map { it.trim() }.filter { it.isNotBlank() }
     }
 }

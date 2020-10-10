@@ -50,7 +50,7 @@ class QATest {
             // Question
 
             var qa = QuestionProcessor(textProcessor)
-            val result = qa.question(buildTextModel("Who did John have lunch with ?"))
+            val result = qa.question(buildTextModel("Who did John have lunch with?"))
 
             assertEquals(1, result.sentenceResult.size)
             val answerConcept = result.sentenceResult[0]
