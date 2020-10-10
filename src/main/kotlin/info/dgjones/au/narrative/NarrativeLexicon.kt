@@ -328,7 +328,8 @@ class WordLunch: WordHandler(EntryWord("lunch")) {
     }
 }
 
-class WordEats: WordHandler(EntryWord("eats")) {
+//FIXME differentiate between eat food vs eat meal?
+class WordEats: WordHandler(EntryWord("eat")) {
     override fun build(wordContext: WordContext): List<Demon> {
         val lexicalConcept = lexicalConcept(wordContext, Acts.INGEST.name) {
             expectHead("actor", headValue = "Human", direction = SearchDirection.Before)

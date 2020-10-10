@@ -155,3 +155,13 @@ fun copyCompletedSlot(slotName: Fields, source: Concept, destination: Concept) {
         }
     }
 }
+
+// Key value for the concept
+fun selectKeyValue(concept: Concept, vararg fieldNames: Fields) =
+    selectKeyValue(concept, fieldNames.map {it.fieldName()})
+
+fun selectKeyValue(concept: Concept, fieldNames: List<String>) =
+    fieldNames.map { concept.valueName(it)}
+        .filter { it != null && it.isNotBlank() }
+        .firstOrNull() ?: concept.name
+

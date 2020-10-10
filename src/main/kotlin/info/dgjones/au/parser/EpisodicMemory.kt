@@ -3,6 +3,7 @@ package info.dgjones.au.parser
 import info.dgjones.au.concept.*
 import info.dgjones.au.domain.general.Human
 import info.dgjones.au.domain.general.characterMatcher
+import info.dgjones.au.domain.general.humanKeyValue
 import info.dgjones.au.narrative.InDepthUnderstandingConcepts
 import info.dgjones.au.narrative.Marriage
 import info.dgjones.au.narrative.MopMeal
@@ -18,14 +19,9 @@ class IndexedNameGenerator {
     val nextIndexes = mutableMapOf<String, Int>()
 
     fun episodicId(name: String): String {
-        val index = nextIndexes.getOrDefault(name, 0)
+        val index = nextIndexes.getOrDefault(name ?: "noname", 0)
         nextIndexes[name] = index + 1
         return name + index
-    }
-
-    fun episodicId(names: List<String?>): String {
-        val name = names.firstOrNull { it != null && it.isNotEmpty() }
-        return episodicId(name ?: "noname")
     }
 
     fun episodicId(concept: Concept): String = episodicId(concept.name)
@@ -163,8 +159,7 @@ class EpisodicMemory {
             character.with(human.duplicateResolvedSlot(Human.LAST_NAME))
             character.with(human.duplicateResolvedSlot(Human.GENDER))
         }
-        val episodicInstance = indexGenerator.episodicId(
-            listOf(character.valueName(Human.FIRST_NAME), character.valueName(Human.LAST_NAME), Human.CONCEPT.fieldName))
+        val episodicInstance = indexGenerator.episodicId(humanKeyValue(character))
         character.with(Slot(CoreFields.INSTANCE, Concept(episodicInstance)))
         characters[episodicInstance] = character
         return character

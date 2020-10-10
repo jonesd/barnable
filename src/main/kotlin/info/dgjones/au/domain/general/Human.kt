@@ -54,6 +54,9 @@ fun buildHuman(firstName: String? = "", lastName: String? = "", gender: String? 
         .with(Slot("gender", Concept(gender ?: "")))
 }
 
+fun humanKeyValue(human: Concept) =
+    selectKeyValue(human, Human.FIRST_NAME, Human.LAST_NAME)
+
 // Word Senses
 
 fun buildGeneralHumanLexicon(lexicon: Lexicon) {

@@ -192,4 +192,44 @@ class SlotTest {
             assertNull(duplicated.value)
         }
     }
+
+    @Nested
+    inner class KeyValue {
+        @Test
+        fun `select key value of concept based on field names`() {
+            val root = Concept("root")
+                .with(Slot("a", Concept("valueA")))
+                .with(Slot("b", Concept("valueB")))
+
+            val keyValue = selectKeyValue(root, listOf("b", "a"))
+            assertEquals("valueB", keyValue)
+        }
+        @Test
+        fun `select key value skips missing values`() {
+            val root = Concept("root")
+                .with(Slot("a", Concept("valueA")))
+                .with(Slot("b"))
+
+            val keyValue = selectKeyValue(root, listOf("b", "a"))
+            assertEquals("valueA", keyValue)
+        }
+        @Test
+        fun `select key value skips blank values`() {
+            val root = Concept("root")
+                .with(Slot("a", Concept("valueA")))
+                .with(Slot("b", Concept("")))
+
+            val keyValue = selectKeyValue(root, listOf("b", "a"))
+            assertEquals("valueA", keyValue)
+        }
+        @Test
+        fun `select key value falls back to head value`() {
+            val root = Concept("root")
+                .with(Slot("a"))
+                .with(Slot("b"))
+
+            val keyValue = selectKeyValue(root, listOf("b", "a"))
+            assertEquals("root", keyValue)
+        }
+    }
 }
