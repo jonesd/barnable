@@ -55,7 +55,7 @@ fun buildHuman(firstName: String? = "", lastName: String? = "", gender: String? 
 }
 
 fun humanKeyValue(human: Concept) =
-    selectKeyValue(human, Human.FIRST_NAME, Human.LAST_NAME)
+    human.selectKeyValue(Human.FIRST_NAME, Human.LAST_NAME)
 
 // Word Senses
 

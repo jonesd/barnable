@@ -201,7 +201,7 @@ class SlotTest {
                 .with(Slot("a", Concept("valueA")))
                 .with(Slot("b", Concept("valueB")))
 
-            val keyValue = selectKeyValue(root, listOf("b", "a"))
+            val keyValue = root.selectKeyValue(listOf("b", "a"))
             assertEquals("valueB", keyValue)
         }
         @Test
@@ -210,7 +210,7 @@ class SlotTest {
                 .with(Slot("a", Concept("valueA")))
                 .with(Slot("b"))
 
-            val keyValue = selectKeyValue(root, listOf("b", "a"))
+            val keyValue = root.selectKeyValue(listOf("b", "a"))
             assertEquals("valueA", keyValue)
         }
         @Test
@@ -219,7 +219,7 @@ class SlotTest {
                 .with(Slot("a", Concept("valueA")))
                 .with(Slot("b", Concept("")))
 
-            val keyValue = selectKeyValue(root, listOf("b", "a"))
+            val keyValue = root.selectKeyValue(listOf("b", "a"))
             assertEquals("valueA", keyValue)
         }
         @Test
@@ -228,7 +228,7 @@ class SlotTest {
                 .with(Slot("a"))
                 .with(Slot("b"))
 
-            val keyValue = selectKeyValue(root, listOf("b", "a"))
+            val keyValue = root.selectKeyValue(listOf("b", "a"))
             assertEquals("root", keyValue)
         }
     }
