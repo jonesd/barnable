@@ -54,6 +54,7 @@ fun LexicalConceptBuilder.expectPrep(slotName: String, variableName: String? = n
 // Word Senses
 
 fun buildGrammarPropositionLexicon(lexicon: Lexicon) {
+    // FIXME InDepth p304 "with" also needs to "determine social activity"
     lexicon.addMapping(PrepositionWord(Preposition.With, setOf(InDepthUnderstandingConcepts.Human.name)))
     lexicon.addMapping(PrepositionWord(Preposition.In, setOf(InDepthUnderstandingConcepts.PhysicalObject.name, InDepthUnderstandingConcepts.Setting.name)))
     lexicon.addMapping(PrepositionWord(Preposition.By, setOf(InDepthUnderstandingConcepts.Setting.name)))

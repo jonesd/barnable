@@ -70,6 +70,7 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     lexicon.addMapping(WordHungry())
     lexicon.addMapping(WordWalk())
     lexicon.addMapping(WordKnock())
+    lexicon.addMapping(WordPour())
 
     lexicon.addMapping(WordLunch())
 
@@ -80,6 +81,8 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     lexicon.addMapping(WordMeasureObject())
 
     // FIXME lexicon.addMapping(WordWas())
+
+    lexicon.addMapping(WordAnother())
 
     // FIXME only for QA
     lexicon.addMapping(WordWho())
@@ -176,6 +179,23 @@ class WordPickUp: WordHandler(EntryWord("picked", listOf("picked", "up"))/*.and(
     }
     fun description(): String {
         return "Picked Up"
+    }
+}
+
+class WordPour: WordHandler(EntryWord("pour")) {
+    override fun build(wordContext: WordContext): List<Demon> {
+        val lexicalConcept = lexicalConcept(wordContext, "GRASP") {
+            expectHead("actor", variableName = "actor", headValue = "Human", direction = SearchDirection.Before)
+            expectHead("thing", variableName = "thing", headValue = PhysicalObjectKind.Liquid.name)
+            slot("instr", "MOVE") {
+                varReference("actor", "actor")
+                slot("thing", BodyParts.Fingers.name)
+                varReference("to", "thing")
+                slot("kind", InDepthUnderstandingConcepts.Act.name)
+            }
+            slot("kind", "Act")
+        }
+        return lexicalConcept.demons
     }
 }
 
@@ -320,7 +340,7 @@ class WordLunch: WordHandler(EntryWord("lunch")) {
         val lexicalConcept = lexicalConcept(wordContext, MopMeal.MopMeal.name) {
             expectHead(MopMealFields.EATER_A.fieldName, headValue = "Human", direction = SearchDirection.Before)
             expectPrep(MopMealFields.EATER_B.fieldName, preps = listOf(Preposition.With), matcher= matchConceptByHead(InDepthUnderstandingConcepts.Human.name))
-            slot(MopMealFields.Event, MopMeal.EventEatMeal.name) // FIXME find associated event
+            slot(CoreFields.Event, MopMeal.EventEatMeal.name) // FIXME find associated event
             checkMop(CoreFields.INSTANCE.fieldName)
             // FIXME slot("kind", "Act")
         }
@@ -544,5 +564,21 @@ class WordWas(): WordHandler(EntryWord("was")) {
             }
         }
         return listOf(wasDisambiguation)
+    }
+}
+
+// InDepth p150/5.4, p304
+class WordAnother: WordHandler(EntryWord("another")) {
+    override fun build(wordContext: WordContext): List<Demon> {
+        val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
+            slot(Human.GENDER, Gender.Female.name)
+            slot(Relationships.Name, Marriage.Concept.fieldName) {
+                possessiveRef(Marriage.Husband, gender = Gender.Male)
+                nextChar("wife", relRole = "Wife")
+                checkRelationship(CoreFields.INSTANCE, waitForSlots = listOf("husband", "wife"))
+            }
+            innerInstan("instan", observeSlot = "wife")
+        }
+        return lexicalConcept.demons
     }
 }

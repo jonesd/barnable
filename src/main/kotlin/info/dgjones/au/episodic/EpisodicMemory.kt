@@ -1,7 +1,8 @@
-package info.dgjones.au.parser
+package info.dgjones.au.episodic
 
 import info.dgjones.au.concept.*
 import info.dgjones.au.domain.general.Human
+import info.dgjones.au.domain.general.RoleThemeFields
 import info.dgjones.au.domain.general.characterMatcher
 import info.dgjones.au.domain.general.humanKeyValue
 import info.dgjones.au.narrative.InDepthUnderstandingConcepts
@@ -35,6 +36,9 @@ class EpisodicMemory {
     val characters = mutableMapOf<EpisodicInstance, EpisodicConcept>()
     val mops = mutableMapOf<EpisodicInstance, EpisodicConcept>()
     val events = mutableMapOf<EpisodicInstance, EpisodicConcept>()
+    val roleThemes = mutableMapOf<EpisodicInstance, EpisodicConcept>()
+
+    val scenarioMap = ScenarioMap()
 
     val concepts = mutableListOf<EpisodicConcept>()
 
@@ -130,7 +134,7 @@ class EpisodicMemory {
         //FIXME may need to use deepcopy...
         println("EP UpdateMopMeal ${episodicConcept.name} $slotUpdate")
         when (slotUpdate.name) {
-            MopMealFields.Event.fieldName -> slotUpdate.copyValue(episodicConcept)
+            CoreFields.Event.fieldName -> slotUpdate.copyValue(episodicConcept)
             MopMealFields.EATER_A.fieldName -> episodicConcept.value(MopMealFields.EATER_A, checkOrCreateCharacter(slotUpdate.value))
             MopMealFields.EATER_B.fieldName -> episodicConcept.value(MopMealFields.EATER_B, checkOrCreateCharacter(slotUpdate.value))
             else -> println("EP UpdateMopMeal - no slot match for update $slotUpdate")
@@ -142,6 +146,7 @@ class EpisodicMemory {
         when (slotUpdate.name) {
             Human.FIRST_NAME.fieldName -> slotUpdate.copyValue(episodicConcept)
             Human.LAST_NAME.fieldName -> slotUpdate.copyValue(episodicConcept)
+            RoleThemeFields.RoleTheme.fieldName -> slotUpdate.copyValue(episodicConcept)
             Human.GENDER.fieldName -> slotUpdate.copyValue(episodicConcept)
             else -> println("EP UpdateCharacter - no slot match for update $slotUpdate")
         }
@@ -158,6 +163,7 @@ class EpisodicMemory {
             character.with(human.duplicateResolvedSlot(Human.FIRST_NAME))
             character.with(human.duplicateResolvedSlot(Human.LAST_NAME))
             character.with(human.duplicateResolvedSlot(Human.GENDER))
+            character.with(human.duplicateResolvedSlot(RoleThemeFields.RoleTheme))
         }
         val episodicInstance = indexGenerator.episodicId(humanKeyValue(character))
         character.with(Slot(CoreFields.INSTANCE, Concept(episodicInstance)))
@@ -172,6 +178,10 @@ class EpisodicMemory {
 
     private fun nextEpisodicId(conceptType: String): String {
         return indexGenerator.episodicId(conceptType)
+    }
+
+    fun setCurrentEvent(event: Concept, mainEvent: Boolean = false) {
+        scenarioMap.setCurrentEvent(event, mainEvent)
     }
 
     fun dumpMemory() {

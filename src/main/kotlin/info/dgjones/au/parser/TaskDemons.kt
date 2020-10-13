@@ -3,10 +3,9 @@ package info.dgjones.au.parser
 import info.dgjones.au.concept.*
 import info.dgjones.au.domain.general.Gender
 import info.dgjones.au.domain.general.Human
+import info.dgjones.au.episodic.EpisodicMemory
 import info.dgjones.au.grammar.*
-import info.dgjones.au.narrative.HumanAccessor
-import info.dgjones.au.narrative.InDepthUnderstandingConcepts
-import info.dgjones.au.narrative.checkOrCreateMop
+import info.dgjones.au.narrative.*
 
 class ExpectDemon(val matcher: ConceptMatcher, val direction: SearchDirection, wordContext: WordContext, val action: (ConceptHolder) -> Unit): Demon(wordContext) {
     var found: ConceptHolder? = null
@@ -69,6 +68,7 @@ class CheckMopDemon(val mop: Concept, wordContext: WordContext, val action: (Con
     override fun run() {
         val matchedMop = wordContext.context.episodicMemory.checkOrCreateMop(mop)
         action(matchedMop)
+
         active = false
     }
     override fun description(): String {
@@ -328,5 +328,21 @@ class EpisodicRoleCheck(val mop: Concept, wordContext: WordContext, val action: 
     }
     override fun description(): String {
         return "CheckMOP from episodic with ${mop.name}"
+    }
+}
+
+class UpdateEventDemon(val episodicConcept: Concept, wordContext: WordContext, val action: (Concept?) -> Unit): Demon(wordContext) {
+    override fun run() {
+        //FIXME should this also handle "having a meeting"
+        if (wordContext.previousWord()?.equals("have", ignoreCase = true) == true) {
+            episodicConcept.value(CoreFields.Event)?.let { event ->
+                wordContext.context.episodicMemory.setCurrentEvent(event, mainEvent = true)
+                // FIXME spawn extra demons?
+            }
+        }
+    }
+
+    override fun description(): String {
+        return "UpdateEvent if HAVE precedes: set as main event, update scenario map"
     }
 }

@@ -58,6 +58,10 @@ class WordIt: WordHandler(EntryWord("it")) {
     }
 }
 
+/*
+Progressive form of have can indicate a social interaction.
+eg "having lunch"
+ */
 class WordHave: WordHandler(EntryWord("have")) {
     override fun build(wordContext: WordContext): List<Demon> {
         println("FIXME implement have")

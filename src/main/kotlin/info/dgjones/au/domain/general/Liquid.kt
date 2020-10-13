@@ -12,6 +12,7 @@ enum class Liquids {
     soda,
     tea,
     water,
+    wine
 }
 
 fun buildGeneralLiquidLexicon(lexicon: Lexicon) {

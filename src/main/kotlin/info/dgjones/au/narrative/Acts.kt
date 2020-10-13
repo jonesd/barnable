@@ -1,7 +1,16 @@
 package info.dgjones.au.narrative
 
 import info.dgjones.au.concept.Concept
+import info.dgjones.au.concept.Fields
 import info.dgjones.au.concept.Slot
+
+enum class ActFields(override val fieldName: String): Fields {
+    Actor("actor"),
+    Thing("thing"),
+    From("from"),
+    To("to"),
+    Instrument("instr")
+}
 
 enum class Acts {
     ATRANS, // Transfer of Possession

@@ -5,7 +5,7 @@ import info.dgjones.au.concept.CoreFields
 import info.dgjones.au.concept.matchConceptByHead
 import info.dgjones.au.narrative.InDepthUnderstandingConcepts
 import info.dgjones.au.nlp.TextModel
-import info.dgjones.au.parser.EpisodicMemory
+import info.dgjones.au.episodic.EpisodicMemory
 import info.dgjones.au.parser.TextProcessor
 
 class QuestionProcessor(val textProcessor: TextProcessor) {

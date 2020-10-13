@@ -64,22 +64,10 @@ class QATest {
         fun `Question - Who ate lunch?`() {
             val textProcessor = runTextProcess("John had lunch with George .", lexicon)
 
-//            assertEquals(1, textProcessor.workingMemory.concepts.size)
-//            val meal = textProcessor.workingMemory.concepts[0]
-//            assertEquals("MopMeal", meal.name)
-//            assertEquals("John", meal.value("eaterA")?.valueName("firstName"))
-//            assertEquals("George", meal.value("eaterB")?.valueName("firstName"))
-//            assertEquals("EventEatMeal", meal.valueName("event"))
-
             // Question
 
             var qa = QuestionProcessor(textProcessor)
             val result = qa.question(buildTextModel("Who ate lunch?"))
-
-//            assertEquals(1, result.sentenceResult.size)
-//            val answerConcept = result.sentenceResult[0]
-//            assertEquals("John", answerConcept.value("actor")?.valueName(Human.FIRST_NAME))
-//            assertEquals("MopMeal", answerConcept.valueName("act"))
 
             assertEquals("John and George", result.answer)
         }

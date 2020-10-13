@@ -32,6 +32,7 @@ class WordMorphologyBuilderTest {
         @Test
         fun edForIrregular() {
             assertEquals("had", WordMorphologyBuilder("have").suffixEd()?.full)
+            assertEquals("poured", WordMorphologyBuilder("pour").suffixEd()?.full)
         }
     }
     @Nested

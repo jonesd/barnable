@@ -1,5 +1,6 @@
 package info.dgjones.au.concept
 
+import info.dgjones.au.episodic.EpisodicMemory
 import info.dgjones.au.nlp.TextSentence
 import info.dgjones.au.nlp.WordElement
 import info.dgjones.au.parser.*

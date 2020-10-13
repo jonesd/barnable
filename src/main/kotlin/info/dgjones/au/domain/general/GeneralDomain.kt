@@ -7,4 +7,5 @@ fun buildGeneralDomainLexicon(lexicon: Lexicon) {
     buildGeneralLiquidLexicon(lexicon)
     buildGeneralHumanLexicon(lexicon)
     buildGeneralPhysicalObjectsLexicon(lexicon)
+    buildGeneralRoleThemeLexicon(lexicon)
 }

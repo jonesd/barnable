@@ -48,7 +48,8 @@ class WordMorphologyBuilder(val root: String) {
 
     private val suffixEdIrregular = mapOf(
         "have" to "had",
-        "eat" to "ate"
+        "eat" to "ate",
+        "pour" to "poured"
     )
 
     // 1.Used to form gerunds, a type of verbal nouns, from verbs.

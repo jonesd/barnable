@@ -9,5 +9,8 @@ interface Fields {
 
 enum class CoreFields(override val fieldName: String): Fields {
     // Related episodic concept identity
-    INSTANCE("instan");
+    INSTANCE("instan"),
+    Event("event"),
+    Kind("kind"),
+    Name("name")
 }

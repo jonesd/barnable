@@ -3,6 +3,7 @@ package info.dgjones.au.parser
 import info.dgjones.au.concept.Concept
 import info.dgjones.au.concept.matchConceptByHead
 import info.dgjones.au.concept.matchConceptValueName
+import info.dgjones.au.episodic.EpisodicMemory
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 

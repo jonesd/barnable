@@ -18,13 +18,18 @@ enum class Gender {
 }
 
 fun characterMatcher(human: Concept): ConceptMatcher =
-    characterMatcher(human.valueName(Human.FIRST_NAME), human.valueName(Human.LAST_NAME), human.valueName(Human.GENDER))
+    characterMatcher(human.valueName(Human.FIRST_NAME),
+        human.valueName(Human.LAST_NAME),
+        human.valueName(Human.GENDER),
+        human.valueName(RoleThemeFields.RoleTheme.fieldName)
+    )
 
-fun characterMatcher(firstName: String?, lastName: String?, gender: String?): ConceptMatcher =
+fun characterMatcher(firstName: String?, lastName: String?, gender: String?, roleTheme: String?): ConceptMatcher =
     ConceptMatcherBuilder()
         .with(matchConceptByHead(InDepthUnderstandingConcepts.Human.name))
         .matchSetField(Human.FIRST_NAME, firstName)
         .matchSetField(Human.LAST_NAME, lastName)
+        .matchSetField(RoleThemeFields.RoleTheme, roleTheme)
         .matchSetField(Human.GENDER, gender)
         .matchAll()
 
@@ -55,7 +60,7 @@ fun buildHuman(firstName: String? = "", lastName: String? = "", gender: String? 
 }
 
 fun humanKeyValue(human: Concept) =
-    human.selectKeyValue(Human.FIRST_NAME, Human.LAST_NAME)
+    human.selectKeyValue(Human.FIRST_NAME, Human.LAST_NAME, RoleThemeFields.RoleTheme)
 
 // Word Senses
 

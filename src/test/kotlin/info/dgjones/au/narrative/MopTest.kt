@@ -4,7 +4,7 @@ import info.dgjones.au.concept.Concept
 import info.dgjones.au.concept.CoreFields
 import info.dgjones.au.concept.Slot
 import info.dgjones.au.domain.general.*
-import info.dgjones.au.parser.*
+import info.dgjones.au.episodic.EpisodicMemory
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
@@ -16,7 +16,7 @@ class MopMealTest() {
         val concept = Concept(MopMeal.MopMeal.name)
             .with(Slot(MopMealFields.EATER_A, buildHuman("john", "smith", Gender.Male.name)))
             .with(Slot(MopMealFields.EATER_B, buildHuman("george", "may", Gender.Male.name)))
-            .with(Slot(MopMealFields.Event, Concept(MopMeal.EventEatMeal.name))
+            .with(Slot(CoreFields.Event, Concept(MopMeal.EventEatMeal.name))
         )
 
         // test
@@ -40,12 +40,12 @@ class MopMealTest() {
         val concept = Concept(MopMeal.MopMeal.name)
             .with(Slot(MopMealFields.EATER_A, buildHuman("john", "smith", Gender.Male.name)))
             .with(Slot(MopMealFields.EATER_B, buildHuman("george", "may", Gender.Male.name)))
-            .with(Slot(MopMealFields.Event, Concept(MopMeal.EventEatMeal.name)))
+            .with(Slot(CoreFields.Event, Concept(MopMeal.EventEatMeal.name)))
         val originalEpisodic = memory.checkOrCreateMop(concept)
 
         val concept2 = Concept(MopMeal.MopMeal.name)
             .with(Slot(MopMealFields.EATER_A, buildHuman("john", "smith", Gender.Male.name)))
-            .with(Slot(MopMealFields.Event, Concept(MopMeal.EventEatMeal.name)))
+            .with(Slot(CoreFields.Event, Concept(MopMeal.EventEatMeal.name)))
 
         // test
         val episodic = memory.checkOrCreateMop(concept2)

@@ -3,6 +3,7 @@ package info.dgjones.au.concept
 import info.dgjones.au.domain.general.Gender
 import info.dgjones.au.domain.general.Human
 import info.dgjones.au.domain.general.buildHuman
+import info.dgjones.au.episodic.EpisodicConcept
 import info.dgjones.au.narrative.MopMealFields
 import info.dgjones.au.parser.*
 
@@ -190,7 +191,7 @@ class LexicalConceptBuilder(val root: LexicalRootBuilder, conceptName: String) {
                 this.episodicConcept = episodicMop
                 copyCompletedSlot(MopMealFields.EATER_A, episodicMop, concept)
                 copyCompletedSlot(MopMealFields.EATER_B, episodicMop, concept)
-                copyCompletedSlot(MopMealFields.Event, episodicMop, concept)
+                copyCompletedSlot(CoreFields.Event, episodicMop, concept)
 //            } else {
 //                println("Creating mop ${concept.name} in EP memory")
 //                val human = buildHuman(concept.valueName("firstName"), concept.valueName("lastName"), concept.valueName("gender"))
