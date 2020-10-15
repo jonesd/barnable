@@ -12,7 +12,7 @@ class RoleThemeTest {
     val lexicon = buildInDepthUnderstandingLexicon()
 
     @Test
-    fun `Use RoleTheme for Human`() {
+    fun `RoleThemes are Humans and so can be used with actions`() {
         val textProcessor = runTextProcess("The teacher had lunch", lexicon)
 
         assertEquals(1, textProcessor.workingMemory.concepts.size)
@@ -24,7 +24,7 @@ class RoleThemeTest {
     }
 
     @Test
-    fun `Include gender for specific names`() {
+    fun `Include gender for gender specific role names`() {
         val textProcessor = runTextProcess("The waitress poured the wine.", lexicon)
 
         assertEquals(1, textProcessor.workingMemory.concepts.size)

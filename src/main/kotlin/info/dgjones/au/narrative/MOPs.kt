@@ -6,6 +6,14 @@ import info.dgjones.au.concept.Fields
 import info.dgjones.au.episodic.EpisodicConcept
 import info.dgjones.au.episodic.EpisodicMemory
 
+enum class MopService {
+    MopService
+}
+
+enum class MopRestaurant {
+    MopRestaurant
+}
+
 enum class MopMeal {
     MopMeal,
     EventEatMeal
