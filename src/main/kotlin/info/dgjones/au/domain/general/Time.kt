@@ -26,6 +26,15 @@ enum class TimeConcepts {
     Sunday
 }
 
+// Word Sense
+
+fun buildGeneralTimeLexicon(lexicon: Lexicon) {
+    lexicon.addMapping(WordYesterday())
+}
+
+/*
+Indicate that an action occurred in the past on the day before the current day.
+ */
 class WordYesterday: WordHandler(EntryWord("yesterday")) {
     override fun build(wordContext: WordContext): List<Demon> {
         val demon = object : Demon(wordContext) {

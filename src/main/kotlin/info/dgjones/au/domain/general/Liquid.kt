@@ -1,6 +1,7 @@
 package info.dgjones.au.domain.general
 
 import info.dgjones.au.concept.Concept
+import info.dgjones.au.concept.CoreFields
 import info.dgjones.au.concept.Slot
 import info.dgjones.au.narrative.PhysicalObjectKind
 import info.dgjones.au.parser.*
@@ -28,6 +29,6 @@ class KindLiquid(private val liquid: Liquids):  WordHandler(EntryWord(liquid.nam
 
 fun buildLiquid(kindOfLiquid: Liquids, name: String = kindOfLiquid.name): Concept {
     return Concept(PhysicalObjectKind.Liquid.name)
-        .with(Slot("kind", Concept(kindOfLiquid.name)))
-        .with(Slot("name", Concept(name)))
+        .with(Slot(CoreFields.Kind, Concept(kindOfLiquid.name)))
+        .with(Slot(CoreFields.Name, Concept(name)))
 }

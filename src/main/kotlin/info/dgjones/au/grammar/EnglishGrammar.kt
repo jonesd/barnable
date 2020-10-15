@@ -34,11 +34,6 @@ enum class Voice {
     Passive
 }
 
-/* Prepositions */
-
-/* Conjunctions */
-
-
 /* Word senses */
 
 fun buildEnglishGrammarLexicon(lexicon: Lexicon) {

@@ -25,7 +25,7 @@ fun buildPhysicalObject(kind: String, name: String): Concept {
 // Word Senses
 
 fun buildGeneralPhysicalObjectsLexicon(lexicon: Lexicon) {
-    // FIXME use catalagoue of physical objects
+    // FIXME use catalogue of physical objects
     // FIXME support containers
     lexicon.addMapping(WordBook())
     lexicon.addMapping(WordTree())

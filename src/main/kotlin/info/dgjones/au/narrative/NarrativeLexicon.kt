@@ -9,7 +9,6 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     val lexicon = Lexicon()
     buildEnglishGrammarLexicon(lexicon)
     buildGeneralDomainLexicon(lexicon)
-    buildNumberLexicon(lexicon)
 
     lexicon.addMapping(WordPickUp())
     lexicon.addMapping(WordIgnore(EntryWord("up")))
@@ -55,8 +54,6 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     lexicon.addMapping(ModifierWord("thin", "weight", "LT-NORM"))
     lexicon.addMapping(ModifierWord("old", "age", "GT-NORM"))
     lexicon.addMapping(ModifierWord("young", "age", "LT-NORM"))
-
-    lexicon.addMapping(WordYesterday())
 
     lexicon.addMapping(WordHusband())
     lexicon.addMapping(WordWife())
@@ -364,7 +361,7 @@ class WordMeasureQuantity : WordHandler(EntryWord("measure")) {
     override fun build(wordContext: WordContext): List<Demon> {
         val lexicalConcept = lexicalConcept(wordContext, "Quantity") {
             // FIXME also support "a measure of ..." = default to 1 unit
-            expectHead("amount", headValue = "number", direction = SearchDirection.Before)
+            expectHead("amount", headValue = NumberConcept.Number.name, direction = SearchDirection.Before)
             slot("unit", "measure")
             expectHead("of", headValues = listOf(PhysicalObjectKind.Liquid.name, PhysicalObjectKind.Food.name))
         }

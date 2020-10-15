@@ -8,4 +8,6 @@ fun buildGeneralDomainLexicon(lexicon: Lexicon) {
     buildGeneralHumanLexicon(lexicon)
     buildGeneralPhysicalObjectsLexicon(lexicon)
     buildGeneralRoleThemeLexicon(lexicon)
+    buildGeneralTimeLexicon(lexicon)
+    buildGeneralNumberLexicon(lexicon)
 }

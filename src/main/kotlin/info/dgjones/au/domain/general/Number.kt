@@ -1,10 +1,21 @@
-package info.dgjones.au.narrative
+package info.dgjones.au.domain.general
 
+import info.dgjones.au.concept.Fields
 import info.dgjones.au.concept.lexicalConcept
 import info.dgjones.au.parser.*
 
+enum class NumberConcept {
+    Number
+}
+
+enum class NumberFields(override val fieldName: String): Fields {
+    Value("value")
+}
+
+// Word Sense
+
 //FIXME introduce more flexible approach to quantity/numbers
-fun buildNumberLexicon(lexicon: Lexicon) {
+fun buildGeneralNumberLexicon(lexicon: Lexicon) {
     addNumber("one", 1, lexicon)
     addNumber("two", 2, lexicon)
     addNumber("three", 3, lexicon)
@@ -31,14 +42,14 @@ fun buildNumberLexicon(lexicon: Lexicon) {
     addNumber("dozen", 12, lexicon)
 }
 
-fun addNumber(word: String, value: Int, lexicon: Lexicon) {
+private fun addNumber(word: String, value: Int, lexicon: Lexicon) {
     lexicon.addMapping(NumberHandler(value, word))
 }
 
 class NumberHandler(var value: Int, word: String): WordHandler(EntryWord(word)) {
     override fun build(wordContext: WordContext): List<Demon> {
-        val lexicalConcept = lexicalConcept(wordContext, "number") {
-            slot("value", value.toString())
+        val lexicalConcept = lexicalConcept(wordContext, NumberConcept.Number.name) {
+            slot(NumberFields.Value, value.toString())
         }
         return lexicalConcept.demons
     }

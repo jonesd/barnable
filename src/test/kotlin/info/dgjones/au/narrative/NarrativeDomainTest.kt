@@ -123,18 +123,6 @@ class NarrativeDomainTest {
     }
 
     @Test
-    fun `Time modification`() {
-        val textProcessor = runTextProcess("John walked home yesterday", lexicon)
-
-        assertEquals(1 /*should be 1?*/, textProcessor.workingMemory.concepts.size)
-        val walk = textProcessor.workingMemory.concepts[0]
-        assertEquals("PTRANS", walk.name)
-        assertEquals("John", walk.value("actor")?.valueName("firstName"))
-        assertEquals("Home", walk.value("to")?.valueName("name"))
-        assertEquals("Yesterday", walk.valueName("time"))
-    }
-
-    @Test
     fun `John had lunch with George`() {
         val textProcessor = runTextProcess("John had lunch with George", lexicon)
 

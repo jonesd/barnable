@@ -66,55 +66,6 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
         return qaMemory.concepts
     }
 
-    /* FIXME extract
-    fun processQuestion(sentence: TextSentence): String {
-        qaMode = true
-        qaMemory = WorkingMemory()
-        try {
-            processSentence(sentence)
-        } catch (e: NoMentionOfCharacter) {
-            return "No mention of a character named ${e.characterName}."
-        }
-
-        val acts = qaMemory.concepts.filter{ isActHead(it) }
-        if (acts.isEmpty()) {
-            return "I don't know."
-        }
-        //FIXME assume who - should be generated from demon/node?
-        val c = acts[0]
-        val closestMatch = this.findMatchingConceptFromWorking(c)
-        if (closestMatch != null) {
-            if (c.name == Acts.ATRANS.name) {
-                if (closestMatch.name == Acts.ATRANS.name) {
-                    if (c.value("actor")?.valueName("firstName") == "who") {
-                        return closestMatch.value("actor")?.valueName("firstName") ?: "missing"
-                    } else if (c.value("from")?.valueName("firstName") == "who") {
-                        return closestMatch.value("from")?.valueName("firstName") ?:"missing"
-                    } else if (c.value("to")?.valueName("firstName") == "who") {
-                        return closestMatch.value("to")?.valueName("firstName") ?:  "missing"
-                    }
-                }
-            }
-        }
-        return "I don't know."
-    }
-
-    fun isActHead(concept: Concept): Boolean {
-        val names = Acts.values().map { it.name }
-        return names.contains(concept.name)
-    }
-
-     fun findMatchingConceptFromWorking(whoAct: Concept): Concept? {
-         println("finding best match for $whoAct")
-         workingMemory.concepts.filter{ isActHead(it)}.forEach {
-             // FIXME hack....
-                 if (it.name == whoAct.name) {
-                     return it
-                 }
-         }
-         return null
-     }*/
-
     private fun endSentence(context: SentenceContext) {
         val memory = if (qaMode) qaMemory else workingMemory
         promoteDefsToWorkingMemory(context, memory)
@@ -326,8 +277,6 @@ class WorkingMemory {
     }
 }
 
-class NoMentionOfCharacter(val characterName: String): Exception()
-
 class Agenda {
 
     val demons = mutableListOf<Demon>()
@@ -403,7 +352,7 @@ open class Demon(val wordContext: WordContext) {
 class DemonComment(val test: String, val act: String)
 
 data class ConceptHolder(val instanceNumber: Int, var value: Concept? = null) {
-    val flags = mutableListOf<ParserFlags>()
+    private val flags = mutableListOf<ParserFlags>()
 
     fun addFlag(flag: ParserFlags) {
         flags.add(flag)
