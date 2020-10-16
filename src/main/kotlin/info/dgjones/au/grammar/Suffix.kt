@@ -37,8 +37,8 @@ class SuffixSDemon(wordContext: WordContext): Demon(wordContext) {
     override fun run() {
         val def = wordContext.def()
         if (def != null) {
-            if (def.value("group-instances") == null) {
-                def.value("group-instances", Concept("*multiple*"))
+            if (def.value(GroupFields.GroupInstances) == null) {
+                def.value(GroupFields.GroupInstances, Concept(GroupConcept.`*multiple*`.name))
                 active = false
             }
         }

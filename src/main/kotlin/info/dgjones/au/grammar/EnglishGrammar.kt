@@ -40,6 +40,7 @@ fun buildEnglishGrammarLexicon(lexicon: Lexicon) {
     buildGrammarConjunctionLexicon(lexicon)
     buildGrammarPropositionLexicon(lexicon)
     buildGrammarPunctuationLexicon(lexicon)
+    buildGrammarPronounLexicon(lexicon)
 
     lexicon.addMapping(WordIt())
     lexicon.addMapping(WordHave())

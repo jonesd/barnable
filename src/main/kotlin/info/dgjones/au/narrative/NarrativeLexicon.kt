@@ -40,15 +40,6 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     lexicon.addMapping(WordPerson(buildHuman("", "", Gender.Female.name), "woman"))
     lexicon.addMapping(WordPerson(buildHuman("", "", Gender.Male.name), "man"))
 
-    // FIXME not sure about this...
-    lexicon.addMapping(WordPronoun("hers", Gender.Female, Case.Possessive))
-    lexicon.addMapping(WordPronoun("his", Gender.Male, Case.Possessive))
-    lexicon.addMapping(WordPronoun("her", Gender.Female, Case.Possessive))
-    lexicon.addMapping(WordPronoun("him", Gender.Male, Case.Objective))
-    // FIXME why aren't these WordPronoun?
-    lexicon.addMapping(PronounWord("he", Gender.Male))
-    lexicon.addMapping(PronounWord("she", Gender.Female))
-
     // Modifiers
     lexicon.addMapping(ModifierWord("red", "colour"))
     lexicon.addMapping(ModifierWord("black", "colour"))
@@ -73,7 +64,6 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     // Divorce2
 
     // Disambiguate
-    lexicon.addMapping(WordMeasureQuantity())
     lexicon.addMapping(WordMeasureObject())
 
     // FIXME lexicon.addMapping(WordWas())
@@ -356,24 +346,6 @@ class WordEats: WordHandler(EntryWord("eat")) {
     }
 }
 
-class WordMeasureQuantity : WordHandler(EntryWord("measure")) {
-    override fun build(wordContext: WordContext): List<Demon> {
-        val lexicalConcept = lexicalConcept(wordContext, "Quantity") {
-            // FIXME also support "a measure of ..." = default to 1 unit
-            expectHead("amount", headValue = NumberConcept.Number.name, direction = SearchDirection.Before)
-            slot("unit", "measure")
-            expectHead("of", headValues = listOf(PhysicalObjectKind.Liquid.name, PhysicalObjectKind.Food.name))
-        }
-        return lexicalConcept.demons
-    }
-
-    override fun disambiguationDemons(wordContext: WordContext, disambiguationHandler: DisambiguationHandler): List<Demon> {
-        return listOf(
-            DisambiguateUsingWord("of", matchConceptByHead(listOf(PhysicalObjectKind.Food.name, PhysicalObjectKind.Liquid.name)), SearchDirection.After, wordContext, disambiguationHandler)
-        )
-    }
-}
-
 class WordMeasureObject: WordHandler(EntryWord("measure")) {
     override fun build(wordContext: WordContext): List<Demon> {
         // FIXME not sure how to model this...
@@ -421,18 +393,6 @@ class ModifierWord(word: String, val modifier: String, val value: String = word)
     }
 }
 
-class WordPronoun(word: String, val gender: Gender, val case: Case): WordHandler(EntryWord(word)) {
-    override fun build(wordContext: WordContext): List<Demon> {
-        val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.Ref.name) {
-            ignoreHolder()
-            slot("case", case.name)
-            slot("gender", gender.name)
-            findCharacter(CoreFields.INSTANCE.fieldName)
-        }
-        return lexicalConcept.demons
-    }
-}
-
 class WordMan(word: String): WordHandler(EntryWord(word)) {
     override fun build(wordContext: WordContext): List<Demon> {
         val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
@@ -441,29 +401,6 @@ class WordMan(word: String): WordHandler(EntryWord(word)) {
             slot("gender", Gender.Male.name)
         }
         return lexicalConcept.demons
-    }
-}
-
-class PronounWord(word: String, val genderMatch: Gender): WordHandler(EntryWord(word)) {
-    override fun build(wordContext: WordContext): List<Demon> {
-        // FIXME partial implementation - also why not use demon
-        wordContext.defHolder.addFlag(ParserFlags.Ignore)
-        val localHuman = wordContext.context.localCharacter
-        if (localHuman != null && localHuman.valueName("gender") == genderMatch.name) {
-            wordContext.defHolder.value = localHuman
-        } else {
-            val mostRecentHuman = wordContext.context.mostRecentCharacter
-            if (mostRecentHuman != null && mostRecentHuman.valueName("gender") == genderMatch.name) {
-                wordContext.defHolder.value = mostRecentHuman
-            }
-        }
-        if (!wordContext.isDefSet()) {
-            val mostRecentHuman = wordContext.context.workingMemory.charactersRecent.firstOrNull { it.valueName("gender") == genderMatch.name }
-            if (mostRecentHuman != null) {
-                wordContext.defHolder.value = mostRecentHuman
-            }
-        }
-        return listOf()
     }
 }
 
