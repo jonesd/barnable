@@ -1,11 +1,10 @@
 package info.dgjones.au.narrative
 
-import info.dgjones.au.concept.CoreFields
 import info.dgjones.au.domain.general.Gender
 import info.dgjones.au.domain.general.Human
-import info.dgjones.au.domain.general.RoleThemeFields
-import info.dgjones.au.parser.*
-import org.junit.jupiter.api.Assertions.*
+import info.dgjones.au.parser.runTextProcess
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 
 class RelationshipsTest {

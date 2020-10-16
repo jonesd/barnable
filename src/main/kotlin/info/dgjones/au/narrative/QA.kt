@@ -1,9 +1,8 @@
 package info.dgjones.au.narrative
 
-import info.dgjones.au.concept.Concept
-import info.dgjones.au.concept.CoreFields
 import info.dgjones.au.concept.lexicalConcept
-import info.dgjones.au.domain.general.*
+import info.dgjones.au.domain.general.Gender
+import info.dgjones.au.domain.general.buildHuman
 import info.dgjones.au.parser.*
 
 

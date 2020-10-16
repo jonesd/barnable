@@ -1,7 +1,7 @@
 package info.dgjones.au.concept
 
-import info.dgjones.au.concept.*
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class MatchConceptByHeadTest {
@@ -131,7 +131,7 @@ class MatchAllTest {
 
 class MatchAlwaysTest {
     @Test
-    fun `Matches`() {
+    fun Matches() {
         assertTrue(matchAlways()(Concept("anything")))
     }
     @Test

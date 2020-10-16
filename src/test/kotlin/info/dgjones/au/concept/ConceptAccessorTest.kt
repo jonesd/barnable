@@ -1,9 +1,6 @@
 package info.dgjones.au.concept
 
-import info.dgjones.au.concept.Concept
-import info.dgjones.au.concept.Slot
-import info.dgjones.au.concept.buildConceptPathAccessor
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Test
 
 class ConceptAccessorTest {

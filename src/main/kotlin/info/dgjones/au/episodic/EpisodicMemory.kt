@@ -20,7 +20,7 @@ class IndexedNameGenerator {
     val nextIndexes = mutableMapOf<String, Int>()
 
     fun episodicId(name: String): String {
-        val index = nextIndexes.getOrDefault(name ?: "noname", 0)
+        val index = nextIndexes.getOrDefault(name, 0)
         nextIndexes[name] = index + 1
         return name + index
     }

@@ -13,7 +13,7 @@ A scenario setting can be broken down into scenes, for example a scene outside o
 
 See: InDepth p255/9.1
  */
-class ScenarioMap() {
+class ScenarioMap {
     val scenarios = mutableMapOf<EpisodicInstance, EpisodicConcept>()
     val activeScenario: EpisodicConcept? = null
     var currentEvent: EpisodicConcept? = null
@@ -25,7 +25,7 @@ class ScenarioMap() {
     }
 }
 
-class Episode() {
+class Episode {
     val scenes = mutableListOf<Concept>()
     val participants = mutableListOf<Concept>()
     val events = mutableListOf<Concept>()

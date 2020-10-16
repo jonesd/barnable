@@ -1,6 +1,5 @@
 package info.dgjones.au.domain.general
 
-import info.dgjones.au.concept.Concept
 import info.dgjones.au.concept.Fields
 
 enum class GroupConcept {

@@ -1,7 +1,5 @@
 package info.dgjones.au.concept
 
-import info.dgjones.au.concept.Concept
-import info.dgjones.au.concept.Slot
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test

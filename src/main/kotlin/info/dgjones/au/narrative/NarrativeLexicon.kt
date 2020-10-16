@@ -444,7 +444,7 @@ was
 
 https://en.wiktionary.org/wiki/was#English
 */
-class WordWas(): WordHandler(EntryWord("was")) {
+class WordWas : WordHandler(EntryWord("was")) {
     override fun build(wordContext: WordContext): List<Demon> {
         wordContext.defHolder.value = Concept("word")
         wordContext.defHolder.addFlag(ParserFlags.Ignore)

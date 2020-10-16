@@ -8,7 +8,7 @@ import info.dgjones.au.episodic.EpisodicMemory
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
-class MopMealTest() {
+class MopMealTest {
     @Test
     fun `Create new EpisodicMop from populated Concept`() {
         val memory = EpisodicMemory()

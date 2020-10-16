@@ -77,7 +77,7 @@ class Lexicon {
     }
 
     private fun wordHandlersFor(word: String): List<WordHandler> {
-        return wordMappings[word.toLowerCase()] ?: listOf<WordHandler>()
+        return wordMappings[word.toLowerCase()] ?: listOf()
     }
 
     private fun directMatches(word: String): List<LexicalItem> {
