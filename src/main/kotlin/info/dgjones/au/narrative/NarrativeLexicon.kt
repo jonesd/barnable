@@ -10,6 +10,8 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     buildEnglishGrammarLexicon(lexicon)
     buildGeneralDomainLexicon(lexicon)
 
+    buildNarrativeRelationshipLexicon(lexicon)
+
     lexicon.addMapping(WordPickUp())
     lexicon.addMapping(WordIgnore(EntryWord("up")))
     lexicon.addMapping(WordBall())
@@ -38,10 +40,10 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     lexicon.addMapping(WordPerson(buildHuman("", "", Gender.Female.name), "woman"))
     lexicon.addMapping(WordPerson(buildHuman("", "", Gender.Male.name), "man"))
 
-
+    // FIXME not sure about this...
     lexicon.addMapping(WordPronoun("hers", Gender.Female, Case.Possessive))
     lexicon.addMapping(WordPronoun("his", Gender.Male, Case.Possessive))
-    lexicon.addMapping(WordPronoun("her", Gender.Female, Case.Objective))
+    lexicon.addMapping(WordPronoun("her", Gender.Female, Case.Possessive))
     lexicon.addMapping(WordPronoun("him", Gender.Male, Case.Objective))
     // FIXME why aren't these WordPronoun?
     lexicon.addMapping(PronounWord("he", Gender.Male))
@@ -54,9 +56,6 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     lexicon.addMapping(ModifierWord("thin", "weight", "LT-NORM"))
     lexicon.addMapping(ModifierWord("old", "age", "GT-NORM"))
     lexicon.addMapping(ModifierWord("young", "age", "LT-NORM"))
-
-    lexicon.addMapping(WordHusband())
-    lexicon.addMapping(WordWife())
 
     // Locations
     lexicon.addMapping(WordHome())
@@ -465,36 +464,6 @@ class PronounWord(word: String, val genderMatch: Gender): WordHandler(EntryWord(
             }
         }
         return listOf()
-    }
-}
-
-class WordWife: WordHandler(EntryWord("wife")) {
-    override fun build(wordContext: WordContext): List<Demon> {
-        val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
-            slot(Human.GENDER, Gender.Female.name)
-            slot(Relationships.Name, Marriage.Concept.fieldName) {
-                possessiveRef(Marriage.Husband, gender = Gender.Male)
-                nextChar("wife", relRole = "Wife")
-                checkRelationship(CoreFields.INSTANCE, waitForSlots = listOf("husband", "wife"))
-            }
-            innerInstan("instan", observeSlot = "wife")
-        }
-        return lexicalConcept.demons
-    }
-}
-
-class WordHusband: WordHandler(EntryWord("husband")) {
-    override fun build(wordContext: WordContext): List<Demon> {
-        val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
-            slot(Human.GENDER, Gender.Male.name)
-            slot(Relationships.Name, Marriage.Concept.fieldName) {
-                possessiveRef(Marriage.Wife, gender = Gender.Female)
-                nextChar("husband", relRole = "Husband")
-                checkRelationship(CoreFields.INSTANCE, waitForSlots = listOf("husband", "wife"))
-            }
-            innerInstan("instan", observeSlot = "husband")
-        }
-        return lexicalConcept.demons
     }
 }
 

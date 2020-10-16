@@ -23,12 +23,6 @@ data class Concept(val name: String) {
         return value(slotName.fieldName)?.name ?: defaultValue
     }
 
-//    fun valueName(slotName: String, default: String = "unknown"): String {
-//        return value(slotName)?.name ?: default
-//    }
-//    fun valueName(slotName: SL): String? {
-//        return valueName(slotName.name)
-//    }
     fun value(field: Fields, value: Concept?): Concept =
         value(field.fieldName, value)
 

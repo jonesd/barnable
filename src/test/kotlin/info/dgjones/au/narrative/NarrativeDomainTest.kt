@@ -155,26 +155,6 @@ class NarrativeDomainTest {
     }
 
     @Test
-    fun `John and his wife Ann`() {
-        val textProcessor = runTextProcess("John and his wife Ann.", lexicon)
-
-        // FIXME implement
-        assertEquals(2, textProcessor.workingMemory.concepts.size)
-
-        val john = textProcessor.workingMemory.concepts[0]
-        assertEquals(Human.CONCEPT.fieldName, john.name)
-        assertEquals("John", john.valueName(Human.FIRST_NAME))
-
-        val wife = textProcessor.workingMemory.concepts[1]
-        assertEquals(Human.CONCEPT.fieldName, wife.name)
-        val marriage = wife.value(Relationships.Name)
-        assertNotNull(marriage)
-        assertEquals(Gender.Male.name, marriage?.value(Marriage.Husband)?.valueName(Human.GENDER))
-        assertEquals("Ann", marriage?.value(Marriage.Wife)?.valueName(Human.FIRST_NAME))
-        assertEquals(Gender.Female.name, marriage?.value(Marriage.Wife)?.valueName(Human.GENDER))
-    }
-
-    @Test
     fun `John Snicklefritz`() {
         val textProcessor = runTextProcess("John Snicklefritz.", lexicon)
 
