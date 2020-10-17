@@ -45,25 +45,52 @@ fun characterMatcherWithInstance(human: Concept): ConceptMatcher =
 
 fun LexicalConceptBuilder.human(firstName: String = "", lastName: String = "", gender: Gender? = null, initializer: LexicalConceptBuilder.() -> Unit): Concept {
     val child = LexicalConceptBuilder(root, InDepthUnderstandingConcepts.Human.name)
-    child.slot("firstName", firstName)
+    child.slot(HumanFields.FIRST_NAME, firstName)
 
     return Concept(InDepthUnderstandingConcepts.Human.name)
-        .with(Slot("firstName", Concept(firstName)))
-        .with(Slot("lastName", Concept(lastName)))
+        .with(Slot(HumanFields.FIRST_NAME, Concept(firstName)))
+        .with(Slot(HumanFields.LAST_NAME, Concept(lastName)))
         //FIXME empty concept doesn't seem helpful
-        .with(Slot("gender", Concept(gender?.name ?: "")))
+        .with(Slot(HumanFields.GENDER, Concept(gender?.name ?: "")))
 }
 
 fun buildHuman(firstName: String? = "", lastName: String? = "", gender: String? = null): Concept {
     return Concept(InDepthUnderstandingConcepts.Human.name)
-        .with(Slot("firstName", Concept(firstName ?: "")))
-        .with(Slot("lastName", Concept(lastName ?: "")))
+        .with(Slot(HumanFields.FIRST_NAME, Concept(firstName ?: "")))
+        .with(Slot(HumanFields.LAST_NAME, Concept(lastName ?: "")))
         //FIXME empty concept doesn't seem helpful
-        .with(Slot("gender", Concept(gender ?: "")))
+        .with(Slot(HumanFields.GENDER, Concept(gender ?: "")))
 }
 
 fun humanKeyValue(human: Concept) =
     human.selectKeyValue(HumanFields.FIRST_NAME, HumanFields.LAST_NAME, RoleThemeFields.RoleTheme)
+
+fun LexicalConceptBuilder.lastName(slotName: Fields, variableName: String? = null) {
+    val variableSlot = root.createVariable(slotName, variableName)
+    concept.with(variableSlot)
+    val demon = LastNameDemon(root.wordContext) {
+        if (it != null) {
+            root.completeVariable(variableSlot, it, root.wordContext, this.episodicConcept)
+        }
+    }
+    root.addDemon(demon)
+}
+
+class LastNameDemon(wordContext: WordContext, val action: (Concept?) -> Unit): Demon(wordContext) {
+    override fun run() {
+        val matcher = matchConceptByHead(InDepthUnderstandingConcepts.UnknownWord.name)
+        searchContext(matcher, matchNever(), direction = SearchDirection.After, distance = 1, wordContext = wordContext) {
+            it.value?.let {
+                val lastName = it.value("word")
+                active = false
+                action(lastName)
+            }
+        }
+    }
+    override fun description(): String {
+        return "If an unknown word immediately follows,\nThen assume it is a character's last name\nand update character information."
+    }
+}
 
 // Word Senses
 
@@ -90,3 +117,4 @@ class WordPerson(val human: Concept, word: String = human.valueName(HumanFields.
         return lexicalConcept.demons
     }
 }
+

@@ -171,8 +171,8 @@ class LexicalConceptBuilder(val root: LexicalRootBuilder, conceptName: String) {
                 copyCompletedSlot(HumanFields.GENDER, episodicCharacter, concept)
                 root.wordContext.context.workingMemory.markAsRecentCharacter(concept)
             } else {
-                println("Creating character ${concept.valueName("firstName")} in EP memory")
-                val human = buildHuman(concept.valueName("firstName"), concept.valueName("lastName"), concept.valueName("gender"))
+                println("Creating character ${concept.valueName(HumanFields.FIRST_NAME)} in EP memory")
+                val human = buildHuman(concept.valueName(HumanFields.FIRST_NAME), concept.valueName(HumanFields.LAST_NAME), concept.valueName(HumanFields.GENDER))
                 // val saveCharacterDemon = SaveCharacterDemon(root.wordContext)
                 root.wordContext.context.workingMemory.markAsRecentCharacter(concept)
                 //root.wordContext.context.episodicMemory.addConcept(human)
@@ -209,7 +209,7 @@ class LexicalConceptBuilder(val root: LexicalRootBuilder, conceptName: String) {
     fun findCharacter(slotName: String, variableName: String? = null) {
         val variableSlot = root.createVariable(slotName, variableName)
         concept.with(variableSlot)
-        val demon = FindCharacterDemon(concept.valueName("gender"), root.wordContext) {
+        val demon = FindCharacterDemon(concept.valueName(HumanFields.GENDER), root.wordContext) {
             if (it != null) {
                 root.completeVariable(variableSlot, it, root.wordContext, this.episodicConcept)
             }
@@ -243,17 +243,6 @@ class LexicalConceptBuilder(val root: LexicalRootBuilder, conceptName: String) {
         val variableSlot = root.createVariable(slotName, variableName)
         concept.with(variableSlot)
         val demon = InnerInstanceDemon(observeSlot, root.wordContext) {
-            if (it != null) {
-                root.completeVariable(variableSlot, it, root.wordContext, this.episodicConcept)
-            }
-        }
-        root.addDemon(demon)
-    }
-
-    fun lastName(slotName: Fields, variableName: String? = null) {
-        val variableSlot = root.createVariable(slotName, variableName)
-        concept.with(variableSlot)
-        val demon = LastNameDemon(root.wordContext) {
             if (it != null) {
                 root.completeVariable(variableSlot, it, root.wordContext, this.episodicConcept)
             }

@@ -143,7 +143,7 @@ class HumanAccessor(concept: Concept): ConceptAccessor(concept) {
         return concept.name == InDepthUnderstandingConcepts.Human.name
     }
     fun firstName(): String? {
-        return concept.valueName("firstName")
+        return concept.valueName(HumanFields.FIRST_NAME)
     }
 }
 
@@ -396,9 +396,9 @@ class ModifierWord(word: String, val modifier: String, val value: String = word)
 class WordMan(word: String): WordHandler(EntryWord(word)) {
     override fun build(wordContext: WordContext): List<Demon> {
         val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
-            slot("firstName", "")
-            slot("lastName", "")
-            slot("gender", Gender.Male.name)
+            slot(HumanFields.FIRST_NAME, "")
+            slot(HumanFields.LAST_NAME, "")
+            slot(HumanFields.GENDER, Gender.Male.name)
         }
         return lexicalConcept.demons
     }

@@ -246,22 +246,6 @@ class NextCharacterDemon(wordContext: WordContext, val action: (ConceptHolder) -
     }
 }
 
-class LastNameDemon(wordContext: WordContext, val action: (Concept?) -> Unit): Demon(wordContext) {
-    override fun run() {
-        val matcher = matchConceptByHead(InDepthUnderstandingConcepts.UnknownWord.name)
-        searchContext(matcher, matchNever(), direction = SearchDirection.After, distance = 1, wordContext = wordContext) {
-            it.value?.let {
-                val lastName = it.value("word")
-                active = false
-                action(lastName)
-            }
-        }
-    }
-    override fun description(): String {
-        return "If an unknown word immediately follows,\nThen assume it is a character's last name\nand update character information."
-    }
-}
-
 /** Search for a Human to fill an actor slot of the Act.
  * This starts by looking for an actor referenced earlier in the text, however,
  * if it finds a voice = passive then it will switch to looking for a "by" Human

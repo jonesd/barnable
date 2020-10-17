@@ -43,8 +43,8 @@ class QATest {
             assertEquals(1, textProcessor.workingMemory.concepts.size)
             val meal = textProcessor.workingMemory.concepts[0]
             assertEquals("MopMeal", meal.name)
-            assertEquals("John", meal.value("eaterA")?.valueName("firstName"))
-            assertEquals("George", meal.value("eaterB")?.valueName("firstName"))
+            assertEquals("John", meal.value("eaterA")?.valueName(HumanFields.FIRST_NAME))
+            assertEquals("George", meal.value("eaterB")?.valueName(HumanFields.FIRST_NAME))
             assertEquals("EventEatMeal", meal.valueName("event"))
 
             // Question

@@ -1,5 +1,7 @@
 package info.dgjones.au.narrative
 
+import info.dgjones.au.concept.CoreFields
+import info.dgjones.au.domain.general.HumanFields
 import info.dgjones.au.parser.runTextProcess
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -27,7 +29,7 @@ class DisambiguateMeasureTest {
         assertEquals(1, textProcessor.workingMemory.concepts.size)
         val toMeasure = textProcessor.workingMemory.concepts[0]
         assertEquals("ATRANS", toMeasure.name)
-        assertEquals("John", toMeasure.value("actor")?.valueName("firstName"))
-        assertEquals("tree", toMeasure.value("thing")?.valueName("name"))
+        assertEquals("John", toMeasure.value("actor")?.valueName(HumanFields.FIRST_NAME))
+        assertEquals("tree", toMeasure.value("thing")?.valueName(CoreFields.Name))
     }
 }
