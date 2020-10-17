@@ -2,7 +2,7 @@ package info.dgjones.au.narrative
 
 import info.dgjones.au.concept.CoreFields
 import info.dgjones.au.domain.general.Gender
-import info.dgjones.au.domain.general.Human
+import info.dgjones.au.domain.general.HumanFields
 import info.dgjones.au.domain.general.RoleThemeFields
 import info.dgjones.au.parser.*
 import org.junit.jupiter.api.Assertions.*
@@ -33,7 +33,7 @@ class RoleThemeTest {
         assertEquals("GRASP", grasp.name)
         assertEquals("RoleThemeWaiter", grasp.value(ActFields.Actor)?.valueName(RoleThemeFields.RoleTheme))
         assertEquals("RoleThemeWaiter0", grasp.value(ActFields.Actor)?.valueName(CoreFields.INSTANCE))
-        assertEquals(Gender.Female.name, grasp.value(ActFields.Actor)?.valueName(Human.GENDER))
+        assertEquals(Gender.Female.name, grasp.value(ActFields.Actor)?.valueName(HumanFields.GENDER))
         assertEquals("wine", grasp.value(ActFields.Thing)?.valueName(CoreFields.Name))
     }
 }

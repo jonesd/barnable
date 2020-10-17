@@ -1,7 +1,7 @@
 package info.dgjones.au.episodic
 
 import info.dgjones.au.concept.*
-import info.dgjones.au.domain.general.Human
+import info.dgjones.au.domain.general.HumanFields
 import info.dgjones.au.domain.general.RoleThemeFields
 import info.dgjones.au.domain.general.characterMatcher
 import info.dgjones.au.domain.general.humanKeyValue
@@ -144,10 +144,10 @@ class EpisodicMemory {
     fun updateCharacter(episodicConcept: EpisodicConcept, slotUpdate: Slot) {
         //FIXME may need to use deepcopy...
         when (slotUpdate.name) {
-            Human.FIRST_NAME.fieldName -> slotUpdate.copyValue(episodicConcept)
-            Human.LAST_NAME.fieldName -> slotUpdate.copyValue(episodicConcept)
+            HumanFields.FIRST_NAME.fieldName -> slotUpdate.copyValue(episodicConcept)
+            HumanFields.LAST_NAME.fieldName -> slotUpdate.copyValue(episodicConcept)
             RoleThemeFields.RoleTheme.fieldName -> slotUpdate.copyValue(episodicConcept)
-            Human.GENDER.fieldName -> slotUpdate.copyValue(episodicConcept)
+            HumanFields.GENDER.fieldName -> slotUpdate.copyValue(episodicConcept)
             else -> println("EP UpdateCharacter - no slot match for update $slotUpdate")
         }
         }
@@ -160,9 +160,9 @@ class EpisodicMemory {
         }
         val character = EpisodicConcept(InDepthUnderstandingConcepts.Human.name)
         if (human != null) {
-            character.with(human.duplicateResolvedSlot(Human.FIRST_NAME))
-            character.with(human.duplicateResolvedSlot(Human.LAST_NAME))
-            character.with(human.duplicateResolvedSlot(Human.GENDER))
+            character.with(human.duplicateResolvedSlot(HumanFields.FIRST_NAME))
+            character.with(human.duplicateResolvedSlot(HumanFields.LAST_NAME))
+            character.with(human.duplicateResolvedSlot(HumanFields.GENDER))
             character.with(human.duplicateResolvedSlot(RoleThemeFields.RoleTheme))
         }
         val episodicInstance = indexGenerator.episodicId(humanKeyValue(character))

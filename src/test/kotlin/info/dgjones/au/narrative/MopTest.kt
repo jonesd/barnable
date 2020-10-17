@@ -24,11 +24,11 @@ class MopMealTest {
 
         assertEquals("MopMeal0", episodic.valueName(CoreFields.INSTANCE))
 
-        assertEquals("john", episodic.value(MopMealFields.EATER_A)?.valueName(Human.FIRST_NAME))
-        assertEquals("smith", episodic.value(MopMealFields.EATER_A)?.valueName(Human.LAST_NAME))
-        assertEquals("Male", episodic.value(MopMealFields.EATER_A)?.valueName(Human.GENDER))
+        assertEquals("john", episodic.value(MopMealFields.EATER_A)?.valueName(HumanFields.FIRST_NAME))
+        assertEquals("smith", episodic.value(MopMealFields.EATER_A)?.valueName(HumanFields.LAST_NAME))
+        assertEquals("Male", episodic.value(MopMealFields.EATER_A)?.valueName(HumanFields.GENDER))
 
-        assertEquals("george", episodic.value(MopMealFields.EATER_B)?.valueName(Human.FIRST_NAME))
+        assertEquals("george", episodic.value(MopMealFields.EATER_B)?.valueName(HumanFields.FIRST_NAME))
 
         assertEquals(episodic, memory.mops["MopMeal0"])
     }
@@ -53,8 +53,8 @@ class MopMealTest {
         assertEquals("MopMeal0", originalEpisodic.valueName(CoreFields.INSTANCE))
         assertEquals("MopMeal0", episodic.valueName(CoreFields.INSTANCE))
 
-        assertEquals("john", episodic.value(MopMealFields.EATER_A)?.valueName(Human.FIRST_NAME))
-        assertEquals("george", episodic.value(MopMealFields.EATER_B)?.valueName(Human.FIRST_NAME))
+        assertEquals("john", episodic.value(MopMealFields.EATER_A)?.valueName(HumanFields.FIRST_NAME))
+        assertEquals("george", episodic.value(MopMealFields.EATER_B)?.valueName(HumanFields.FIRST_NAME))
 
         assertEquals(episodic, memory.mops["MopMeal0"])
     }

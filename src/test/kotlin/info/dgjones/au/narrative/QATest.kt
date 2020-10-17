@@ -1,6 +1,6 @@
 package info.dgjones.au.narrative
 
-import info.dgjones.au.domain.general.Human
+import info.dgjones.au.domain.general.HumanFields
 import info.dgjones.au.qa.QuestionProcessor
 import info.dgjones.au.parser.buildTextModel
 import info.dgjones.au.parser.runTextProcess
@@ -54,7 +54,7 @@ class QATest {
 
             assertEquals(1, result.sentenceResult.size)
             val answerConcept = result.sentenceResult[0]
-            assertEquals("John", answerConcept.value("actor")?.valueName(Human.FIRST_NAME))
+            assertEquals("John", answerConcept.value("actor")?.valueName(HumanFields.FIRST_NAME))
             assertEquals("MopMeal", answerConcept.valueName("act"))
 
             assertEquals("George", result.answer)

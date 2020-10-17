@@ -33,7 +33,7 @@ class RoleThemeWord(word: String, val roleTheme: RoleTheme, val gender: Gender? 
         val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
             slot(RoleThemeFields.RoleTheme, roleTheme.name)
             gender?.let {
-                slot(Human.GENDER, gender.name)
+                slot(HumanFields.GENDER, gender.name)
             }
             checkCharacter(CoreFields.INSTANCE.fieldName)
         }

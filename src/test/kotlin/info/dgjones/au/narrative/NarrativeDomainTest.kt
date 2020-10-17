@@ -102,9 +102,9 @@ class NarrativeDomainTest {
         val kissAttend = textProcessor.workingMemory.concepts[1]
         assertEquals("ATTEND", kissAttend.name)
         assertEquals("John0", kissAttend.value("actor")?.valueName(CoreFields.INSTANCE))
-        assertEquals(Gender.Male.name, kissAttend.value("actor")?.valueName(Human.GENDER))
+        assertEquals(Gender.Male.name, kissAttend.value("actor")?.valueName(HumanFields.GENDER))
         assertEquals("Anne0", kissAttend.value("to")?.valueName(CoreFields.INSTANCE))
-        assertEquals(Gender.Female.name, kissAttend.value("to")?.valueName(Human.GENDER))
+        assertEquals(Gender.Female.name, kissAttend.value("to")?.valueName(HumanFields.GENDER))
 
         //FIXME more assertions
     }
@@ -160,10 +160,10 @@ class NarrativeDomainTest {
 
         assertEquals(1, textProcessor.workingMemory.concepts.size)
         val human = textProcessor.workingMemory.concepts[0]
-        assertEquals(Human.CONCEPT.fieldName, human.name)
-        assertEquals("John", human.valueName(Human.FIRST_NAME))
-        assertEquals(Gender.Male.name, human.valueName(Human.GENDER))
-        assertEquals("Snicklefritz", human.valueName(Human.LAST_NAME))
+        assertEquals(HumanConcept.Human.name, human.name)
+        assertEquals("John", human.valueName(HumanFields.FIRST_NAME))
+        assertEquals(Gender.Male.name, human.valueName(HumanFields.GENDER))
+        assertEquals("Snicklefritz", human.valueName(HumanFields.LAST_NAME))
     }
 
     @Test
@@ -172,10 +172,10 @@ class NarrativeDomainTest {
 
         assertEquals(1, textProcessor.workingMemory.concepts.size)
         val human = textProcessor.workingMemory.concepts[0]
-        assertEquals(Human.CONCEPT.fieldName, human.name)
-        assertEquals("", human.valueName(Human.FIRST_NAME))
-        assertEquals(Gender.Male.name, human.valueName(Human.GENDER))
-        assertEquals("Snicklefritz", human.valueName(Human.LAST_NAME))
+        assertEquals(HumanConcept.Human.name, human.name)
+        assertEquals("", human.valueName(HumanFields.FIRST_NAME))
+        assertEquals(Gender.Male.name, human.valueName(HumanFields.GENDER))
+        assertEquals("Snicklefritz", human.valueName(HumanFields.LAST_NAME))
     }
 
     @Test
@@ -184,10 +184,10 @@ class NarrativeDomainTest {
 
         assertEquals(1, textProcessor.workingMemory.concepts.size)
         val human = textProcessor.workingMemory.concepts[0]
-        assertEquals(Human.CONCEPT.fieldName, human.name)
-        assertEquals("", human.valueName(Human.FIRST_NAME))
-        assertEquals(Gender.Female.name, human.valueName(Human.GENDER))
-        assertEquals("Snicklefritz", human.valueName(Human.LAST_NAME))
+        assertEquals(HumanConcept.Human.name, human.name)
+        assertEquals("", human.valueName(HumanFields.FIRST_NAME))
+        assertEquals(Gender.Female.name, human.valueName(HumanFields.GENDER))
+        assertEquals("Snicklefritz", human.valueName(HumanFields.LAST_NAME))
     }
 
     @Test
@@ -197,10 +197,10 @@ class NarrativeDomainTest {
         // FIXME implement
         assertEquals(1, textProcessor.workingMemory.concepts.size)
         val human = textProcessor.workingMemory.concepts[0]
-        assertEquals(Human.CONCEPT.fieldName, human.name)
-        assertEquals("", human.valueName(Human.FIRST_NAME))
-        assertEquals(Gender.Female.name, human.valueName(Human.GENDER))
-        assertEquals("Snicklefritz", human.valueName(Human.LAST_NAME))
+        assertEquals(HumanConcept.Human.name, human.name)
+        assertEquals("", human.valueName(HumanFields.FIRST_NAME))
+        assertEquals(Gender.Female.name, human.valueName(HumanFields.GENDER))
+        assertEquals("Snicklefritz", human.valueName(HumanFields.LAST_NAME))
     }
 
     @Test
@@ -210,10 +210,10 @@ class NarrativeDomainTest {
         // FIXME implement
         assertEquals(1, textProcessor.workingMemory.concepts.size)
         val human = textProcessor.workingMemory.concepts[0]
-        assertEquals(Human.CONCEPT.fieldName, human.name)
-        assertEquals("", human.valueName(Human.FIRST_NAME))
-        assertEquals(Gender.Female.name, human.valueName(Human.GENDER))
-        assertEquals("Snicklefritz", human.valueName(Human.LAST_NAME))
+        assertEquals(HumanConcept.Human.name, human.name)
+        assertEquals("", human.valueName(HumanFields.FIRST_NAME))
+        assertEquals(Gender.Female.name, human.valueName(HumanFields.GENDER))
+        assertEquals("Snicklefritz", human.valueName(HumanFields.LAST_NAME))
     }
 
     @Test
@@ -222,9 +222,9 @@ class NarrativeDomainTest {
 
         assertEquals(1, textProcessor.workingMemory.concepts.size)
         val human = textProcessor.workingMemory.concepts[0]
-        assertEquals(Human.CONCEPT.fieldName, human.name)
-        assertEquals("John", human.valueName(Human.FIRST_NAME))
-        assertEquals(Gender.Male.name, human.valueName(Human.GENDER))
-        assertEquals("Snicklefritz", human.valueName(Human.LAST_NAME))
+        assertEquals(HumanConcept.Human.name, human.name)
+        assertEquals("John", human.valueName(HumanFields.FIRST_NAME))
+        assertEquals(Gender.Male.name, human.valueName(HumanFields.GENDER))
+        assertEquals("Snicklefritz", human.valueName(HumanFields.LAST_NAME))
     }
 }

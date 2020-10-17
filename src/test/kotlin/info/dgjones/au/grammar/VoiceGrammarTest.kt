@@ -1,6 +1,6 @@
 package info.dgjones.au.grammar
 
-import info.dgjones.au.domain.general.Human
+import info.dgjones.au.domain.general.HumanFields
 import info.dgjones.au.narrative.Acts
 import info.dgjones.au.narrative.buildInDepthUnderstandingLexicon
 import info.dgjones.au.concept.Concept
@@ -31,7 +31,7 @@ class ShouldMapPassiveAndActiveToSameConceptsTest {
 
     private fun verifyFredKickedBall(propel: Concept) {
         assertEquals(Acts.PROPEL.name, propel.name)
-        assertEquals("Fred", propel.value("actor")?.valueName(Human.FIRST_NAME))
+        assertEquals("Fred", propel.value("actor")?.valueName(HumanFields.FIRST_NAME))
         assertEquals("ball", propel.value("thing")?.valueName("name"))
     }
 }

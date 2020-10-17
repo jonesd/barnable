@@ -407,9 +407,9 @@ class WordMan(word: String): WordHandler(EntryWord(word)) {
 class TitleWord(word: String, val gender: Gender): WordHandler(EntryWord(word, noSuffix = true)) {
     override fun build(wordContext: WordContext): List<Demon> {
         val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
-            slot(Human.FIRST_NAME, "")
-            lastName(Human.LAST_NAME)
-            slot(Human.GENDER, gender.name)
+            slot(HumanFields.FIRST_NAME, "")
+            lastName(HumanFields.LAST_NAME)
+            slot(HumanFields.GENDER, gender.name)
             // FIXME include title
             checkCharacter(CoreFields.INSTANCE.fieldName)
         }
@@ -474,7 +474,7 @@ class WordWas : WordHandler(EntryWord("was")) {
 class WordAnother: WordHandler(EntryWord("another")) {
     override fun build(wordContext: WordContext): List<Demon> {
         val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
-            slot(Human.GENDER, Gender.Female.name)
+            slot(HumanFields.GENDER, Gender.Female.name)
             slot(Relationships.Name, Marriage.Concept.fieldName) {
                 possessiveRef(Marriage.Husband, gender = Gender.Male)
                 nextChar("wife", relRole = "Wife")

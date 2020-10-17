@@ -3,7 +3,7 @@ package info.dgjones.au.grammar
 import info.dgjones.au.concept.CoreFields
 import info.dgjones.au.concept.lexicalConcept
 import info.dgjones.au.domain.general.Gender
-import info.dgjones.au.domain.general.Human
+import info.dgjones.au.domain.general.HumanFields
 import info.dgjones.au.narrative.InDepthUnderstandingConcepts
 import info.dgjones.au.parser.*
 
@@ -34,7 +34,7 @@ class WordPronoun(word: String, val gender: Gender, val case: Case): WordHandler
         val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.Ref.name) {
             ignoreHolder()
             slot(GrammarFields.Case, case.name)
-            slot(Human.GENDER, gender.name)
+            slot(HumanFields.GENDER, gender.name)
             findCharacter(CoreFields.INSTANCE.fieldName)
         }
         return lexicalConcept.demons

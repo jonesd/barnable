@@ -17,7 +17,7 @@ class TimeTest {
         Assertions.assertEquals(1, textProcessor.workingMemory.concepts.size)
         val walk = textProcessor.workingMemory.concepts[0]
         Assertions.assertEquals(Acts.PTRANS.name, walk.name)
-        Assertions.assertEquals("John", walk.value(ActFields.Actor)?.valueName(Human.FIRST_NAME))
+        Assertions.assertEquals("John", walk.value(ActFields.Actor)?.valueName(HumanFields.FIRST_NAME))
         Assertions.assertEquals("Home", walk.value(ActFields.To)?.valueName("name"))
         Assertions.assertEquals("Yesterday", walk.valueName(TimeFields.TIME))
     }

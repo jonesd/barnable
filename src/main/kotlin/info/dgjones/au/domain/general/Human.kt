@@ -4,8 +4,11 @@ import info.dgjones.au.concept.*
 import info.dgjones.au.narrative.InDepthUnderstandingConcepts
 import info.dgjones.au.parser.*
 
-enum class Human(override val fieldName: String): Fields {
-    CONCEPT("Human"),
+enum class HumanConcept {
+    Human
+}
+
+enum class HumanFields(override val fieldName: String): Fields {
     FIRST_NAME("firstName"),
     LAST_NAME("lastName"),
     GENDER("gender")
@@ -18,19 +21,19 @@ enum class Gender {
 }
 
 fun characterMatcher(human: Concept): ConceptMatcher =
-    characterMatcher(human.valueName(Human.FIRST_NAME),
-        human.valueName(Human.LAST_NAME),
-        human.valueName(Human.GENDER),
+    characterMatcher(human.valueName(HumanFields.FIRST_NAME),
+        human.valueName(HumanFields.LAST_NAME),
+        human.valueName(HumanFields.GENDER),
         human.valueName(RoleThemeFields.RoleTheme.fieldName)
     )
 
 fun characterMatcher(firstName: String?, lastName: String?, gender: String?, roleTheme: String?): ConceptMatcher =
     ConceptMatcherBuilder()
         .with(matchConceptByHead(InDepthUnderstandingConcepts.Human.name))
-        .matchSetField(Human.FIRST_NAME, firstName)
-        .matchSetField(Human.LAST_NAME, lastName)
+        .matchSetField(HumanFields.FIRST_NAME, firstName)
+        .matchSetField(HumanFields.LAST_NAME, lastName)
         .matchSetField(RoleThemeFields.RoleTheme, roleTheme)
-        .matchSetField(Human.GENDER, gender)
+        .matchSetField(HumanFields.GENDER, gender)
         .matchAll()
 
 fun characterMatcherWithInstance(human: Concept): ConceptMatcher =
@@ -60,7 +63,7 @@ fun buildHuman(firstName: String? = "", lastName: String? = "", gender: String? 
 }
 
 fun humanKeyValue(human: Concept) =
-    human.selectKeyValue(Human.FIRST_NAME, Human.LAST_NAME, RoleThemeFields.RoleTheme)
+    human.selectKeyValue(HumanFields.FIRST_NAME, HumanFields.LAST_NAME, RoleThemeFields.RoleTheme)
 
 // Word Senses
 
@@ -74,14 +77,14 @@ fun buildGeneralHumanLexicon(lexicon: Lexicon) {
     lexicon.addMapping(WordPerson(buildHuman("George", "", Gender.Male.name)))
 }
 
-class WordPerson(val human: Concept, word: String = human.valueName(Human.FIRST_NAME)?:"unknown"): WordHandler(EntryWord(word)) {
+class WordPerson(val human: Concept, word: String = human.valueName(HumanFields.FIRST_NAME)?:"unknown"): WordHandler(EntryWord(word)) {
     override fun build(wordContext: WordContext): List<Demon> {
         val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
             // FIXME not sure about defaulting to ""
-            slot(Human.FIRST_NAME, human.valueName(Human.FIRST_NAME) ?: "")
-            lastName(Human.LAST_NAME)
+            slot(HumanFields.FIRST_NAME, human.valueName(HumanFields.FIRST_NAME) ?: "")
+            lastName(HumanFields.LAST_NAME)
             //slot(Human.LAST_NAME, human.valueName(Human.LAST_NAME) ?: "")
-            slot(Human.GENDER, human.valueName(Human.GENDER)?: "")
+            slot(HumanFields.GENDER, human.valueName(HumanFields.GENDER)?: "")
             checkCharacter(CoreFields.INSTANCE.fieldName)
         }
         return lexicalConcept.demons

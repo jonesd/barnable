@@ -4,7 +4,7 @@ import info.dgjones.au.concept.CoreFields
 import info.dgjones.au.concept.Fields
 import info.dgjones.au.concept.lexicalConcept
 import info.dgjones.au.domain.general.Gender
-import info.dgjones.au.domain.general.Human
+import info.dgjones.au.domain.general.HumanFields
 import info.dgjones.au.parser.*
 
 enum class Relationships(override val fieldName: String): Fields {
@@ -27,7 +27,7 @@ fun buildNarrativeRelationshipLexicon(lexicon: Lexicon) {
 class WordWife: WordHandler(EntryWord("wife")) {
     override fun build(wordContext: WordContext): List<Demon> {
         val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
-            slot(Human.GENDER, Gender.Female.name)
+            slot(HumanFields.GENDER, Gender.Female.name)
             slot(Relationships.Name, Marriage.Concept.fieldName) {
                 possessiveRef(Marriage.Husband, gender = Gender.Male)
                 nextChar("wife", relRole = "Wife")
@@ -42,7 +42,7 @@ class WordWife: WordHandler(EntryWord("wife")) {
 class WordHusband: WordHandler(EntryWord("husband")) {
     override fun build(wordContext: WordContext): List<Demon> {
         val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
-            slot(Human.GENDER, Gender.Male.name)
+            slot(HumanFields.GENDER, Gender.Male.name)
             slot(Relationships.Name, Marriage.Concept.fieldName) {
                 possessiveRef(Marriage.Wife, gender = Gender.Female)
                 nextChar("husband", relRole = "Husband")

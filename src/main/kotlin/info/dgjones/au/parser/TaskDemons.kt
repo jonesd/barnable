@@ -2,7 +2,7 @@ package info.dgjones.au.parser
 
 import info.dgjones.au.concept.*
 import info.dgjones.au.domain.general.Gender
-import info.dgjones.au.domain.general.Human
+import info.dgjones.au.domain.general.HumanFields
 import info.dgjones.au.episodic.EpisodicMemory
 import info.dgjones.au.grammar.*
 import info.dgjones.au.narrative.*
@@ -60,7 +60,7 @@ class CheckCharacterDemon(val human: Concept, wordContext: WordContext, val acti
         active = false
     }
     override fun description(): String {
-        return "CheckCharacter from episodic with ${human.valueName(Human.FIRST_NAME)} ${human.valueName(Human.GENDER)}"
+        return "CheckCharacter from episodic with ${human.valueName(HumanFields.FIRST_NAME)} ${human.valueName(HumanFields.GENDER)}"
     }
 }
 

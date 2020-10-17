@@ -1,7 +1,7 @@
 package info.dgjones.au.concept
 
 import info.dgjones.au.domain.general.Gender
-import info.dgjones.au.domain.general.Human
+import info.dgjones.au.domain.general.HumanFields
 import info.dgjones.au.domain.general.buildHuman
 import info.dgjones.au.episodic.EpisodicConcept
 import info.dgjones.au.narrative.MopMealFields
@@ -166,9 +166,9 @@ class LexicalConceptBuilder(val root: LexicalRootBuilder, conceptName: String) {
                 val episodicInstance = episodicCharacter.value(CoreFields.INSTANCE)
                 root.completeVariable(variableSlot, root.wordContext.context.workingMemory.createDefHolder(episodicInstance))
                 this.episodicConcept = episodicCharacter
-                copyCompletedSlot(Human.FIRST_NAME, episodicCharacter, concept)
-                copyCompletedSlot(Human.LAST_NAME, episodicCharacter, concept)
-                copyCompletedSlot(Human.GENDER, episodicCharacter, concept)
+                copyCompletedSlot(HumanFields.FIRST_NAME, episodicCharacter, concept)
+                copyCompletedSlot(HumanFields.LAST_NAME, episodicCharacter, concept)
+                copyCompletedSlot(HumanFields.GENDER, episodicCharacter, concept)
                 root.wordContext.context.workingMemory.markAsRecentCharacter(concept)
             } else {
                 println("Creating character ${concept.valueName("firstName")} in EP memory")
