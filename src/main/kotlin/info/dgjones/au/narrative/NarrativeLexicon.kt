@@ -18,15 +18,6 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     lexicon.addMapping(WordDrop())
     lexicon.addMapping(WordBox())
 
-    // Titles
-    lexicon.addMapping(TitleWord("Mr", Gender.Male))
-    lexicon.addMapping(TitleWord("Mr.", Gender.Male))
-    lexicon.addMapping(TitleWord("Mrs", Gender.Female))
-    lexicon.addMapping(TitleWord("Mrs.", Gender.Female))
-    lexicon.addMapping(TitleWord("Miss", Gender.Female))
-    lexicon.addMapping(TitleWord("Ms", Gender.Female))
-    lexicon.addMapping(TitleWord("Ms.", Gender.Female))
-
     lexicon.addMapping(WordGive())
 
     lexicon.addMapping(WordWas())
@@ -401,24 +392,6 @@ class WordMan(word: String): WordHandler(EntryWord(word)) {
             slot(HumanFields.GENDER, Gender.Male.name)
         }
         return lexicalConcept.demons
-    }
-}
-
-class TitleWord(word: String, val gender: Gender): WordHandler(EntryWord(word, noSuffix = true)) {
-    override fun build(wordContext: WordContext): List<Demon> {
-        val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
-            slot(HumanFields.FIRST_NAME, "")
-            lastName(HumanFields.LAST_NAME)
-            slot(HumanFields.GENDER, gender.name)
-            // FIXME include title
-            checkCharacter(CoreFields.INSTANCE.fieldName)
-        }
-        return lexicalConcept.demons
-    }
-    override fun disambiguationDemons(wordContext: WordContext, disambiguationHandler: DisambiguationHandler): List<Demon> {
-        return listOf(
-            DisambiguateUsingMatch(matchConceptByHead(listOf(InDepthUnderstandingConcepts.UnknownWord.name)), SearchDirection.After, 1, wordContext, disambiguationHandler)
-        )
     }
 }
 

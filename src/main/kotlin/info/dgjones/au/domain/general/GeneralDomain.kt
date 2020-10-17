@@ -6,6 +6,7 @@ fun buildGeneralDomainLexicon(lexicon: Lexicon) {
     buildGeneralFoodLexicon(lexicon)
     buildGeneralLiquidLexicon(lexicon)
     buildGeneralHumanLexicon(lexicon)
+    buildGeneralHonorificLexicon(lexicon)
     buildGeneralPhysicalObjectsLexicon(lexicon)
     buildGeneralRoleThemeLexicon(lexicon)
     buildGeneralTimeLexicon(lexicon)

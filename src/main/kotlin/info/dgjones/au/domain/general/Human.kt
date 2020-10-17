@@ -17,7 +17,7 @@ enum class HumanFields(override val fieldName: String): Fields {
 enum class Gender {
     Male,
     Female,
-    Other
+    Neutral
 }
 
 fun characterMatcher(human: Concept): ConceptMatcher =
@@ -65,6 +65,33 @@ fun buildHuman(firstName: String? = "", lastName: String? = "", gender: String? 
 fun humanKeyValue(human: Concept) =
     human.selectKeyValue(HumanFields.FIRST_NAME, HumanFields.LAST_NAME, RoleThemeFields.RoleTheme)
 
+// Word Senses
+
+fun buildGeneralHumanLexicon(lexicon: Lexicon) {
+    lexicon.addMapping(WordPerson(buildHuman("Ann", "", Gender.Female.name)))
+    lexicon.addMapping(WordPerson(buildHuman("Anne", "", Gender.Female.name)))
+    lexicon.addMapping(WordPerson(buildHuman("Bill", "", Gender.Male.name)))
+    lexicon.addMapping(WordPerson(buildHuman("Fred", "", Gender.Male.name)))
+    lexicon.addMapping(WordPerson(buildHuman("George", "", Gender.Male.name)))
+    lexicon.addMapping(WordPerson(buildHuman("Jane", "", Gender.Female.name)))
+    lexicon.addMapping(WordPerson(buildHuman("John", "", Gender.Male.name)))
+    lexicon.addMapping(WordPerson(buildHuman("Mary", "", Gender.Female.name)))
+}
+
+class WordPerson(val human: Concept, word: String = human.valueName(HumanFields.FIRST_NAME)?:"unknown"): WordHandler(EntryWord(word)) {
+    override fun build(wordContext: WordContext): List<Demon> {
+        val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
+            // FIXME not sure about defaulting to ""
+            slot(HumanFields.FIRST_NAME, human.valueName(HumanFields.FIRST_NAME) ?: "")
+            lastName(HumanFields.LAST_NAME)
+            //slot(Human.LAST_NAME, human.valueName(Human.LAST_NAME) ?: "")
+            slot(HumanFields.GENDER, human.valueName(HumanFields.GENDER)?: "")
+            checkCharacter(CoreFields.INSTANCE.fieldName)
+        }
+        return lexicalConcept.demons
+    }
+}
+
 fun LexicalConceptBuilder.lastName(slotName: Fields, variableName: String? = null) {
     val variableSlot = root.createVariable(slotName, variableName)
     concept.with(variableSlot)
@@ -91,30 +118,3 @@ class LastNameDemon(wordContext: WordContext, val action: (Concept?) -> Unit): D
         return "If an unknown word immediately follows,\nThen assume it is a character's last name\nand update character information."
     }
 }
-
-// Word Senses
-
-fun buildGeneralHumanLexicon(lexicon: Lexicon) {
-    lexicon.addMapping(WordPerson(buildHuman("Fred", "", Gender.Male.name)))
-    lexicon.addMapping(WordPerson(buildHuman("John", "", Gender.Male.name)))
-    lexicon.addMapping(WordPerson(buildHuman("Mary", "", Gender.Female.name)))
-    lexicon.addMapping(WordPerson(buildHuman("Ann", "", Gender.Female.name)))
-    lexicon.addMapping(WordPerson(buildHuman("Anne", "", Gender.Female.name)))
-    lexicon.addMapping(WordPerson(buildHuman("Bill", "", Gender.Male.name)))
-    lexicon.addMapping(WordPerson(buildHuman("George", "", Gender.Male.name)))
-}
-
-class WordPerson(val human: Concept, word: String = human.valueName(HumanFields.FIRST_NAME)?:"unknown"): WordHandler(EntryWord(word)) {
-    override fun build(wordContext: WordContext): List<Demon> {
-        val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
-            // FIXME not sure about defaulting to ""
-            slot(HumanFields.FIRST_NAME, human.valueName(HumanFields.FIRST_NAME) ?: "")
-            lastName(HumanFields.LAST_NAME)
-            //slot(Human.LAST_NAME, human.valueName(Human.LAST_NAME) ?: "")
-            slot(HumanFields.GENDER, human.valueName(HumanFields.GENDER)?: "")
-            checkCharacter(CoreFields.INSTANCE.fieldName)
-        }
-        return lexicalConcept.demons
-    }
-}
-
