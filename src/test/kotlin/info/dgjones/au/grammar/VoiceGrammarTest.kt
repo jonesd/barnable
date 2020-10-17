@@ -1,7 +1,7 @@
 package info.dgjones.au.grammar
 
 import info.dgjones.au.domain.general.HumanFields
-import info.dgjones.au.narrative.Acts
+import info.dgjones.au.domain.general.Acts
 import info.dgjones.au.narrative.buildInDepthUnderstandingLexicon
 import info.dgjones.au.concept.Concept
 import info.dgjones.au.parser.runTextProcess

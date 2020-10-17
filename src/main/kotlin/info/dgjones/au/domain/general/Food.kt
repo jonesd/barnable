@@ -2,14 +2,8 @@ package info.dgjones.au.domain.general
 
 import info.dgjones.au.concept.Concept
 import info.dgjones.au.concept.CoreFields
-import info.dgjones.au.concept.LexicalConceptBuilder
 import info.dgjones.au.concept.Slot
-import info.dgjones.au.narrative.PhysicalObjectKind
 import info.dgjones.au.parser.*
-
-enum class FoodConcept {
-    Food
-}
 
 // FIXME generate food word handlers
 enum class Foods {
@@ -23,7 +17,7 @@ fun buildGeneralFoodLexicon(lexicon: Lexicon) {
 
 class FoodWord(private val food: Foods):  WordHandler(EntryWord(food.name)) {
     override fun build(wordContext: WordContext): List<Demon> =
-        buildLexicalPhysicalObject(FoodConcept.Food.name, food.name, wordContext).demons
+        buildLexicalPhysicalObject(PhysicalObjectKind.Food.name, food.name, wordContext).demons
 }
 
 fun buildFood(kindOfFood: Foods, name: String = kindOfFood.name): Concept {

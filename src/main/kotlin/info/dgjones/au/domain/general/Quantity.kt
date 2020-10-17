@@ -1,7 +1,6 @@
 package info.dgjones.au.domain.general
 
 import info.dgjones.au.concept.*
-import info.dgjones.au.narrative.PhysicalObjectKind
 import info.dgjones.au.parser.*
 
 enum class QuantityConcept {

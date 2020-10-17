@@ -3,7 +3,6 @@ package info.dgjones.au.domain.general
 import info.dgjones.au.concept.Concept
 import info.dgjones.au.concept.CoreFields
 import info.dgjones.au.concept.Slot
-import info.dgjones.au.narrative.PhysicalObjectKind
 import info.dgjones.au.parser.*
 
 enum class Liquids {

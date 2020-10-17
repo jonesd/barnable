@@ -1,8 +1,19 @@
 package info.dgjones.au.domain.general
 
 import info.dgjones.au.concept.*
-import info.dgjones.au.narrative.PhysicalObjectKind
 import info.dgjones.au.parser.*
+
+enum class PhysicalObjectKind {
+    PhysicalObject,
+    Container,
+    GameObject,
+    Book,
+    Food,
+    Liquid,
+    Location,
+    BodyPart,
+    Plant, // Tree?
+}
 
 fun LexicalConceptBuilder.physicalObject(name: String, kind: String, initializer: LexicalConceptBuilder.() -> Unit)  {
     val child = LexicalConceptBuilder(root, PhysicalObjectKind.PhysicalObject.name)

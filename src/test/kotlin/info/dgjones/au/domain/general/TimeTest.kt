@@ -1,8 +1,6 @@
 package info.dgjones.au.domain.general
 
 import info.dgjones.au.concept.CoreFields
-import info.dgjones.au.narrative.ActFields
-import info.dgjones.au.narrative.Acts
 import info.dgjones.au.narrative.buildInDepthUnderstandingLexicon
 import info.dgjones.au.parser.runTextProcess
 import org.junit.jupiter.api.Assertions

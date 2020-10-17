@@ -1,8 +1,9 @@
-package info.dgjones.au.narrative
+package info.dgjones.au.domain.general
 
-import info.dgjones.au.concept.Concept
-import info.dgjones.au.concept.Fields
-import info.dgjones.au.concept.Slot
+import info.dgjones.au.concept.*
+import info.dgjones.au.narrative.BodyParts
+import info.dgjones.au.narrative.InDepthUnderstandingConcepts
+import info.dgjones.au.parser.WordContext
 
 enum class ActFields(override val fieldName: String): Fields {
     Actor("actor"),

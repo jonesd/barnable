@@ -86,18 +86,6 @@ enum class Force {
     Gravity
 }
 
-enum class PhysicalObjectKind {
-    PhysicalObject,
-    Container,
-    GameObject,
-    Book,
-    Food,
-    Liquid,
-    Location,
-    BodyPart,
-    Plant, // Tree?
-}
-
 // FIXME how to define this? force
 val gravity = Concept("gravity")
 

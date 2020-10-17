@@ -1,11 +1,8 @@
 package info.dgjones.au.domain.general
 
-import info.dgjones.au.narrative.ActFields
-import info.dgjones.au.narrative.Acts
 import info.dgjones.au.narrative.buildInDepthUnderstandingLexicon
 import info.dgjones.au.parser.runTextProcess
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class HumanTest {

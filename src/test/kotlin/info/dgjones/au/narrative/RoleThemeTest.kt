@@ -1,6 +1,7 @@
 package info.dgjones.au.narrative
 
 import info.dgjones.au.concept.CoreFields
+import info.dgjones.au.domain.general.ActFields
 import info.dgjones.au.domain.general.Gender
 import info.dgjones.au.domain.general.HumanFields
 import info.dgjones.au.domain.general.RoleThemeFields
