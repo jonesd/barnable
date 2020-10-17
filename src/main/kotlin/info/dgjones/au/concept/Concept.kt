@@ -66,6 +66,12 @@ data class Concept(val name: String) {
         }
     }
 
+    fun replaceSlotValues(matcher: ConceptMatcher, replace: String?) {
+        slots.forEach {
+            it.value.replaceSlotValues(matcher, replace)
+        }
+    }
+
     // Key value for the concept
     fun selectKeyValue(vararg fieldNames: Fields) =
         selectKeyValue(fieldNames.map {it.fieldName()})
@@ -93,7 +99,7 @@ data class Concept(val name: String) {
         return Slot(slotName)
     }
 
-    private fun isVariable() =
+    fun isVariable() =
         name.startsWith(VARIABLE_PREFIX)
 
     override fun toString(): String {
@@ -118,6 +124,14 @@ class Slot(val name: String, var value: Concept? = null) {
     fun duplicateResolvedValue(): Slot {
         val duplicatedConcept = value?.duplicateResolvedValue()
         return Slot(name, duplicatedConcept)
+    }
+
+    fun replaceSlotValues(matcher: ConceptMatcher, replace: String?) {
+        if (matcher(value)) {
+            value = if (replace != null) Concept(replace) else null
+        } else {
+            value?.replaceSlotValues(matcher, replace)
+        }
     }
 
     fun isVariable() =

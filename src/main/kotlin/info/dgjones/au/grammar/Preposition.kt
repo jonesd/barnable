@@ -9,6 +9,10 @@ import info.dgjones.au.parser.*
 adverbial sense, with some other word. Examples of prepositions in English are in, from and during."
 https://en.wiktionary.org/wiki/Appendix:Glossary#preposition
  */
+enum class PrepositionConcept {
+    Preposition
+}
+
 enum class Preposition {
     By,
     In,
@@ -19,7 +23,7 @@ enum class Preposition {
 }
 
 fun buildPrep(preposition: Preposition): Concept {
-    val concept = Concept("Preposition")
+    val concept = Concept(PrepositionConcept.Preposition.name)
     withPreposition(concept, preposition)
     return concept
 }
@@ -60,6 +64,13 @@ fun buildGrammarPropositionLexicon(lexicon: Lexicon) {
     lexicon.addMapping(PrepositionWord(Preposition.By, setOf(InDepthUnderstandingConcepts.Setting.name)))
 }
 
+/*
+A preposition word will mark a matched target word as being connected to the preposition. This can then be matched
+This target can then be matched by another word searching for a preposition.
+For example: John had lunch with George
+ - With word will mark George as being related to the With preposition
+ - Lunch looks for a following Human related to a With preposition
+ */
 class PrepositionWord(val preposition: Preposition, val matchConcepts: Set<String>): WordHandler(EntryWord(preposition.name.toLowerCase())) {
     override fun build(wordContext: WordContext): List<Demon> {
         wordContext.defHolder.value = buildPrep(preposition)

@@ -24,6 +24,10 @@ fun matchCase(match: Case): ConceptMatcher {
     return matchConceptValueName("case", match.name)
 }
 
+fun matchUnresovledVariables(): ConceptMatcher {
+    return { c -> c?.isVariable() == true}
+}
+
 fun matchConceptValueName(slot: Fields, match: String): ConceptMatcher {
     return { c -> c?.valueName(slot) == match }
 }

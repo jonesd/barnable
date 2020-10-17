@@ -127,6 +127,22 @@ class ConceptTest {
             assertNotNull(matches[0].slot("c"))
         }
     }
+
+    @Nested
+    inner class Replace {
+        @Test
+        fun `replace multiple matches`() {
+            val root = Concept("test")
+                .with(Slot("a", createConceptVariable("someVariable")))
+                .with(Slot("b", createConceptVariable("otherVariable")))
+                .with(Slot("c", Concept("valueC")))
+
+            root.replaceSlotValues(matchUnresovledVariables(), null)
+            assertEquals(null, root.valueName("a"))
+            assertEquals(null, root.valueName("b"))
+            assertEquals("valueC", root.valueName("c"))
+        }
+    }
 }
 
 class SlotTest {

@@ -2,6 +2,7 @@ package info.dgjones.au.parser
 
 import info.dgjones.au.concept.Concept
 import info.dgjones.au.concept.lexicalConcept
+import info.dgjones.au.concept.matchUnresovledVariables
 import info.dgjones.au.episodic.EpisodicMemory
 import info.dgjones.au.grammar.buildSuffixDemon
 import info.dgjones.au.narrative.InDepthUnderstandingConcepts
@@ -27,7 +28,6 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
     var qaMemory = WorkingMemory()
 
     fun runProcessor(): WorkingMemory {
-
         textModel.paragraphs.forEach { processParagraph(it) }
         return workingMemory
     }
@@ -68,9 +68,14 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
 
     private fun endSentence(context: SentenceContext) {
         val memory = if (qaMode) qaMemory else workingMemory
+        clearUnresolvedVariables(context)
         promoteDefsToWorkingMemory(context, memory)
         println(memory)
         context.episodicMemory.dumpMemory()
+    }
+
+    private fun clearUnresolvedVariables(context: SentenceContext) {
+        context.wordContexts.forEach { it.defHolder.value?.replaceSlotValues(matchUnresovledVariables(), null) }
     }
 
     private fun promoteDefsToWorkingMemory(context: SentenceContext, memory: WorkingMemory) {

@@ -12,5 +12,6 @@ enum class CoreFields(override val fieldName: String): Fields {
     INSTANCE("instan"),
     Event("event"),
     Kind("kind"),
-    Name("name")
+    Name("name"),
+    Is("is")
 }
