@@ -47,10 +47,8 @@ private fun addNumber(word: String, value: Int, lexicon: Lexicon) {
 }
 
 class NumberHandler(var value: Int, word: String): WordHandler(EntryWord(word)) {
-    override fun build(wordContext: WordContext): List<Demon> {
-        val lexicalConcept = lexicalConcept(wordContext, NumberConcept.Number.name) {
+    override fun build(wordContext: WordContext): List<Demon> =
+        lexicalConcept(wordContext, NumberConcept.Number.name) {
             slot(NumberFields.Value, value.toString())
-        }
-        return lexicalConcept.demons
-    }
+        }.demons
 }

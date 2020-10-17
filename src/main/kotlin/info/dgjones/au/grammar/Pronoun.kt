@@ -30,15 +30,13 @@ fun buildGrammarPronounLexicon(lexicon: Lexicon) {
 }
 
 class WordPronoun(word: String, val gender: Gender, val case: Case): WordHandler(EntryWord(word)) {
-    override fun build(wordContext: WordContext): List<Demon> {
-        val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.Ref.name) {
+    override fun build(wordContext: WordContext): List<Demon> =
+        lexicalConcept(wordContext, InDepthUnderstandingConcepts.Ref.name) {
             ignoreHolder()
             slot(GrammarFields.Case, case.name)
             slot(HumanFields.GENDER, gender.name)
             findCharacter(CoreFields.INSTANCE.fieldName)
-        }
-        return lexicalConcept.demons
-    }
+        }.demons
 }
 
 class PronounWord(word: String, val genderMatch: Gender): WordHandler(EntryWord(word)) {

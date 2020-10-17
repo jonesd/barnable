@@ -92,18 +92,6 @@ class FindCharacterDemon(val gender: String?, wordContext: WordContext, val acti
     }
 }
 
-class FindObjectReferenceDemon(wordContext: WordContext): Demon(wordContext) {
-    override fun run() {
-        if (!wordContext.isDefSet()) {
-            wordContext.defHolder.value = wordContext.context.mostRecentObject
-            println("updated word=${wordContext.word} to def=${wordContext.def()}")
-        }
-        if (wordContext.isDefSet()) {
-            active = false
-        }
-    }
-}
-
 class SaveCharacterDemon(wordContext: WordContext): Demon(wordContext){
     override fun run() {
         val character = wordContext.def()
@@ -135,6 +123,18 @@ class SaveObjectDemon(wordContext: WordContext): Demon(wordContext) {
 
     override fun description(): String {
         return "SaveObject def=${wordContext.def()}"
+    }
+}
+
+class FindObjectReferenceDemon(wordContext: WordContext): Demon(wordContext) {
+    override fun run() {
+        if (!wordContext.isDefSet()) {
+            wordContext.defHolder.value = wordContext.context.mostRecentObject
+            println("updated word=${wordContext.word} to def=${wordContext.def()}")
+        }
+        if (wordContext.isDefSet()) {
+            active = false
+        }
     }
 }
 

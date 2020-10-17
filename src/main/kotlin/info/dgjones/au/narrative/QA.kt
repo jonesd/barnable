@@ -14,14 +14,12 @@ import info.dgjones.au.parser.*
 
 //FIXME only tries to handle simple ConceptCompletion involving a character and action
 class WordWho: WordHandler(EntryWord("who")) {
-    override fun build(wordContext: WordContext): List<Demon> {
-        val lexicalConcept = lexicalConcept(wordContext, "WhoAnswer") {
+    override fun build(wordContext: WordContext): List<Demon> =
+        lexicalConcept(wordContext, "WhoAnswer") {
             expectHead("actor", headValue = "Human", direction = SearchDirection.After)
             // FIXME brittle hack for first test... perhaps this should be event matching
             expectHead("act", headValue = MopMeal.MopMeal.name, direction = SearchDirection.After)
-        }
-        return lexicalConcept.demons
-    }
+        }.demons
 }
 
 class WhoDemon(wordContext: WordContext): Demon(wordContext) {

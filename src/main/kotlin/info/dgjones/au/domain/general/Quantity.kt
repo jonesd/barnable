@@ -25,15 +25,13 @@ fun buildGeneralQuantityLexicon(lexicon: Lexicon) {
  * "two measures of sugar"
  */
 class WordMeasureQuantity : WordHandler(EntryWord("measure")) {
-    override fun build(wordContext: WordContext): List<Demon> {
-        val lexicalConcept = lexicalConcept(wordContext, QuantityConcept.Quantity.name) {
+    override fun build(wordContext: WordContext): List<Demon> =
+        lexicalConcept(wordContext, QuantityConcept.Quantity.name) {
             // FIXME also support "a measure of ..." = default to 1 unit
             expectHead(QuantityFields.Amount.fieldName, headValue = NumberConcept.Number.name, direction = SearchDirection.Before)
             slot(QuantityFields.Unit, QuantityConcept.Measure.name)
             expectConcept(QuantityFields.Of.fieldName, matcher = matchConceptByKind(listOf(PhysicalObjectKind.Liquid.name, PhysicalObjectKind.Food.name)))
-        }
-        return lexicalConcept.demons
-    }
+        }.demons
 
     override fun disambiguationDemons(wordContext: WordContext, disambiguationHandler: DisambiguationHandler): List<Demon> {
         return listOf(

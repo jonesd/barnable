@@ -9,8 +9,8 @@ fun LexicalConceptBuilder.physicalObject(name: String, kind: String, initializer
     child.slot(CoreFields.Name, name)
     child.slot(CoreFields.Kind, kind)
     child.apply(initializer)
-    val c = child.build()
-    // FIXME add physicalObject
+    child.saveAsObject()
+    child.build()
 }
 
 fun buildPhysicalObject(kind: String, name: String): Concept {
@@ -24,6 +24,7 @@ fun buildLexicalPhysicalObject(kind: String, name: String,  wordContext: WordCon
     builder.root.apply {
         slot(CoreFields.Kind, kind)
         slot(CoreFields.Name, name)
+        saveAsObject()
     }
     initializer?.let { builder.root.apply(initializer)}
     return builder.build()
@@ -36,20 +37,26 @@ fun buildGeneralPhysicalObjectsLexicon(lexicon: Lexicon) {
     // FIXME support containers
     lexicon.addMapping(WordBook())
     lexicon.addMapping(WordTree())
+    lexicon.addMapping(WordBall())
+    lexicon.addMapping(WordBox())
 }
 
 class WordBook: WordHandler(EntryWord("book")) {
     override fun build(wordContext: WordContext): List<Demon> =
         buildLexicalPhysicalObject(PhysicalObjectKind.Book.name, word.word, wordContext).demons
-//        wordContext.defHolder.value =  buildPhysicalObject(PhysicalObjectKind.Book.name, word.word)
-//        return listOf(SaveObjectDemon(wordContext))
-//    }
 }
 
 class WordTree: WordHandler(EntryWord("tree")) {
     override fun build(wordContext: WordContext): List<Demon> =
         buildLexicalPhysicalObject(PhysicalObjectKind.Plant.name, word.word, wordContext).demons
-//        wordContext.defHolder.value =  buildPhysicalObject(PhysicalObjectKind.Plant.name, word.word)
-//        return listOf(SaveObjectDemon(wordContext))
-//    }
+}
+
+class WordBall: WordHandler(EntryWord("ball")) {
+    override fun build(wordContext: WordContext): List<Demon> =
+        buildLexicalPhysicalObject(PhysicalObjectKind.GameObject.name, word.word, wordContext).demons
+}
+
+class WordBox: WordHandler(EntryWord("box")) {
+    override fun build(wordContext: WordContext): List<Demon> =
+        buildLexicalPhysicalObject(PhysicalObjectKind.Container.name, word.word, wordContext).demons
 }

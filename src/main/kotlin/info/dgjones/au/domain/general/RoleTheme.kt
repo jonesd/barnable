@@ -29,14 +29,12 @@ fun buildGeneralRoleThemeLexicon(lexicon: Lexicon) {
 }
 
 class RoleThemeWord(word: String, val roleTheme: RoleTheme, val gender: Gender? = null): WordHandler(EntryWord(word)) {
-    override fun build(wordContext: WordContext): List<Demon> {
-        val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
+    override fun build(wordContext: WordContext): List<Demon> =
+        lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
             slot(RoleThemeFields.RoleTheme, roleTheme.name)
             gender?.let {
                 slot(HumanFields.GENDER, gender.name)
             }
             checkCharacter(CoreFields.INSTANCE.fieldName)
-        }
-        return lexicalConcept.demons
-    }
+        }.demons
 }

@@ -24,16 +24,15 @@ fun buildGeneralHonorificLexicon(lexicon: Lexicon) {
 }
 
 class TitleWord(word: String, val gender: Gender): WordHandler(EntryWord(word, noSuffix = true)) {
-    override fun build(wordContext: WordContext): List<Demon> {
-        val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
+    override fun build(wordContext: WordContext): List<Demon> =
+        lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
             slot(HumanFields.FIRST_NAME, "")
             lastName(HumanFields.LAST_NAME)
             slot(HumanFields.GENDER, gender.name)
             // FIXME include title
             checkCharacter(CoreFields.INSTANCE.fieldName)
-        }
-        return lexicalConcept.demons
-    }
+        }.demons
+
     override fun disambiguationDemons(wordContext: WordContext, disambiguationHandler: DisambiguationHandler): List<Demon> {
         return listOf(
             DisambiguateUsingMatch(matchConceptByHead(listOf(InDepthUnderstandingConcepts.UnknownWord.name)), SearchDirection.After, 1, wordContext, disambiguationHandler)

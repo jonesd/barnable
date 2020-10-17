@@ -25,8 +25,8 @@ fun buildNarrativeRelationshipLexicon(lexicon: Lexicon) {
 }
 
 class WordWife: WordHandler(EntryWord("wife")) {
-    override fun build(wordContext: WordContext): List<Demon> {
-        val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
+    override fun build(wordContext: WordContext): List<Demon> =
+        lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
             slot(HumanFields.GENDER, Gender.Female.name)
             slot(Relationships.Name, Marriage.Concept.fieldName) {
                 possessiveRef(Marriage.Husband, gender = Gender.Male)
@@ -34,14 +34,12 @@ class WordWife: WordHandler(EntryWord("wife")) {
                 checkRelationship(CoreFields.INSTANCE, waitForSlots = listOf("husband", "wife"))
             }
             innerInstan("instan", observeSlot = "wife")
-        }
-        return lexicalConcept.demons
-    }
+        }.demons
 }
 
 class WordHusband: WordHandler(EntryWord("husband")) {
-    override fun build(wordContext: WordContext): List<Demon> {
-        val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
+    override fun build(wordContext: WordContext): List<Demon> =
+        lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
             slot(HumanFields.GENDER, Gender.Male.name)
             slot(Relationships.Name, Marriage.Concept.fieldName) {
                 possessiveRef(Marriage.Wife, gender = Gender.Female)
@@ -49,7 +47,5 @@ class WordHusband: WordHandler(EntryWord("husband")) {
                 checkRelationship(CoreFields.INSTANCE, waitForSlots = listOf("husband", "wife"))
             }
             innerInstan("instan", observeSlot = "husband")
-        }
-        return lexicalConcept.demons
-    }
+        }.demons
 }

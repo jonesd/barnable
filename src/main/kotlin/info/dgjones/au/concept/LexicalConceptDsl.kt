@@ -178,6 +178,10 @@ class LexicalConceptBuilder(val root: LexicalRootBuilder, conceptName: String) {
         root.addDemon(demon)
     }
 
+    fun saveAsObject() {
+        root.addDemon(SaveObjectDemon(root.wordContext))
+    }
+
     // Find matching human in episodic memory, and associate concept
     // InDepth p185
     fun checkCharacter(slotName: String, variableName: String? = null) {

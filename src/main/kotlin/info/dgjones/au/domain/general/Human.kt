@@ -79,17 +79,15 @@ fun buildGeneralHumanLexicon(lexicon: Lexicon) {
 }
 
 class WordPerson(val human: Concept, word: String = human.valueName(HumanFields.FIRST_NAME)?:"unknown"): WordHandler(EntryWord(word)) {
-    override fun build(wordContext: WordContext): List<Demon> {
-        val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
+    override fun build(wordContext: WordContext): List<Demon> =
+        lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
             // FIXME not sure about defaulting to ""
             slot(HumanFields.FIRST_NAME, human.valueName(HumanFields.FIRST_NAME) ?: "")
             lastName(HumanFields.LAST_NAME)
             //slot(Human.LAST_NAME, human.valueName(Human.LAST_NAME) ?: "")
             slot(HumanFields.GENDER, human.valueName(HumanFields.GENDER)?: "")
             checkCharacter(CoreFields.INSTANCE.fieldName)
-        }
-        return lexicalConcept.demons
-    }
+        }.demons
 }
 
 fun LexicalConceptBuilder.lastName(slotName: Fields, variableName: String? = null) {
