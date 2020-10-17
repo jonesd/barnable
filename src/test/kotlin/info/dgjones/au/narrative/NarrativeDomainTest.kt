@@ -66,7 +66,7 @@ class NarrativeDomainTest {
         // assertEquals("Fred", ingest.actor.firstName)
         // this seems correct:
         assertEquals("John", ingest.value("actor")?.valueName(HumanFields.FIRST_NAME))
-        assertEquals("Lobster", ingest.value("thing")?.valueName("kind"))
+        assertEquals("Lobster", ingest.value("thing")?.valueName(CoreFields.Name))
     }
 
     @Test

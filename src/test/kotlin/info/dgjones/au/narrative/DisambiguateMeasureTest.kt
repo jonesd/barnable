@@ -18,8 +18,7 @@ class DisambiguateMeasureTest {
         val quantity = textProcessor.workingMemory.concepts[0]
         assertEquals("Quantity", quantity.name)
         assertEquals("2", quantity.value("amount")?.valueName("value"))
-        assertEquals("Food", quantity.valueName("of"))
-        assertEquals("Sugar", quantity.value("of")?.valueName("kind"))
+        assertEquals("Sugar", quantity.value("of")?.valueName("name"))
     }
 
     @Test

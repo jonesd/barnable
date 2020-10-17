@@ -330,7 +330,7 @@ class WordEats: WordHandler(EntryWord("eat")) {
     override fun build(wordContext: WordContext): List<Demon> {
         val lexicalConcept = lexicalConcept(wordContext, Acts.INGEST.name) {
             expectHead("actor", headValue = "Human", direction = SearchDirection.Before)
-            expectHead("thing", headValue = PhysicalObjectKind.Food.name)
+            expectKind("thing", kinds = listOf(PhysicalObjectKind.Food.name))
             slot("kind", "Act")
         }
         return lexicalConcept.demons

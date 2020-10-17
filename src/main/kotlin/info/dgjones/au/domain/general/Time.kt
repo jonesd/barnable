@@ -55,7 +55,7 @@ class WordYesterday: WordHandler(EntryWord("yesterday")) {
             }
 
             override fun description(): String {
-                return "Yesterday"
+                return "Modify Act before to be occur Yesterday"
             }
         }
         val actDemon = ExpectDemon(matchConceptByKind(InDepthUnderstandingConcepts.Act.name), SearchDirection.Before, wordContext) {

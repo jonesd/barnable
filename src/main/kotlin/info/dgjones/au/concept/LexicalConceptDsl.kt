@@ -130,6 +130,28 @@ class LexicalConceptBuilder(val root: LexicalRootBuilder, conceptName: String) {
         }
         root.addDemon(demon)
     }
+
+    /**
+     * General find a concept from the concept sentence and extract out the specified concept value
+     */
+    fun expectConcept(slotName: String, variableName: String? = null, conceptField: String? = null, matcher: ConceptMatcher, direction: SearchDirection = SearchDirection.After) {
+        val variableSlot = root.createVariable(slotName, variableName)
+        concept.with(variableSlot)
+        val demon = ExpectDemon(matcher, direction, root.wordContext) {
+            if (conceptField != null) {
+                // FIXME support sub-concept matching
+                val value = it.value?.value(conceptField)
+                // FIXME will never complete if value initially empty...
+                if (value != null) {
+                    root.completeVariable(variableSlot, value, wordContext = root.wordContext, this.episodicConcept)
+                    it.addFlag(ParserFlags.Inside)
+                }
+            } else {
+                root.completeVariable(variableSlot, it, this.episodicConcept)
+            }
+        }
+        root.addDemon(demon)
+    }
     fun expectKind(slotName: String, variableName: String? = null, kinds: List<String>, direction: SearchDirection = SearchDirection.After) {
         val variableSlot = root.createVariable(slotName, variableName)
         concept.with(variableSlot)

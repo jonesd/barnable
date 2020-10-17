@@ -6,6 +6,11 @@ import info.dgjones.au.concept.matchConceptByHead
 import info.dgjones.au.narrative.InDepthUnderstandingConcepts
 import info.dgjones.au.parser.*
 
+/**
+ * Support Honorifics, such as Mr, Dr, etc.
+ *
+ * See: https://en.wikipedia.org/wiki/English_honorifics
+ */
 fun buildGeneralHonorificLexicon(lexicon: Lexicon) {
     // Common Titles
     lexicon.addMapping(TitleWord("Mr", Gender.Male))
