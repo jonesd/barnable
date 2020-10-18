@@ -1,5 +1,6 @@
 package info.dgjones.au.concept
 
+import info.dgjones.au.domain.general.Acts
 import info.dgjones.au.domain.general.Gender
 import info.dgjones.au.domain.general.HumanFields
 import info.dgjones.au.domain.general.buildHuman
@@ -116,7 +117,7 @@ class LexicalConceptBuilder(val root: LexicalRootBuilder, conceptName: String) {
         val c = child.build()
         concept.with(Slot(slotName, c))
     }
-    fun build(): Concept {
+    open fun build(): Concept {
         return concept
     }
     fun expectHead(slotName: String, variableName: String? = null, headValue: String, direction: SearchDirection = SearchDirection.After) {
@@ -159,27 +160,6 @@ class LexicalConceptBuilder(val root: LexicalRootBuilder, conceptName: String) {
             root.completeVariable(variableSlot, it, this.episodicConcept)
         }
         root.addDemon(demon)
-    }
-    fun expectActor(slotName: String, variableName: String? = null) {
-        val variableSlot = root.createVariable(slotName, variableName)
-        concept.with(variableSlot)
-        val demon = ExpectActor(root.wordContext) {
-            root.completeVariable(variableSlot, it, this.episodicConcept)
-        }
-        root.addDemon(demon)
-    }
-
-    fun expectThing(slotName: String, variableName: String? = null, headValues: List<String>) {
-        val variableSlot = root.createVariable(slotName, variableName)
-        concept.with(variableSlot)
-        val demon = ExpectThing(headValues,root.wordContext) {
-            root.completeVariable(variableSlot, it, this.episodicConcept)
-        }
-        root.addDemon(demon)
-    }
-
-    fun saveAsObject() {
-        root.addDemon(SaveObjectDemon(root.wordContext))
     }
 
     // Find matching human in episodic memory, and associate concept

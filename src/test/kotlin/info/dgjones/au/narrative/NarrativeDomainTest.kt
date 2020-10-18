@@ -139,7 +139,7 @@ class NarrativeDomainTest {
         val textProcessor = runTextProcess("John knocked a glass of water over", lexicon)
 
         // FIXME implement
-        assertEquals(2 /*should be 1?*/, textProcessor.workingMemory.concepts.size)
+        assertEquals(1 /*should be 1?*/, textProcessor.workingMemory.concepts.size)
     }
 
     @Test

@@ -30,10 +30,10 @@ class WordWife: WordHandler(EntryWord("wife")) {
             slot(HumanFields.GENDER, Gender.Female.name)
             slot(Relationships.Name, Marriage.Concept.fieldName) {
                 possessiveRef(Marriage.Husband, gender = Gender.Male)
-                nextChar("wife", relRole = "Wife")
-                checkRelationship(CoreFields.INSTANCE, waitForSlots = listOf("husband", "wife"))
+                nextChar(Marriage.Wife.fieldName, relRole = "Wife")
+                checkRelationship(CoreFields.INSTANCE, waitForSlots = listOf(Marriage.Husband.fieldName, Marriage.Wife.fieldName))
             }
-            innerInstan("instan", observeSlot = "wife")
+            innerInstan(CoreFields.INSTANCE.fieldName, observeSlot = Marriage.Wife.fieldName)
         }.demons
 }
 
@@ -43,9 +43,9 @@ class WordHusband: WordHandler(EntryWord("husband")) {
             slot(HumanFields.GENDER, Gender.Male.name)
             slot(Relationships.Name, Marriage.Concept.fieldName) {
                 possessiveRef(Marriage.Wife, gender = Gender.Female)
-                nextChar("husband", relRole = "Husband")
-                checkRelationship(CoreFields.INSTANCE, waitForSlots = listOf("husband", "wife"))
+                nextChar(Marriage.Husband.fieldName, relRole = "Husband")
+                checkRelationship(CoreFields.INSTANCE, waitForSlots = listOf(Marriage.Husband.fieldName, Marriage.Wife.fieldName))
             }
-            innerInstan("instan", observeSlot = "husband")
+            innerInstan(CoreFields.INSTANCE.fieldName, observeSlot = Marriage.Husband.fieldName)
         }.demons
 }

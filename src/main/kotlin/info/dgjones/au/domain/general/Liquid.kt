@@ -16,18 +16,11 @@ enum class Liquids {
 }
 
 fun buildGeneralLiquidLexicon(lexicon: Lexicon) {
-    Liquids.values().forEach { lexicon.addMapping(KindLiquid(it)) }
+    Liquids.values().forEach { lexicon.addMapping(LiquidWord(it)) }
 }
 
-class KindLiquid(private val liquid: Liquids):  WordHandler(EntryWord(liquid.name)) {
-    override fun build(wordContext: WordContext): List<Demon> {
-        wordContext.defHolder.value = buildLiquid(liquid, word.word)
-        return listOf(SaveObjectDemon(wordContext))
-    }
+class LiquidWord(private val liquid: Liquids):  WordHandler(EntryWord(liquid.name)) {
+    override fun build(wordContext: WordContext): List<Demon> =
+        buildLexicalPhysicalObject(PhysicalObjectKind.Liquid.name, liquid.name, wordContext).demons
 }
 
-fun buildLiquid(kindOfLiquid: Liquids, name: String = kindOfLiquid.name): Concept {
-    return Concept(PhysicalObjectKind.Liquid.name)
-        .with(Slot(CoreFields.Kind, Concept(kindOfLiquid.name)))
-        .with(Slot(CoreFields.Name, Concept(name)))
-}

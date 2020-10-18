@@ -41,6 +41,10 @@ fun buildLexicalPhysicalObject(kind: String, name: String,  wordContext: WordCon
     return builder.build()
 }
 
+fun LexicalConceptBuilder.saveAsObject() {
+    root.addDemon(SaveObjectDemon(root.wordContext))
+}
+
 // Word Senses
 
 fun buildGeneralPhysicalObjectsLexicon(lexicon: Lexicon) {
