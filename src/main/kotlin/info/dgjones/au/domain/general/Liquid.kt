@@ -1,26 +1,17 @@
 package info.dgjones.au.domain.general
 
-import info.dgjones.au.concept.Concept
-import info.dgjones.au.concept.CoreFields
-import info.dgjones.au.concept.Slot
-import info.dgjones.au.parser.*
+import info.dgjones.au.parser.Lexicon
 
-enum class Liquids {
-    `Coca-Cola`,
-    coffee,
-    coke,
-    soda,
-    tea,
-    water,
-    wine
+enum class Liquids(override val title: String, override val kind: PhysicalObjectKind = PhysicalObjectKind.Liquid): PhysicalObjectDefinitions {
+    CocaCola("Coca-Cola"),
+    Coffee("coffee"),
+    Coke("coke"),
+    Soda("soda"),
+    Tea("tea"),
+    Water("water"),
+    Wine("wine")
 }
 
 fun buildGeneralLiquidLexicon(lexicon: Lexicon) {
-    Liquids.values().forEach { lexicon.addMapping(LiquidWord(it)) }
+    Liquids.values().forEach { lexicon.addMapping(PhysicalObjectWord(it)) }
 }
-
-class LiquidWord(private val liquid: Liquids):  WordHandler(EntryWord(liquid.name)) {
-    override fun build(wordContext: WordContext): List<Demon> =
-        buildLexicalPhysicalObject(PhysicalObjectKind.Liquid.name, liquid.name, wordContext).demons
-}
-

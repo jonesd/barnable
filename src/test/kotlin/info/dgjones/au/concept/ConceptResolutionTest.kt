@@ -23,7 +23,7 @@ class ConceptResolutionTest {
     }
 
     @Test
-    fun `set slott value is resolved`() {
+    fun `set slot value is resolved`() {
         assertTrue(isConceptResolved(Concept("someValue")))
     }
 }

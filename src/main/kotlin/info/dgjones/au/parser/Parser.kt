@@ -140,14 +140,18 @@ class DisambiguationHandler(val wordContext: WordContext, val lexicalOptions: Li
             disambiguationsByWordHandler[lexicalItem] = disambiguationDemons.toMutableList()
         }
         val noDisambiguationNeeded = disambiguationsByWordHandler.keys.filter { disambiguationsByWordHandler[it]?.isEmpty() ?: true }
-        if (noDisambiguationNeeded.size == 1) {
-            resolveTo(noDisambiguationNeeded.first())
-        } else if (noDisambiguationNeeded.size > 1) {
-            // FIXME what to do? let them all work in parallel?
-            println("Disambiguation failed - multiple wordHandlers do not need disambiguation $noDisambiguationNeeded")
-        } else {
-            disambiguationsByWordHandler.forEach { (wordHandler, disambiguationDemons) ->
-                spawnDemons(disambiguationDemons)
+        when {
+            noDisambiguationNeeded.size == 1 -> {
+                resolveTo(noDisambiguationNeeded.first())
+            }
+            noDisambiguationNeeded.size > 1 -> {
+                // FIXME what to do? let them all work in parallel?
+                println("Disambiguation failed - multiple wordHandlers do not need disambiguation $noDisambiguationNeeded")
+            }
+            else -> {
+                disambiguationsByWordHandler.forEach { (wordHandler, disambiguationDemons) ->
+                    spawnDemons(disambiguationDemons)
+                }
             }
         }
     }

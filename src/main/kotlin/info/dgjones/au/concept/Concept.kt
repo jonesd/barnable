@@ -77,9 +77,7 @@ data class Concept(val name: String) {
         selectKeyValue(fieldNames.map {it.fieldName()})
 
     fun selectKeyValue(fieldNames: List<String>) =
-        fieldNames.map { valueName(it)}
-            .filter { it != null && it.isNotBlank() }
-            .firstOrNull() ?: name
+        fieldNames.map { valueName(it) }.firstOrNull { it != null && it.isNotBlank() } ?: name
 
 
     fun duplicateResolvedValue(): Concept? {

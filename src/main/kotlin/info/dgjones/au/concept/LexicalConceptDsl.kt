@@ -1,6 +1,5 @@
 package info.dgjones.au.concept
 
-import info.dgjones.au.domain.general.Acts
 import info.dgjones.au.domain.general.Gender
 import info.dgjones.au.domain.general.HumanFields
 import info.dgjones.au.domain.general.buildHuman
@@ -12,7 +11,7 @@ import info.dgjones.au.parser.*
 It also triggers demons to populate the concept slots.
  */
 
-class LexicalRootBuilder(val wordContext: WordContext, val headName: String) {
+class LexicalRootBuilder(val wordContext: WordContext, private val headName: String) {
     val root = LexicalConceptBuilder(this, headName)
 
     val demons = mutableListOf<Demon>()
@@ -50,7 +49,7 @@ class LexicalRootBuilder(val wordContext: WordContext, val headName: String) {
         //FIXME can multiple demons update the same value here?
         completeVariableSlots.forEach {
             it.value = valueHolder.value
-            // FIXME better way to triggerd updating - spawn demon instead
+            // FIXME better way to triggered updating - spawn demon instead
             episodicConcept?.let { episodicConcept ->
                 // FIXME not sure about this qa hack?
                 if (!wordContext.context.qaMode) {
@@ -279,8 +278,6 @@ fun lexicalConcept(wordContext: WordContext, headName: String, initializer: Lexi
     builder.root.apply(initializer)
     return builder.build()
 }
-
-class LexicalRoot(val wordContext: WordContext, val head: Concept)
 
 class LexicalConcept(val wordContext: WordContext, val head: Concept, val demons: List<Demon>, val disambiguateDemons: List<Demon>) {
     init {

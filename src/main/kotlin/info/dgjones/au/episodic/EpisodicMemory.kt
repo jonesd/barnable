@@ -131,7 +131,7 @@ class EpisodicMemory {
     }
 
     fun updateMopMeal(episodicConcept: EpisodicConcept, slotUpdate: Slot) {
-        //FIXME may need to use deepcopy...
+        //FIXME may need to use deep copy...
         println("EP UpdateMopMeal ${episodicConcept.name} $slotUpdate")
         when (slotUpdate.name) {
             CoreFields.Event.fieldName -> slotUpdate.copyValue(episodicConcept)
@@ -142,7 +142,7 @@ class EpisodicMemory {
     }
 
     fun updateCharacter(episodicConcept: EpisodicConcept, slotUpdate: Slot) {
-        //FIXME may need to use deepcopy...
+        //FIXME may need to use deep copy...
         when (slotUpdate.name) {
             HumanFields.FIRST_NAME.fieldName -> slotUpdate.copyValue(episodicConcept)
             HumanFields.LAST_NAME.fieldName -> slotUpdate.copyValue(episodicConcept)

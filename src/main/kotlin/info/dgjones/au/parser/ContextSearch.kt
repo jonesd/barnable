@@ -30,7 +30,7 @@ fun searchContext(matcher: ConceptMatcher, abortSearch: ConceptMatcher = matchNe
             return null
         }
         val defHolder = wordContext.context.defHolderAtWordIndex(index)
-        var value = defHolder.value
+        val value = defHolder.value
         if (abortSearch(value)) {
             // FIXME should not search any farther in this direction
             return null

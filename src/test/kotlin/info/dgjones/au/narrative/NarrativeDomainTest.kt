@@ -31,8 +31,8 @@ class NarrativeDomainTest {
         // FIXME thing should be obj
         assertEquals("ball", ptrans.value("thing")?.valueName("name"))
         assertEquals("box", ptrans.value("to")?.valueName("name"))
-        val ptransIntr = ptrans.value("instr")
-        assertEquals("Gravity", ptransIntr?.value("actor")?.name)
+        val ptransInstrument = ptrans.value("instr")
+        assertEquals("Gravity", ptransInstrument?.value("actor")?.name)
     }
 
     @Test

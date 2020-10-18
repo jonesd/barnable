@@ -373,13 +373,17 @@ class WordWas : WordHandler(EntryWord("was")) {
         )
         val wasDisambiguation = InsertAfterDemon(matcher, wordContext) {
             it.value?.let { concept ->
-                if (concept.valueName(GrammarFields.Aspect) == Aspect.Progressive.name) {
-                    // Do nothing
-                } else if (concept.valueName(TimeFields.TIME) == TimeConcepts.Past.name) {
-                    // FIXME should Past also match yesterday, etc....
-                    wordContext.def()?.with(Slot(GrammarFields.Voice, Concept(Voice.Passive.name)))
-                } else {
-                    concept.with(Slot(TimeFields.TIME, Concept(TimeConcepts.Past.name)))
+                when {
+                    concept.valueName(GrammarFields.Aspect) == Aspect.Progressive.name -> {
+                        // Do nothing
+                    }
+                    concept.valueName(TimeFields.TIME) == TimeConcepts.Past.name -> {
+                        // FIXME should Past also match yesterday, etc....
+                        wordContext.def()?.with(Slot(GrammarFields.Voice, Concept(Voice.Passive.name)))
+                    }
+                    else -> {
+                        concept.with(Slot(TimeFields.TIME, Concept(TimeConcepts.Past.name)))
+                    }
                 }
             }
         }

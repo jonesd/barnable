@@ -104,8 +104,8 @@ fun LexicalConceptBuilder.lastName(slotName: Fields, variableName: String? = nul
 class LastNameDemon(wordContext: WordContext, val action: (Concept?) -> Unit): Demon(wordContext) {
     override fun run() {
         val matcher = matchConceptByHead(InDepthUnderstandingConcepts.UnknownWord.name)
-        searchContext(matcher, matchNever(), direction = SearchDirection.After, distance = 1, wordContext = wordContext) {
-            it.value?.let {
+        searchContext(matcher, matchNever(), direction = SearchDirection.After, distance = 1, wordContext = wordContext) { holder ->
+            holder.value?.let {
                 val lastName = it.value("word")
                 active = false
                 action(lastName)

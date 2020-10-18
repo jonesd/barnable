@@ -21,7 +21,7 @@ class QuestionProcessor(val textProcessor: TextProcessor) {
     }
 
     fun generateAnswer(workingConcepts: List<Concept>, epdisodicMemory: EpisodicMemory): String {
-        if (!workingConcepts.isEmpty() && workingConcepts[0].name == "WhoAnswer") {
+        if (workingConcepts.isNotEmpty() && workingConcepts[0].name == "WhoAnswer") {
             return generateWhoAnswer(workingConcepts[0], epdisodicMemory)
         }
         return "FIXME Do not know how to handle result"

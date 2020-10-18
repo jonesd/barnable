@@ -18,6 +18,7 @@ class LexiconTest {
         assertEquals(handler, lexicalItems.first().handler)
     }
 
+    @Test
     fun `can be multiple matching simple words`() {
         val lexicon = Lexicon()
         val handler0 = withWordMapping(lexicon, "test")
@@ -188,9 +189,5 @@ class LexiconTest {
         val handler = WordHandler(EntryWord(word, expression, noSuffix = noSuffix))
         lexicon.addMapping(handler)
         return handler
-    }
-
-    private fun morphologyFullWords(item: LexicalItem): List<String> {
-        return item.morphologies.map { it.full }
     }
 }

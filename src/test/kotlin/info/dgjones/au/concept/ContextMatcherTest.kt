@@ -131,7 +131,7 @@ class MatchAllTest {
 
 class MatchAlwaysTest {
     @Test
-    fun Matches() {
+    fun `Should always match`() {
         assertTrue(matchAlways()(Concept("anything")))
     }
     @Test

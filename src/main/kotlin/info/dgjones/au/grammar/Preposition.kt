@@ -119,8 +119,8 @@ class PrepDemon(val matcher: ConceptMatcher, val direction: SearchDirection = Se
         if (existing != null) {
             return existing
         }
-        var defHolder = wordContext.context.defHolderAtWordIndex(index)
-        var value = defHolder.value
+        val defHolder = wordContext.context.defHolderAtWordIndex(index)
+        val value = defHolder.value
         // if (isConjunction(value)) {
         //    return null
         //}

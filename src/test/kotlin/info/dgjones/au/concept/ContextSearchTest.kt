@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 class SearchContextTest {
-    val matcher = matchConceptByHead("testHead")
+    private val matcher = matchConceptByHead("testHead")
 
     @Test
     fun `Can match concept after`() {

@@ -209,9 +209,8 @@ fun conceptPathResolvedValue(parent: Concept?, slotName: String): Concept? {
 //FIXME implement more....
 // InDepth p185
 fun checkEpisodicRelationship(parent: Concept, episodicMemory: EpisodicMemory): String {
-    val episodicInstance = episodicMemory.checkOrCreateRelationship(parent)
+    return episodicMemory.checkOrCreateRelationship(parent)
     // FIXME also assume new relationship
-    return episodicInstance
 }
 
 class InsertAfterDemon(val matcher: ConceptMatcher, wordContext: WordContext, val action: (ConceptHolder) -> Unit): Demon(wordContext) {
@@ -237,7 +236,7 @@ class NextCharacterDemon(wordContext: WordContext, val action: (ConceptHolder) -
                 active = false
                 action(it)
             }
-            //FIXME also look for unattached Human preceedes
+            //FIXME also look for unattached preceding Human
         }
     }
 
