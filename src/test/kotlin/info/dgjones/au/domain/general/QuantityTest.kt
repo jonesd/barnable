@@ -19,6 +19,6 @@ class QuantityTest {
         Assertions.assertEquals(QuantityConcept.Quantity.name, quantity.name)
         Assertions.assertEquals("2", quantity.value(QuantityFields.Amount)?.valueName(NumberFields.Value))
         Assertions.assertEquals("Measure", quantity.valueName(QuantityFields.Unit))
-        Assertions.assertEquals("Sugar", quantity.value(QuantityFields.Of)?.valueName(CoreFields.Name))
+        Assertions.assertEquals("sugar", quantity.value(QuantityFields.Of)?.valueName(CoreFields.Name))
     }
 }

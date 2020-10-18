@@ -15,6 +15,24 @@ enum class PhysicalObjectKind {
     Plant, // Tree?
 }
 
+interface PhysicalObjectDefinitions {
+    val title: String
+    fun title(): String {
+        return title
+    }
+    val kind: PhysicalObjectKind
+    fun kind(): PhysicalObjectKind {
+        return kind
+    }
+}
+
+enum class PhysicalObjects(override val title: String, override val kind: PhysicalObjectKind): PhysicalObjectDefinitions {
+    Ball("ball", PhysicalObjectKind.GameObject),
+    Book("book", PhysicalObjectKind.PhysicalObject),
+    Box("box", PhysicalObjectKind.Container),
+    Tree("tree", PhysicalObjectKind.Plant),
+}
+
 fun LexicalConceptBuilder.physicalObject(name: String, kind: String, initializer: LexicalConceptBuilder.() -> Unit)  {
     val child = LexicalConceptBuilder(root, PhysicalObjectKind.PhysicalObject.name)
     child.slot(CoreFields.Name, name)
@@ -24,11 +42,10 @@ fun LexicalConceptBuilder.physicalObject(name: String, kind: String, initializer
     child.build()
 }
 
-fun buildPhysicalObject(kind: String, name: String): Concept {
-    return Concept(PhysicalObjectKind.PhysicalObject.name)
-        .with(Slot(CoreFields.Kind, Concept(kind)))
-        .with(Slot(CoreFields.Name, Concept(name)))
-}
+fun buildPhysicalObject(physicalObject: PhysicalObjectDefinitions): Concept =
+    Concept(PhysicalObjectKind.PhysicalObject.name)
+        .with(Slot(CoreFields.Name, Concept(physicalObject.title)))
+        .with(Slot(CoreFields.Kind, Concept(physicalObject.kind.name)))
 
 fun buildLexicalPhysicalObject(kind: String, name: String,  wordContext: WordContext, initializer: (LexicalConceptBuilder.() -> Unit)? = null): LexicalConcept {
     val builder = LexicalRootBuilder(wordContext, PhysicalObjectKind.PhysicalObject.name)
@@ -48,30 +65,10 @@ fun LexicalConceptBuilder.saveAsObject() {
 // Word Senses
 
 fun buildGeneralPhysicalObjectsLexicon(lexicon: Lexicon) {
-    // FIXME use catalogue of physical objects
-    // FIXME support containers
-    lexicon.addMapping(WordBook())
-    lexicon.addMapping(WordTree())
-    lexicon.addMapping(WordBall())
-    lexicon.addMapping(WordBox())
+    PhysicalObjects.values().forEach { lexicon.addMapping(PhysicalObjectWord(it)) }
 }
 
-class WordBook: WordHandler(EntryWord("book")) {
+class PhysicalObjectWord(private val physicalObject: PhysicalObjectDefinitions): WordHandler(EntryWord(physicalObject.title)) {
     override fun build(wordContext: WordContext): List<Demon> =
-        buildLexicalPhysicalObject(PhysicalObjectKind.Book.name, word.word, wordContext).demons
-}
-
-class WordTree: WordHandler(EntryWord("tree")) {
-    override fun build(wordContext: WordContext): List<Demon> =
-        buildLexicalPhysicalObject(PhysicalObjectKind.Plant.name, word.word, wordContext).demons
-}
-
-class WordBall: WordHandler(EntryWord("ball")) {
-    override fun build(wordContext: WordContext): List<Demon> =
-        buildLexicalPhysicalObject(PhysicalObjectKind.GameObject.name, word.word, wordContext).demons
-}
-
-class WordBox: WordHandler(EntryWord("box")) {
-    override fun build(wordContext: WordContext): List<Demon> =
-        buildLexicalPhysicalObject(PhysicalObjectKind.Container.name, word.word, wordContext).demons
+        buildLexicalPhysicalObject(physicalObject.kind.name, physicalObject.title, wordContext).demons
 }

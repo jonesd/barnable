@@ -17,6 +17,6 @@ class FoodTest {
         val lobster = textProcessor.workingMemory.concepts[0]
         Assertions.assertEquals(PhysicalObjectKind.PhysicalObject.name, lobster.name)
         Assertions.assertEquals(PhysicalObjectKind.Food.name, lobster.valueName(CoreFields.Kind))
-        Assertions.assertEquals("Lobster", lobster.valueName(CoreFields.Name))
+        Assertions.assertEquals("lobster", lobster.valueName(CoreFields.Name))
     }
 }
