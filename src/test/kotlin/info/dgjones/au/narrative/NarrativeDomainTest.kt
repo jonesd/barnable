@@ -16,23 +16,23 @@ class NarrativeDomainTest {
         assertEquals(2, textProcessor.workingMemory.concepts.size)
 
         val grasp = textProcessor.workingMemory.concepts[0]
-        assertEquals("GRASP", grasp.name)
-        assertEquals("John", grasp.value("actor")?.valueName(HumanFields.FIRST_NAME))
-        assertEquals("ball", grasp.value("thing")?.valueName("name"))
+        assertEquals(Acts.GRASP.name, grasp.name)
+        assertEquals("John", grasp.value(ActFields.Actor)?.valueName(HumanFields.FIRST_NAME))
+        assertEquals("ball", grasp.value(ActFields.Thing)?.valueName(CoreFields.Name))
         val actGraspInstr = grasp.value("instr")!!
         // FIXME move structural element not present, rely on name
-        assertEquals("MOVE", actGraspInstr.name)
-        assertEquals("John", actGraspInstr.value("actor")?.valueName(HumanFields.FIRST_NAME))
-        assertEquals("ball", actGraspInstr.value("to")?.valueName("name"))
+        assertEquals(Acts.MOVE.name, actGraspInstr.name)
+        assertEquals("John", actGraspInstr.value(ActFields.Actor)?.valueName(HumanFields.FIRST_NAME))
+        assertEquals("ball", actGraspInstr.value(ActFields.To)?.valueName(CoreFields.Name))
 
         val ptrans = textProcessor.workingMemory.concepts[1]
-        assertEquals("PTRANS", ptrans.name)
-        assertEquals("John", ptrans.value("actor")?.valueName(HumanFields.FIRST_NAME))
+        assertEquals(Acts.PTRANS.name, ptrans.name)
+        assertEquals("John", ptrans.value(ActFields.Actor)?.valueName(HumanFields.FIRST_NAME))
         // FIXME thing should be obj
-        assertEquals("ball", ptrans.value("thing")?.valueName("name"))
-        assertEquals("box", ptrans.value("to")?.valueName("name"))
-        val ptransInstrument = ptrans.value("instr")
-        assertEquals("Gravity", ptransInstrument?.value("actor")?.name)
+        assertEquals("ball", ptrans.value(ActFields.Thing)?.valueName(CoreFields.Name))
+        assertEquals("box", ptrans.value(ActFields.To)?.valueName(CoreFields.Name))
+        val ptransInstrument = ptrans.value(ActFields.Instrument)
+        assertEquals("Gravity", ptransInstrument?.value(ActFields.Actor)?.name)
     }
 
     @Test
@@ -56,7 +56,7 @@ class NarrativeDomainTest {
         assertEquals(1, textProcessor.workingMemory.concepts.size)
 
         val mtrans = textProcessor.workingMemory.concepts[0]
-        assertEquals("MTRANS", mtrans.name)
+        assertEquals(Acts.MTRANS.name, mtrans.name)
         assertEquals("Fred", mtrans.value(ActFields.Actor)?.valueName(HumanFields.FIRST_NAME))
         assertEquals("Fred", mtrans.value(ActFields.From)?.valueName(HumanFields.FIRST_NAME))
         assertEquals("Mary", mtrans.value(ActFields.To)?.valueName(HumanFields.FIRST_NAME))
@@ -69,42 +69,21 @@ class NarrativeDomainTest {
     }
 
     @Test
-    fun `Colour modifier`() {
-        val textProcessor = runTextProcess("the red book", lexicon)
-
-        assertEquals(1, textProcessor.workingMemory.concepts.size)
-        val concept = textProcessor.workingMemory.concepts.first()
-        assertEquals(PhysicalObjectKind.PhysicalObject.name, concept.valueName(CoreFields.Kind))
-        assertEquals("book", concept.valueName(CoreFields.Name))
-        assertEquals("red", concept.valueName("colour"))
-    }
-
-    @Test
-    fun `Age-Weight modifiers`() {
-        val textProcessor = runTextProcess("a thin old man", lexicon)
-
-        assertEquals(1, textProcessor.workingMemory.concepts.size)
-        val concept = textProcessor.workingMemory.concepts.first()
-        assertEquals("GT-NORM", concept.valueName("age"))
-        assertEquals("LT-NORM", concept.valueName("weight"))
-    }
-
-    @Test
     fun `Basic pronoun reference`() {
         val textProcessor = runTextProcess("John went home. He kissed his wife Anne.", lexicon)
 
         assertEquals(2, textProcessor.workingMemory.concepts.size)
 
         val travel = textProcessor.workingMemory.concepts[0]
-        assertEquals("John", travel.value("actor")?.valueName(HumanFields.FIRST_NAME))
-        assertEquals("Home", travel.value("to")?.valueName(CoreFields.Name))
+        assertEquals("John", travel.value(ActFields.Actor)?.valueName(HumanFields.FIRST_NAME))
+        assertEquals("Home", travel.value(ActFields.To)?.valueName(CoreFields.Name))
 
         val kissAttend = textProcessor.workingMemory.concepts[1]
-        assertEquals("ATTEND", kissAttend.name)
-        assertEquals("John0", kissAttend.value("actor")?.valueName(CoreFields.INSTANCE))
-        assertEquals(Gender.Male.name, kissAttend.value("actor")?.valueName(HumanFields.GENDER))
-        assertEquals("Anne0", kissAttend.value("to")?.valueName(CoreFields.INSTANCE))
-        assertEquals(Gender.Female.name, kissAttend.value("to")?.valueName(HumanFields.GENDER))
+        assertEquals(Acts.ATTEND.name, kissAttend.name)
+        assertEquals("John0", kissAttend.value(ActFields.Actor)?.valueName(CoreFields.INSTANCE))
+        assertEquals(Gender.Male.name, kissAttend.value(ActFields.Actor)?.valueName(HumanFields.GENDER))
+        assertEquals("Anne0", kissAttend.value(ActFields.To)?.valueName(CoreFields.INSTANCE))
+        assertEquals(Gender.Female.name, kissAttend.value(ActFields.To)?.valueName(HumanFields.GENDER))
 
         //FIXME more assertions
     }
@@ -115,10 +94,10 @@ class NarrativeDomainTest {
 
         assertEquals(1, textProcessor.workingMemory.concepts.size)
         val told = textProcessor.workingMemory.concepts[0]
-        assertEquals("MTRANS", told.name)
-        assertEquals("John", told.value("actor")?.valueName(HumanFields.FIRST_NAME))
-        assertEquals("Bill", told.value("to")?.valueName(HumanFields.FIRST_NAME))
-        assertEquals("S-Hunger", told.valueName("thing"))
+        assertEquals(Acts.MTRANS.name, told.name)
+        assertEquals("John", told.value(ActFields.Actor)?.valueName(HumanFields.FIRST_NAME))
+        assertEquals("Bill", told.value(ActFields.To)?.valueName(HumanFields.FIRST_NAME))
+        assertEquals("S-Hunger", told.valueName(ActFields.Thing))
 
     }
 
@@ -129,9 +108,9 @@ class NarrativeDomainTest {
         assertEquals(1, textProcessor.workingMemory.concepts.size)
         val meal = textProcessor.workingMemory.concepts[0]
         assertEquals("MopMeal", meal.name)
-        assertEquals("John", meal.value("eaterA")?.valueName(HumanFields.FIRST_NAME))
-        assertEquals("George", meal.value("eaterB")?.valueName(HumanFields.FIRST_NAME))
-        assertEquals("EventEatMeal", meal.valueName("event"))
+        assertEquals("John", meal.value(MopMealFields.EATER_A)?.valueName(HumanFields.FIRST_NAME))
+        assertEquals("George", meal.value(MopMealFields.EATER_B)?.valueName(HumanFields.FIRST_NAME))
+        assertEquals("EventEatMeal", meal.valueName(CoreFields.Event))
     }
 
     @Test

@@ -30,8 +30,6 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     lexicon.addMapping(WordPerson(buildHuman("", "", Gender.Male.name), "man"))
 
     // Modifiers
-    lexicon.addMapping(ModifierWord("red", "colour"))
-    lexicon.addMapping(ModifierWord("black", "colour"))
     lexicon.addMapping(ModifierWord("fat", "weight", "GT-NORM"))
     lexicon.addMapping(ModifierWord("thin", "weight", "LT-NORM"))
     lexicon.addMapping(ModifierWord("old", "age", "GT-NORM"))
@@ -300,32 +298,6 @@ class WordMeasureObject: WordHandler(EntryWord("measure")) {
             DisambiguateUsingMatch(matchConceptByHead(InDepthUnderstandingConcepts.Human.name), SearchDirection.Before, null, wordContext, disambiguationHandler),
             DisambiguateUsingMatch(matchConceptByHead(InDepthUnderstandingConcepts.PhysicalObject.name), SearchDirection.After, null, wordContext, disambiguationHandler)
         )
-    }
-}
-
-class ModifierWord(word: String, val modifier: String, val value: String = word): WordHandler(EntryWord(word)) {
-    override fun build(wordContext: WordContext): List<Demon> {
-        val demon = object : Demon(wordContext) {
-            var thingHolder: ConceptHolder? = null
-
-            override fun run() {
-                val thingConcept = thingHolder?.value
-                if (thingConcept != null) {
-                    thingConcept.with(Slot(modifier, Concept(value)))
-                    //FIXME remove thingConcept.addModifier(modifier, value)
-                    active = false
-                }
-            }
-
-            override fun description(): String {
-                return "ModifierWord $value"
-            }
-        }
-        //FIXME list of kinds is not complete
-        val thingDemon = ExpectDemon(matchConceptByHead(listOf(InDepthUnderstandingConcepts.Human.name, InDepthUnderstandingConcepts.PhysicalObject.name)), SearchDirection.After, wordContext) {
-            demon.thingHolder = it
-        }
-        return listOf(demon, thingDemon)
     }
 }
 

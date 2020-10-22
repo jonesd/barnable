@@ -35,7 +35,7 @@ class PrepositionTest {
 
     @Test
     fun `With preposition does not match non-human`() {
-        val textProcessor = runTextProcess("Fred had lunch a book.", lexicon)
+        val textProcessor = runTextProcess("Fred had lunch with a book.", lexicon)
 
         assertEquals(2, textProcessor.workingMemory.concepts.size)
         val lunch = textProcessor.workingMemory.concepts[0]

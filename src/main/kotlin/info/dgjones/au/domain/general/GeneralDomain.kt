@@ -12,4 +12,5 @@ fun buildGeneralDomainLexicon(lexicon: Lexicon) {
     buildGeneralTimeLexicon(lexicon)
     buildGeneralNumberLexicon(lexicon)
     buildGeneralQuantityLexicon(lexicon)
+    buildGeneralColourLexicon(lexicon)
 }
