@@ -136,8 +136,7 @@ class WordMorphologyBuilder(val root: String) {
         suffixSIrregular[root]?.let {
             full = it
         }
-        // FIXME case insensitive
-        if (suffixSIdem.contains(root)) {
+        if (suffixSIdem.contains(root.toLowerCase())) {
             full = root
         }
         return WordMorphology(root, "s", full)

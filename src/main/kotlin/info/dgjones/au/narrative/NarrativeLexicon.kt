@@ -278,12 +278,10 @@ class WordEats: WordHandler(EntryWord("eat")) {
 
 class WordMeasureObject: WordHandler(EntryWord("measure")) {
     override fun build(wordContext: WordContext): List<Demon> =
-        // FIXME not sure how to model this...
         lexicalConcept(wordContext, Acts.ATRANS.name) {
             expectActor(variableName = "actor")
             expectThing()
             varReference(ActFields.From.fieldName, "actor")
-            //expectHead("to", headValue = "Human")
             slot(CoreFields.Kind, InDepthUnderstandingConcepts.Act.name)
         }.demons
 

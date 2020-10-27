@@ -20,11 +20,9 @@ fun buildSuffixDemon(suffix: String, wordContext: WordContext): Demon? {
 class SuffixEdDemon(wordContext: WordContext): Demon(wordContext) {
     override fun run() {
         val def = wordContext.def()
-        if (def != null) {
-            if (def.value(TimeFields.TIME) == null) {
-                def.value(TimeFields.TIME.fieldName, Concept(TimeConcepts.Past.name))
-                active = false
-            }
+        if (def != null && def.value(TimeFields.TIME) == null) {
+            def.value(TimeFields.TIME.fieldName, Concept(TimeConcepts.Past.name))
+            active = false
         }
     }
 
@@ -36,11 +34,9 @@ class SuffixEdDemon(wordContext: WordContext): Demon(wordContext) {
 class SuffixSDemon(wordContext: WordContext): Demon(wordContext) {
     override fun run() {
         val def = wordContext.def()
-        if (def != null) {
-            if (def.value(GroupFields.GroupInstances) == null) {
-                def.value(GroupFields.GroupInstances, Concept(GroupConcept.`*multiple*`.name))
-                active = false
-            }
+        if (def != null && def.value(GroupFields.GroupInstances) == null) {
+            def.value(GroupFields.GroupInstances, Concept(GroupConcept.`*multiple*`.name))
+            active = false
         }
     }
     override fun description(): String {

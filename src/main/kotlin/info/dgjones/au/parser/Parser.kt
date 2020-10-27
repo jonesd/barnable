@@ -16,7 +16,7 @@ fun buildTextModel(text: String): TextModel {
 fun runTextProcess(text: String, lexicon: Lexicon = buildInDepthUnderstandingLexicon()): TextProcessor {
         val textModel = buildTextModel(text)
         val textProcessor = TextProcessor(textModel, lexicon)
-        val workingMemory = textProcessor.runProcessor()
+        textProcessor.runProcessor()
         return textProcessor
 }
 
@@ -100,7 +100,7 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
             println("  Recognized suffix: ${lexicalItems[0].morphologies[0].suffix.toUpperCase()}")
         }
 
-        val disambiguationHandler = DisambiguationHandler(wordContext, lexicalItems, agenda).startDisambiguations()
+        DisambiguationHandler(wordContext, lexicalItems, agenda).startDisambiguations()
 
         println("Adding to *working-memory*")
         println("DEF.${wordContext.defHolder.instanceNumber} = ${wordContext.def()}")

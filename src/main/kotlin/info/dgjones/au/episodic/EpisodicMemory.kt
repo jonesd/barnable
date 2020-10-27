@@ -176,10 +176,6 @@ class EpisodicMemory {
         return characters.values.firstOrNull {matcher(it)}
     }
 
-    private fun nextEpisodicId(conceptType: String): String {
-        return indexGenerator.episodicId(conceptType)
-    }
-
     fun setCurrentEvent(event: Concept, mainEvent: Boolean = false) {
         scenarioMap.setCurrentEvent(event, mainEvent)
     }

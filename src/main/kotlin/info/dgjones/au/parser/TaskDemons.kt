@@ -97,10 +97,6 @@ class SaveCharacterDemon(wordContext: WordContext): Demon(wordContext){
         val character = wordContext.def()
         if (character != null && HumanAccessor(character).isCompatible()) {
             wordContext.context.workingMemory.markAsRecentCharacter(character)
-//            wordContext.context.mostRecentCharacter = character
-//            if (wordContext.context.localCharacter != null) {
-//                wordContext.context.localCharacter = character
-//            }
             active = false
         } else {
             println("SaveCharacter failed as def = $character")
@@ -177,12 +173,10 @@ class InnerInstanceDemon(val slotName: String, wordContext: WordContext, val act
 class CheckRelationshipDemon(var parent: Concept, var dependentSlotNames: List<String>, wordContext: WordContext, val action: (Concept?) -> Unit): Demon(wordContext) {
     override fun run() {
         val rootConcept =  wordContext.defHolder.value
-        if (rootConcept != null) {
-            if (isDependentSlotsComplete(parent, dependentSlotNames)) {
-                val instance = checkEpisodicRelationship(parent, wordContext.context.episodicMemory)
-                active = false
-                action(Concept(instance))
-            }
+        if (rootConcept != null && isDependentSlotsComplete(parent, dependentSlotNames)) {
+            val instance = checkEpisodicRelationship(parent, wordContext.context.episodicMemory)
+            active = false
+            action(Concept(instance))
         }
     }
     override fun description(): String {
@@ -206,7 +200,6 @@ fun conceptPathResolvedValue(parent: Concept?, slotName: String): Concept? {
     return null
 }
 
-//FIXME implement more....
 // InDepth p185
 fun checkEpisodicRelationship(parent: Concept, episodicMemory: EpisodicMemory): String {
     return episodicMemory.checkOrCreateRelationship(parent)
