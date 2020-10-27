@@ -29,12 +29,6 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     lexicon.addMapping(WordPerson(buildHuman("", "", Gender.Female.name), "woman"))
     lexicon.addMapping(WordPerson(buildHuman("", "", Gender.Male.name), "man"))
 
-    // Modifiers
-    lexicon.addMapping(ModifierWord("fat", "weight", "GT-NORM"))
-    lexicon.addMapping(ModifierWord("thin", "weight", "LT-NORM"))
-    lexicon.addMapping(ModifierWord("old", "age", "GT-NORM"))
-    lexicon.addMapping(ModifierWord("young", "age", "LT-NORM"))
-
     // Locations
     lexicon.addMapping(WordHome())
 

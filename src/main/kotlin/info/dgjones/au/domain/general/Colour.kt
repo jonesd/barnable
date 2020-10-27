@@ -30,5 +30,5 @@ enum class Colours(val title: String) {
 }
 
 fun buildGeneralColourLexicon(lexicon: Lexicon) {
-    Colours.values().forEach { lexicon.addMapping(ModifierWord(it.title, ColourFields.Colour.fieldName)) }
+    Colours.values().forEach { lexicon.addMapping(ModifierWord(it.title, ColourFields.Colour)) }
 }

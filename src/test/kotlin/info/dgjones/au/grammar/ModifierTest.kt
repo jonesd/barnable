@@ -21,16 +21,25 @@ class ModifierTest {
         val concept = textProcessor.workingMemory.concepts.first()
         assertEquals(PhysicalObjectKind.PhysicalObject.name, concept.valueName(CoreFields.Kind))
         assertEquals("book", concept.valueName(CoreFields.Name))
-        assertEquals("red", concept.valueName("colour"))
+        assertEquals("red", concept.valueName(ColourFields.Colour))
     }
 
     @Test
-    fun `Age-Weight modifiers`() {
+    fun `Multiple modifiers of different types can be applied`() {
         val textProcessor = runTextProcess("a thin old man", lexicon)
 
         assertEquals(1, textProcessor.workingMemory.concepts.size)
         val concept = textProcessor.workingMemory.concepts.first()
-        assertEquals("GT-NORM", concept.valueName("age"))
-        assertEquals("LT-NORM", concept.valueName("weight"))
+        assertEquals(ModifierConcepts.GreaterThanNormal.name, concept.valueName(CoreFields.Age))
+        assertEquals(ModifierConcepts.LessThanNormal.name, concept.valueName(CoreFields.Weight))
+    }
+
+    @Test
+    fun `Synonym modifiers`() {
+        val textProcessor = runTextProcess("an overweight man", lexicon)
+
+        assertEquals(1, textProcessor.workingMemory.concepts.size)
+        val concept = textProcessor.workingMemory.concepts.first()
+        assertEquals(ModifierConcepts.GreaterThanNormal.name, concept.valueName(CoreFields.Weight))
     }
 }

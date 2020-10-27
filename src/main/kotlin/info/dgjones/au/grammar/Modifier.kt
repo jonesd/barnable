@@ -1,20 +1,42 @@
 package info.dgjones.au.grammar
 
-import info.dgjones.au.concept.Concept
-import info.dgjones.au.concept.Slot
-import info.dgjones.au.concept.matchConceptByHead
+import info.dgjones.au.concept.*
 import info.dgjones.au.narrative.InDepthUnderstandingConcepts
 import info.dgjones.au.parser.*
 
 /**
- *
+ * A word, phrase, or clause that limits or qualifies the sense of another word or phrase.
+ * https://en.wiktionary.org/wiki/modifier
  */
 
-fun buildGrammarModifierLexicon(lexicon: Lexicon) {
-
+enum class ModifierConcepts {
+    GreaterThanNormal,
+    Normal,
+    LessThanNormal
 }
 
-class ModifierWord(word: String, val modifier: String, val value: String = word): WordHandler(EntryWord(word)) {
+enum class Modifiers(val modifier: Fields, val value: ModifierConcepts, val words: List<String>) {
+    GreaterWeight(CoreFields.Weight, ModifierConcepts.GreaterThanNormal,
+        listOf("fat", "heavy", "obese", "overweight")),
+    LesserWeight(CoreFields.Weight, ModifierConcepts.LessThanNormal,
+        listOf("thin", "underweight")),
+
+    Old(CoreFields.Age, ModifierConcepts.GreaterThanNormal,
+        listOf("old")),
+    Young(CoreFields.Age, ModifierConcepts.LessThanNormal,
+        listOf("young"))
+}
+
+// Word Sense
+
+fun buildGrammarModifierLexicon(lexicon: Lexicon) {
+    Modifiers.values().forEach { modifier ->
+        modifier.words.forEach { word ->
+            lexicon.addMapping(ModifierWord(word, modifier.modifier, modifier.value.name))
+        } }
+}
+
+class ModifierWord(word: String, val field: Fields, val value: String = word): WordHandler(EntryWord(word)) {
     override fun build(wordContext: WordContext): List<Demon> {
         val demon = object : Demon(wordContext) {
             var thingHolder: ConceptHolder? = null
@@ -22,14 +44,13 @@ class ModifierWord(word: String, val modifier: String, val value: String = word)
             override fun run() {
                 val thingConcept = thingHolder?.value
                 if (thingConcept != null) {
-                    thingConcept.with(Slot(modifier, Concept(value)))
-                    //FIXME remove thingConcept.addModifier(modifier, value)
+                    thingConcept.with(Slot(field, Concept(value)))
                     active = false
                 }
             }
 
             override fun description(): String {
-                return "ModifierWord $value"
+                return "ModifierWord ${word}"
             }
         }
         //FIXME list of kinds is not complete
