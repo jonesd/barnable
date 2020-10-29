@@ -1,2 +1,2 @@
-rootProject.name = "au"
+rootProject.name = "barnable"
 

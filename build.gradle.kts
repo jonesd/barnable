@@ -3,7 +3,7 @@ plugins {
     id("org.jetbrains.dokka") version "1.4.10"
 }
 
-group = "info.dgjones.au"
+group = "info.dgjones.barnable"
 version = "0.1-SNAPSHOT"
 
 repositories {
