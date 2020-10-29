@@ -37,14 +37,14 @@ class QuestionProcessor(val textProcessor: TextProcessor) {
         return QuestionProcessorResult(sentenceResult, answer)
     }
 
-    fun generateAnswer(workingConcepts: List<Concept>, epdisodicMemory: EpisodicMemory): String {
+    fun generateAnswer(workingConcepts: List<Concept>, episodicMemory: EpisodicMemory): String {
         if (workingConcepts.isNotEmpty() && workingConcepts[0].name == "WhoAnswer") {
-            return generateWhoAnswer(workingConcepts[0], epdisodicMemory)
+            return generateWhoAnswer(workingConcepts[0], episodicMemory)
         }
         return "FIXME Do not know how to handle result"
     }
 
-    fun generateWhoAnswer(whoQuestion: Concept, epdisodicMemory: EpisodicMemory): String {
+    fun generateWhoAnswer(whoQuestion: Concept, episodicMemory: EpisodicMemory): String {
         val specifiedCharacter = whoQuestion.value("actor")
         val event = whoQuestion.value("act")
         if (event == null) {
