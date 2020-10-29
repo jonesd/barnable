@@ -1,0 +1,23 @@
+* Barnable Reader
+
+Deep text reader library that generates a semantic model from a short input text.
+
+The project is at an early state, and probably will not help you at the moment. The system is currently driven from test cases.
+
+The library is written in the Kotlin language, and the intention is to generate native and Java libraries, in time.
+
+The current implementation is based on learning about the "BORIS" and "Understanding Editorial Text" systems from the 1980s.
+
+* References
+
+*** BORIS -- An Experiment in In-Depth Understanding of Narratives
+Wendy Lehnert, Michael G. Dyer, Peter N. Johnson
+https://apps.dtic.mil/dtic/tr/fulltext/u2/a098965.pdf
+
+*** In-depth Understanding: A computer model of integrated processing for narrative comprehension
+Michael G. Dyer
+https://www.worldcat.org/title/in-depth-understanding-a-computer-model-of-integrated-processing-for-narrative-comprehension/oclc/827009769
+
+*** Understanding Editorial Text: A computer model of Argument Comprehension
+Sergio J. Alvarado
+https://www.worldcat.org/title/understanding-editorial-text-a-computer-model-of-argument-comprehension/oclc/21669425
