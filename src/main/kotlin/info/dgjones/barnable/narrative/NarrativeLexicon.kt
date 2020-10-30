@@ -380,9 +380,9 @@ class WordAnother: WordHandler(EntryWord("another")) {
             slot(HumanFields.Gender, Gender.Female.name)
             slot(Relationships.Name, Marriage.Concept.fieldName) {
                 possessiveRef(Marriage.Husband, gender = Gender.Male)
-                nextChar("wife", relRole = "Wife")
+                nextChar(Marriage.Wife.fieldName, relRole = "Wife")
                 checkRelationship(CoreFields.Instance, waitForSlots = listOf("husband", "wife"))
             }
-            innerInstan(CoreFields.Instance, observeSlot = "wife")
+            innerInstance(CoreFields.Instance, observeSlot = "wife")
         }.demons
 }

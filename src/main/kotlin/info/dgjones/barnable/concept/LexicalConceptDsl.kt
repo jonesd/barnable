@@ -133,7 +133,7 @@ class LexicalConceptBuilder(val root: LexicalRootBuilder, conceptName: String) {
         val c = child.build()
         concept.with(Slot(slotName, c))
     }
-    open fun build(): Concept {
+    fun build(): Concept {
         return concept
     }
     fun expectHead(slotName: String, variableName: String? = null, headValue: String, direction: SearchDirection = SearchDirection.After) {
@@ -239,17 +239,6 @@ class LexicalConceptBuilder(val root: LexicalRootBuilder, conceptName: String) {
         root.addDemon(demon)
     }
 
-    fun possessiveRef(slotName: Fields, variableName: String? = null, gender: Gender) {
-        val variableSlot = root.createVariable(slotName.fieldName, variableName)
-        concept.with(variableSlot)
-        val demon = PossessiveReference(gender, root.wordContext) {
-            if (it != null) {
-                root.completeVariable(variableSlot, it, root.wordContext, this.episodicConcept)
-            }
-        }
-        root.addDemon(demon)
-    }
-
     fun nextChar(slotName: String, variableName: String? = null, relRole: String? = null) {
         val variableSlot = root.createVariable(slotName, variableName)
         concept.with(variableSlot)
@@ -261,7 +250,7 @@ class LexicalConceptBuilder(val root: LexicalRootBuilder, conceptName: String) {
         root.addDemon(demon)
     }
 
-    fun innerInstan(slotName: Fields, variableName: String? = null, observeSlot: String) {
+    fun innerInstance(slotName: Fields, variableName: String? = null, observeSlot: String) {
         val variableSlot = root.createVariable(slotName, variableName)
         concept.with(variableSlot)
         val demon = InnerInstanceDemon(observeSlot, root.wordContext) {

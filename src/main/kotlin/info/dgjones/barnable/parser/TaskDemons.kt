@@ -151,22 +151,6 @@ class FindObjectReferenceDemon(wordContext: WordContext): Demon(wordContext) {
     }
 }
 
-class PossessiveReference(val gender: Gender, wordContext: WordContext, val action: (Concept?) -> Unit): Demon(wordContext) {
-    override fun run() {
-        searchContext( matchCase(Case.Possessive), direction = SearchDirection.Before, wordContext = wordContext) {
-            val instance = it.value?.value(CoreFields.Instance.fieldName)
-            action(instance)
-            if (instance != null) {
-                active = false
-            }
-        }
-    }
-
-    override fun description(): String {
-        return "Poss-Ref for $gender"
-    }
-}
-
 /* Assign the Instance slot value of the resolved concept */
 class InnerInstanceDemon(val slotName: String, wordContext: WordContext, val action: (Concept?) -> Unit): Demon(wordContext) {
     var conceptAccessor: ConceptSlotAccessor? = null

@@ -22,6 +22,7 @@ import info.dgjones.barnable.concept.Fields
 import info.dgjones.barnable.concept.lexicalConcept
 import info.dgjones.barnable.domain.general.Gender
 import info.dgjones.barnable.domain.general.HumanFields
+import info.dgjones.barnable.grammar.possessiveRef
 import info.dgjones.barnable.parser.*
 
 enum class Relationships(override val fieldName: String): Fields {
@@ -50,7 +51,7 @@ class WordWife: WordHandler(EntryWord("wife")) {
                 nextChar(Marriage.Wife.fieldName, relRole = "Wife")
                 checkRelationship(CoreFields.Instance, waitForSlots = listOf(Marriage.Husband.fieldName, Marriage.Wife.fieldName))
             }
-            innerInstan(CoreFields.Instance, observeSlot = Marriage.Wife.fieldName)
+            innerInstance(CoreFields.Instance, observeSlot = Marriage.Wife.fieldName)
         }.demons
 }
 
@@ -63,6 +64,6 @@ class WordHusband: WordHandler(EntryWord("husband")) {
                 nextChar(Marriage.Husband.fieldName, relRole = "Husband")
                 checkRelationship(CoreFields.Instance, waitForSlots = listOf(Marriage.Husband.fieldName, Marriage.Wife.fieldName))
             }
-            innerInstan(CoreFields.Instance, observeSlot = Marriage.Husband.fieldName)
+            innerInstance(CoreFields.Instance, observeSlot = Marriage.Husband.fieldName)
         }.demons
 }
