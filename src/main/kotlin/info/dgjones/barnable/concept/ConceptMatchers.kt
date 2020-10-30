@@ -41,7 +41,7 @@ fun matchCase(match: Case): ConceptMatcher {
     return matchConceptValueName("case", match.name)
 }
 
-fun matchUnresovledVariables(): ConceptMatcher {
+fun matchUnresolvedVariables(): ConceptMatcher {
     return { c -> c?.isVariable() == true}
 }
 
@@ -76,7 +76,7 @@ class ConceptMatcherBuilder {
         return this
     }
     fun matchSetField(valueName: Fields, match: String?): ConceptMatcherBuilder {
-        if (match != null && isConceptValueResolved(match) /* FIXME?match != null && match.isNotBlank()*/) {
+        if (match != null && isConceptValueResolved(match)) {
             matchers.add(matchConceptValueName(valueName, match))
         }
         return this

@@ -49,7 +49,6 @@ data class Concept(val name: String) {
             slot.value = value
         } else {
             slot = Slot(slotName, value)
-            // FIXME not thread safe?
             with(slot)
         }
         return this
@@ -98,7 +97,6 @@ data class Concept(val name: String) {
 
 
     fun duplicateResolvedValue(): Concept? {
-        // FIXME how to stop graphs?
         if (isVariable()) {
             return null
         }
@@ -119,12 +117,10 @@ data class Concept(val name: String) {
 
     override fun toString(): String {
         return printIndented(0)
-        //return "($name ${slots.values.map{it.toString()}.joinToString(separator = "\n  ") { it }})"
     }
 
     fun printIndented(indent: Int = 1): String {
         val indentString = " ".repeat(indent * 2)
-        val continuedString = " ".repeat((indent + 1) * 2)
         return "($name ${slots.values.map{it.printIndented(indent + 1)}.joinToString(separator = "\n$indentString") { it }})"
     }
 }

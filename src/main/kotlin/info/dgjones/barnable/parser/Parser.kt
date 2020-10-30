@@ -19,7 +19,7 @@ package info.dgjones.barnable.parser
 
 import info.dgjones.barnable.concept.Concept
 import info.dgjones.barnable.concept.lexicalConcept
-import info.dgjones.barnable.concept.matchUnresovledVariables
+import info.dgjones.barnable.concept.matchUnresolvedVariables
 import info.dgjones.barnable.episodic.EpisodicMemory
 import info.dgjones.barnable.grammar.buildSuffixDemon
 import info.dgjones.barnable.narrative.InDepthUnderstandingConcepts
@@ -92,7 +92,7 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
     }
 
     private fun clearUnresolvedVariables(context: SentenceContext) {
-        context.wordContexts.forEach { it.defHolder.value?.replaceSlotValues(matchUnresovledVariables(), null) }
+        context.wordContexts.forEach { it.defHolder.value?.replaceSlotValues(matchUnresolvedVariables(), null) }
     }
 
     private fun promoteDefsToWorkingMemory(context: SentenceContext, memory: WorkingMemory) {

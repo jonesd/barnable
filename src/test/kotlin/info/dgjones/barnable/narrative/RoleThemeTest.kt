@@ -38,7 +38,7 @@ class RoleThemeTest {
         val meal = textProcessor.workingMemory.concepts[0]
         assertEquals(MopMeal.MopMeal.name, meal.name)
         assertEquals("RoleThemeTeacher", meal.value(MopMealFields.EATER_A)?.valueName(RoleThemeFields.RoleTheme))
-        assertEquals("RoleThemeTeacher0", meal.value(MopMealFields.EATER_A)?.valueName(CoreFields.INSTANCE))
+        assertEquals("RoleThemeTeacher0", meal.value(MopMealFields.EATER_A)?.valueName(CoreFields.Instance))
     }
 
     @Test
@@ -50,8 +50,8 @@ class RoleThemeTest {
         val grasp = textProcessor.workingMemory.concepts[0]
         assertEquals("GRASP", grasp.name)
         assertEquals("RoleThemeWaiter", grasp.value(ActFields.Actor)?.valueName(RoleThemeFields.RoleTheme))
-        assertEquals("RoleThemeWaiter0", grasp.value(ActFields.Actor)?.valueName(CoreFields.INSTANCE))
-        assertEquals(Gender.Female.name, grasp.value(ActFields.Actor)?.valueName(HumanFields.GENDER))
+        assertEquals("RoleThemeWaiter0", grasp.value(ActFields.Actor)?.valueName(CoreFields.Instance))
+        assertEquals(Gender.Female.name, grasp.value(ActFields.Actor)?.valueName(HumanFields.Gender))
         assertEquals("wine", grasp.value(ActFields.Thing)?.valueName(CoreFields.Name))
     }
 }

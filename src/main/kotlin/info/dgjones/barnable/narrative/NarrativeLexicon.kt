@@ -114,7 +114,7 @@ class HumanAccessor(concept: Concept): ConceptAccessor(concept) {
         return concept.name == InDepthUnderstandingConcepts.Human.name
     }
     fun firstName(): String? {
-        return concept.valueName(HumanFields.FIRST_NAME)
+        return concept.valueName(HumanFields.FirstName)
     }
 }
 
@@ -279,7 +279,7 @@ class WordLunch: WordHandler(EntryWord("lunch")) {
             expectHead(MopMealFields.EATER_A.fieldName, headValue = "Human", direction = SearchDirection.Before)
             expectPrep(MopMealFields.EATER_B.fieldName, preps = listOf(Preposition.With), matcher= matchConceptByHead(InDepthUnderstandingConcepts.Human.name))
             slot(CoreFields.Event, MopMeal.EventEatMeal.name) // FIXME find associated event
-            checkMop(CoreFields.INSTANCE.fieldName)
+            checkMop(CoreFields.Instance.fieldName)
         }.demons
 }
 
@@ -314,9 +314,9 @@ class WordMeasureObject: WordHandler(EntryWord("measure")) {
 class WordMan(word: String): WordHandler(EntryWord(word)) {
     override fun build(wordContext: WordContext): List<Demon> =
         lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
-            slot(HumanFields.FIRST_NAME, "")
-            slot(HumanFields.LAST_NAME, "")
-            slot(HumanFields.GENDER, Gender.Male.name)
+            slot(HumanFields.FirstName, "")
+            slot(HumanFields.LastName, "")
+            slot(HumanFields.Gender, Gender.Male.name)
         }.demons
 }
 
@@ -377,12 +377,12 @@ class WordAnother: WordHandler(EntryWord("another")) {
     //FIXME implement this?
     override fun build(wordContext: WordContext): List<Demon> =
         lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
-            slot(HumanFields.GENDER, Gender.Female.name)
+            slot(HumanFields.Gender, Gender.Female.name)
             slot(Relationships.Name, Marriage.Concept.fieldName) {
                 possessiveRef(Marriage.Husband, gender = Gender.Male)
                 nextChar("wife", relRole = "Wife")
-                checkRelationship(CoreFields.INSTANCE, waitForSlots = listOf("husband", "wife"))
+                checkRelationship(CoreFields.Instance, waitForSlots = listOf("husband", "wife"))
             }
-            innerInstan("instan", observeSlot = "wife")
+            innerInstan(CoreFields.Instance, observeSlot = "wife")
         }.demons
 }

@@ -60,8 +60,8 @@ class QATest {
             assertEquals(1, textProcessor.workingMemory.concepts.size)
             val meal = textProcessor.workingMemory.concepts[0]
             assertEquals("MopMeal", meal.name)
-            assertEquals("John", meal.value("eaterA")?.valueName(HumanFields.FIRST_NAME))
-            assertEquals("George", meal.value("eaterB")?.valueName(HumanFields.FIRST_NAME))
+            assertEquals("John", meal.value("eaterA")?.valueName(HumanFields.FirstName))
+            assertEquals("George", meal.value("eaterB")?.valueName(HumanFields.FirstName))
             assertEquals("EventEatMeal", meal.valueName("event"))
 
             // Question
@@ -71,7 +71,7 @@ class QATest {
 
             assertEquals(1, result.sentenceResult.size)
             val answerConcept = result.sentenceResult[0]
-            assertEquals("John", answerConcept.value("actor")?.valueName(HumanFields.FIRST_NAME))
+            assertEquals("John", answerConcept.value("actor")?.valueName(HumanFields.FirstName))
             assertEquals("MopMeal", answerConcept.valueName("act"))
 
             assertEquals("George", result.answer)

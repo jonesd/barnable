@@ -43,11 +43,11 @@ fun buildGeneralHonorificLexicon(lexicon: Lexicon) {
 class TitleWord(word: String, val gender: Gender): WordHandler(EntryWord(word, noSuffix = true)) {
     override fun build(wordContext: WordContext): List<Demon> =
         lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
-            slot(HumanFields.FIRST_NAME, "")
-            lastName(HumanFields.LAST_NAME)
-            slot(HumanFields.GENDER, gender.name)
+            slot(HumanFields.FirstName, "")
+            lastName(HumanFields.LastName)
+            slot(HumanFields.Gender, gender.name)
             // FIXME include title
-            checkCharacter(CoreFields.INSTANCE.fieldName)
+            checkCharacter(CoreFields.Instance.fieldName)
         }.demons
 
     override fun disambiguationDemons(wordContext: WordContext, disambiguationHandler: DisambiguationHandler): List<Demon> {

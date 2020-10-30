@@ -114,7 +114,7 @@ class EpisodicMemory {
     fun createBareEpisodicConceptFrom(concept: Concept, map: EpisodicConceptMap): EpisodicConcept {
         val episodicConcept = EpisodicConcept(concept.name)
         val episodicId = indexGenerator.episodicId(concept)
-        episodicConcept.with(Slot(CoreFields.INSTANCE, EpisodicConcept(episodicId)))
+        episodicConcept.with(Slot(CoreFields.Instance, EpisodicConcept(episodicId)))
         map[episodicId] = episodicConcept
         return episodicConcept
     }
@@ -132,7 +132,7 @@ class EpisodicMemory {
         val episodicId = indexGenerator.episodicId(concept)
         relationship.with(Slot(Marriage.Wife, checkOrCreateCharacter(concept.value(Marriage.Wife))))
         relationship.with(Slot(Marriage.Husband, checkOrCreateCharacter(concept.value(Marriage.Husband))))
-        relationship.with(Slot(CoreFields.INSTANCE, EpisodicConcept(episodicId)))
+        relationship.with(Slot(CoreFields.Instance, EpisodicConcept(episodicId)))
         relationships[episodicId] = relationship
         return episodicId
     }
@@ -161,10 +161,10 @@ class EpisodicMemory {
     fun updateCharacter(episodicConcept: EpisodicConcept, slotUpdate: Slot) {
         //FIXME may need to use deep copy...
         when (slotUpdate.name) {
-            HumanFields.FIRST_NAME.fieldName -> slotUpdate.copyValue(episodicConcept)
-            HumanFields.LAST_NAME.fieldName -> slotUpdate.copyValue(episodicConcept)
+            HumanFields.FirstName.fieldName -> slotUpdate.copyValue(episodicConcept)
+            HumanFields.LastName.fieldName -> slotUpdate.copyValue(episodicConcept)
             RoleThemeFields.RoleTheme.fieldName -> slotUpdate.copyValue(episodicConcept)
-            HumanFields.GENDER.fieldName -> slotUpdate.copyValue(episodicConcept)
+            HumanFields.Gender.fieldName -> slotUpdate.copyValue(episodicConcept)
             else -> println("EP UpdateCharacter - no slot match for update $slotUpdate")
         }
         }
@@ -177,13 +177,13 @@ class EpisodicMemory {
         }
         val character = EpisodicConcept(InDepthUnderstandingConcepts.Human.name)
         if (human != null) {
-            character.with(human.duplicateResolvedSlot(HumanFields.FIRST_NAME))
-            character.with(human.duplicateResolvedSlot(HumanFields.LAST_NAME))
-            character.with(human.duplicateResolvedSlot(HumanFields.GENDER))
+            character.with(human.duplicateResolvedSlot(HumanFields.FirstName))
+            character.with(human.duplicateResolvedSlot(HumanFields.LastName))
+            character.with(human.duplicateResolvedSlot(HumanFields.Gender))
             character.with(human.duplicateResolvedSlot(RoleThemeFields.RoleTheme))
         }
         val episodicInstance = indexGenerator.episodicId(humanKeyValue(character))
-        character.with(Slot(CoreFields.INSTANCE, Concept(episodicInstance)))
+        character.with(Slot(CoreFields.Instance, Concept(episodicInstance)))
         characters[episodicInstance] = character
         return character
     }

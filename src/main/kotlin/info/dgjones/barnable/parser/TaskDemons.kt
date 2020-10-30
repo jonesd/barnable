@@ -77,7 +77,7 @@ class CheckCharacterDemon(val human: Concept, wordContext: WordContext, val acti
         active = false
     }
     override fun description(): String {
-        return "CheckCharacter from episodic with ${human.valueName(HumanFields.FIRST_NAME)} ${human.valueName(HumanFields.GENDER)}"
+        return "CheckCharacter from episodic with ${human.valueName(HumanFields.FirstName)} ${human.valueName(HumanFields.Gender)}"
     }
 }
 
@@ -154,9 +154,9 @@ class FindObjectReferenceDemon(wordContext: WordContext): Demon(wordContext) {
 class PossessiveReference(val gender: Gender, wordContext: WordContext, val action: (Concept?) -> Unit): Demon(wordContext) {
     override fun run() {
         searchContext( matchCase(Case.Possessive), direction = SearchDirection.Before, wordContext = wordContext) {
-            val instan = it.value?.value("instan")
-            action(instan)
-            if (instan != null) {
+            val instance = it.value?.value(CoreFields.Instance.fieldName)
+            action(instance)
+            if (instance != null) {
                 active = false
             }
         }
@@ -173,7 +173,7 @@ class InnerInstanceDemon(val slotName: String, wordContext: WordContext, val act
     override fun run() {
         wordContext.defHolder.value?.let { rootConcept ->
             conceptPathResolvedValue(rootConcept, slotName)?.let { parentConcept ->
-                val instanceConcept = parentConcept.value(CoreFields.INSTANCE)
+                val instanceConcept = parentConcept.value(CoreFields.Instance)
                 if (isConceptResolved(instanceConcept)) {
                     active = false
                     action(instanceConcept)
@@ -183,7 +183,7 @@ class InnerInstanceDemon(val slotName: String, wordContext: WordContext, val act
     }
 
     override fun description(): String {
-        return "When the inner ${CoreFields.INSTANCE} of $slotName has been bound\nThen use it to bind the demon's role"
+        return "When the inner ${CoreFields.Instance} of $slotName has been bound\nThen use it to bind the demon's role"
     }
 }
 

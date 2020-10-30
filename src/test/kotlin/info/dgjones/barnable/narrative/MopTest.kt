@@ -39,13 +39,13 @@ class MopMealTest {
         // test
         val episodic = memory.checkOrCreateMop(concept)
 
-        assertEquals("MopMeal0", episodic.valueName(CoreFields.INSTANCE))
+        assertEquals("MopMeal0", episodic.valueName(CoreFields.Instance))
 
-        assertEquals("john", episodic.value(MopMealFields.EATER_A)?.valueName(HumanFields.FIRST_NAME))
-        assertEquals("smith", episodic.value(MopMealFields.EATER_A)?.valueName(HumanFields.LAST_NAME))
-        assertEquals("Male", episodic.value(MopMealFields.EATER_A)?.valueName(HumanFields.GENDER))
+        assertEquals("john", episodic.value(MopMealFields.EATER_A)?.valueName(HumanFields.FirstName))
+        assertEquals("smith", episodic.value(MopMealFields.EATER_A)?.valueName(HumanFields.LastName))
+        assertEquals("Male", episodic.value(MopMealFields.EATER_A)?.valueName(HumanFields.Gender))
 
-        assertEquals("george", episodic.value(MopMealFields.EATER_B)?.valueName(HumanFields.FIRST_NAME))
+        assertEquals("george", episodic.value(MopMealFields.EATER_B)?.valueName(HumanFields.FirstName))
 
         assertEquals(episodic, memory.mops["MopMeal0"])
     }
@@ -67,11 +67,11 @@ class MopMealTest {
         // test
         val episodic = memory.checkOrCreateMop(concept2)
 
-        assertEquals("MopMeal0", originalEpisodic.valueName(CoreFields.INSTANCE))
-        assertEquals("MopMeal0", episodic.valueName(CoreFields.INSTANCE))
+        assertEquals("MopMeal0", originalEpisodic.valueName(CoreFields.Instance))
+        assertEquals("MopMeal0", episodic.valueName(CoreFields.Instance))
 
-        assertEquals("john", episodic.value(MopMealFields.EATER_A)?.valueName(HumanFields.FIRST_NAME))
-        assertEquals("george", episodic.value(MopMealFields.EATER_B)?.valueName(HumanFields.FIRST_NAME))
+        assertEquals("john", episodic.value(MopMealFields.EATER_A)?.valueName(HumanFields.FirstName))
+        assertEquals("george", episodic.value(MopMealFields.EATER_B)?.valueName(HumanFields.FirstName))
 
         assertEquals(episodic, memory.mops["MopMeal0"])
     }

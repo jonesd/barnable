@@ -51,8 +51,8 @@ class WordPronoun(word: String, val gender: Gender, val case: Case): WordHandler
         lexicalConcept(wordContext, InDepthUnderstandingConcepts.Ref.name) {
             ignoreHolder()
             slot(GrammarFields.Case, case.name)
-            slot(HumanFields.GENDER, gender.name)
-            findCharacter(CoreFields.INSTANCE.fieldName)
+            slot(HumanFields.Gender, gender.name)
+            findCharacter(CoreFields.Instance.fieldName)
         }.demons
 }
 

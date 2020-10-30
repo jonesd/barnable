@@ -32,9 +32,9 @@ class HumanTest {
         Assertions.assertEquals(1, textProcessor.workingMemory.concepts.size)
         val human = textProcessor.workingMemory.concepts[0]
         Assertions.assertEquals(HumanConcept.Human.name, human.name)
-        Assertions.assertEquals("John", human.valueName(HumanFields.FIRST_NAME))
-        Assertions.assertEquals(Gender.Male.name, human.valueName(HumanFields.GENDER))
-        Assertions.assertNull(human.valueName(HumanFields.LAST_NAME))
+        Assertions.assertEquals("John", human.valueName(HumanFields.FirstName))
+        Assertions.assertEquals(Gender.Male.name, human.valueName(HumanFields.Gender))
+        Assertions.assertNull(human.valueName(HumanFields.LastName))
     }
 
     @Test
@@ -44,9 +44,9 @@ class HumanTest {
         Assertions.assertEquals(1, textProcessor.workingMemory.concepts.size)
         val human = textProcessor.workingMemory.concepts[0]
         Assertions.assertEquals(HumanConcept.Human.name, human.name)
-        Assertions.assertEquals("Jane", human.valueName(HumanFields.FIRST_NAME))
-        Assertions.assertEquals(Gender.Female.name, human.valueName(HumanFields.GENDER))
-        Assertions.assertNull(human.valueName(HumanFields.LAST_NAME))
+        Assertions.assertEquals("Jane", human.valueName(HumanFields.FirstName))
+        Assertions.assertEquals(Gender.Female.name, human.valueName(HumanFields.Gender))
+        Assertions.assertNull(human.valueName(HumanFields.LastName))
     }
 
     @Test
@@ -56,8 +56,8 @@ class HumanTest {
         Assertions.assertEquals(1, textProcessor.workingMemory.concepts.size)
         val human = textProcessor.workingMemory.concepts[0]
         Assertions.assertEquals(HumanConcept.Human.name, human.name)
-        Assertions.assertEquals("John", human.valueName(HumanFields.FIRST_NAME))
-        Assertions.assertEquals(Gender.Male.name, human.valueName(HumanFields.GENDER))
-        Assertions.assertEquals("Snicklefritz", human.valueName(HumanFields.LAST_NAME))
+        Assertions.assertEquals("John", human.valueName(HumanFields.FirstName))
+        Assertions.assertEquals(Gender.Male.name, human.valueName(HumanFields.Gender))
+        Assertions.assertEquals("Snicklefritz", human.valueName(HumanFields.LastName))
     }
 }

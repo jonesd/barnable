@@ -51,7 +51,7 @@ class QuestionProcessor(val textProcessor: TextProcessor) {
             return "ERROR: Could not understand question"
         }
         val humans = event.find(matchConceptByHead(InDepthUnderstandingConcepts.Human.name))
-        val whoMatches = humans.filter { it.valueName(CoreFields.INSTANCE) != specifiedCharacter?.valueName(CoreFields.INSTANCE) }
+        val whoMatches = humans.filter { it.valueName(CoreFields.Instance) != specifiedCharacter?.valueName(CoreFields.Instance) }
         return if (whoMatches.isNotEmpty()) answerGenerator.generateHumanList(whoMatches) else "No one"
     }
 }

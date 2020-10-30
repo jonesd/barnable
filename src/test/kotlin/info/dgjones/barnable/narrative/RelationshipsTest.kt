@@ -37,34 +37,33 @@ class RelationshipsTest {
 
         val john = textProcessor.workingMemory.concepts[0]
         assertEquals(HumanConcept.Human.name, john.name)
-        assertEquals("John", john.valueName(HumanFields.FIRST_NAME))
+        assertEquals("John", john.valueName(HumanFields.FirstName))
 
         val wife = textProcessor.workingMemory.concepts[1]
         assertEquals(HumanConcept.Human.name, wife.name)
         val marriage = wife.value(Relationships.Name)
         assertNotNull(marriage)
-        assertEquals(Gender.Male.name, marriage?.value(Marriage.Husband)?.valueName(HumanFields.GENDER))
-        assertEquals("Ann", marriage?.value(Marriage.Wife)?.valueName(HumanFields.FIRST_NAME))
-        assertEquals(Gender.Female.name, marriage?.value(Marriage.Wife)?.valueName(HumanFields.GENDER))
+        assertEquals(Gender.Male.name, marriage?.value(Marriage.Husband)?.valueName(HumanFields.Gender))
+        assertEquals("Ann", marriage?.value(Marriage.Wife)?.valueName(HumanFields.FirstName))
+        assertEquals(Gender.Female.name, marriage?.value(Marriage.Wife)?.valueName(HumanFields.Gender))
     }
 
     @Test
     fun `Ann and her husband John`() {
         val textProcessor = runTextProcess("Ann and her husband John.", lexicon)
 
-        // FIXME implement
         assertEquals(2, textProcessor.workingMemory.concepts.size)
 
         val ann = textProcessor.workingMemory.concepts[0]
         assertEquals(HumanConcept.Human.name, ann.name)
-        assertEquals("Ann", ann.valueName(HumanFields.FIRST_NAME))
+        assertEquals("Ann", ann.valueName(HumanFields.FirstName))
 
         val husband = textProcessor.workingMemory.concepts[1]
         assertEquals(HumanConcept.Human.name, husband.name)
         val marriage = husband.value(Relationships.Name)
         assertNotNull(marriage)
-        assertEquals(Gender.Female.name, marriage?.value(Marriage.Wife)?.valueName(HumanFields.GENDER))
-        assertEquals("John", marriage?.value(Marriage.Husband)?.valueName(HumanFields.FIRST_NAME))
-        assertEquals(Gender.Male.name, marriage?.value(Marriage.Husband)?.valueName(HumanFields.GENDER))
+        assertEquals(Gender.Female.name, marriage?.value(Marriage.Wife)?.valueName(HumanFields.Gender))
+        assertEquals("John", marriage?.value(Marriage.Husband)?.valueName(HumanFields.FirstName))
+        assertEquals(Gender.Male.name, marriage?.value(Marriage.Husband)?.valueName(HumanFields.Gender))
     }
 }

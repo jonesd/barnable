@@ -154,7 +154,7 @@ class ConceptTest {
                 .with(Slot("b", createConceptVariable("otherVariable")))
                 .with(Slot("c", Concept("valueC")))
 
-            root.replaceSlotValues(matchUnresovledVariables(), null)
+            root.replaceSlotValues(matchUnresolvedVariables(), null)
             assertEquals(null, root.valueName("a"))
             assertEquals(null, root.valueName("b"))
             assertEquals("valueC", root.valueName("c"))
@@ -171,8 +171,8 @@ class SlotTest {
     }
     @Test
     fun `create with fieldName and value`() {
-        val slot = Slot(CoreFields.INSTANCE, Concept("someValue"))
-        assertEquals("instan", slot.name)
+        val slot = Slot(CoreFields.Instance, Concept("someValue"))
+        assertEquals("instance", slot.name)
         assertEquals("someValue", slot.value?.name)
     }
     @Nested

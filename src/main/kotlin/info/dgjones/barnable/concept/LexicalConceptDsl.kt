@@ -185,16 +185,16 @@ class LexicalConceptBuilder(val root: LexicalRootBuilder, conceptName: String) {
         concept.with(variableSlot)
         val checkCharacterDemon = CheckCharacterDemon(concept, root.wordContext) { episodicCharacter ->
             if (episodicCharacter != null) {
-                val episodicInstance = episodicCharacter.value(CoreFields.INSTANCE)
+                val episodicInstance = episodicCharacter.value(CoreFields.Instance)
                 root.completeVariable(variableSlot, root.wordContext.context.workingMemory.createDefHolder(episodicInstance))
                 this.episodicConcept = episodicCharacter
-                copyCompletedSlot(HumanFields.FIRST_NAME, episodicCharacter, concept)
-                copyCompletedSlot(HumanFields.LAST_NAME, episodicCharacter, concept)
-                copyCompletedSlot(HumanFields.GENDER, episodicCharacter, concept)
+                copyCompletedSlot(HumanFields.FirstName, episodicCharacter, concept)
+                copyCompletedSlot(HumanFields.LastName, episodicCharacter, concept)
+                copyCompletedSlot(HumanFields.Gender, episodicCharacter, concept)
                 root.wordContext.context.workingMemory.markAsRecentCharacter(concept)
             } else {
-                println("Creating character ${concept.valueName(HumanFields.FIRST_NAME)} in EP memory")
-                val human = buildHuman(concept.valueName(HumanFields.FIRST_NAME), concept.valueName(HumanFields.LAST_NAME), concept.valueName(HumanFields.GENDER))
+                println("Creating character ${concept.valueName(HumanFields.FirstName)} in EP memory")
+                val human = buildHuman(concept.valueName(HumanFields.FirstName), concept.valueName(HumanFields.LastName), concept.valueName(HumanFields.Gender))
                 // val saveCharacterDemon = SaveCharacterDemon(root.wordContext)
                 root.wordContext.context.workingMemory.markAsRecentCharacter(concept)
                 //root.wordContext.context.episodicMemory.addConcept(human)
@@ -208,7 +208,7 @@ class LexicalConceptBuilder(val root: LexicalRootBuilder, conceptName: String) {
         concept.with(variableSlot)
         val checkMopDemon = CheckMopDemon(concept, root.wordContext) { episodicMop ->
             if (episodicMop != null) {
-                val episodicInstance = episodicMop.value(CoreFields.INSTANCE)
+                val episodicInstance = episodicMop.value(CoreFields.Instance)
                 root.completeVariable(variableSlot, root.wordContext.context.workingMemory.createDefHolder(episodicInstance))
                 this.episodicConcept = episodicMop
                 copyCompletedSlot(MopMealFields.EATER_A, episodicMop, concept)
@@ -231,7 +231,7 @@ class LexicalConceptBuilder(val root: LexicalRootBuilder, conceptName: String) {
     fun findCharacter(slotName: String, variableName: String? = null) {
         val variableSlot = root.createVariable(slotName, variableName)
         concept.with(variableSlot)
-        val demon = FindCharacterDemon(concept.valueName(HumanFields.GENDER), root.wordContext) {
+        val demon = FindCharacterDemon(concept.valueName(HumanFields.Gender), root.wordContext) {
             if (it != null) {
                 root.completeVariable(variableSlot, it, root.wordContext, this.episodicConcept)
             }
@@ -261,7 +261,7 @@ class LexicalConceptBuilder(val root: LexicalRootBuilder, conceptName: String) {
         root.addDemon(demon)
     }
 
-    fun innerInstan(slotName: String, variableName: String? = null, observeSlot: String) {
+    fun innerInstan(slotName: Fields, variableName: String? = null, observeSlot: String) {
         val variableSlot = root.createVariable(slotName, variableName)
         concept.with(variableSlot)
         val demon = InnerInstanceDemon(observeSlot, root.wordContext) {

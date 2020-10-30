@@ -52,7 +52,7 @@ fun EpisodicMemory.checkOrCreateMop(concept: Concept): EpisodicConcept {
             initializeCharacterSlotFrom(concept, MopMealFields.EATER_A, mop)
             initializeCharacterSlotFrom(concept, MopMealFields.EATER_B, mop)
             initializeEventSlotFrom(concept, CoreFields.Event, mop)
-            println("Creating EP ${concept.name} ${mop.valueName(CoreFields.INSTANCE)} ${mop.value(MopMealFields.EATER_A)} ${mop.value(MopMealFields.EATER_B)}")
+            println("Creating EP ${concept.name} ${mop.valueName(CoreFields.Instance)} ${mop.value(MopMealFields.EATER_A)} ${mop.value(MopMealFields.EATER_B)}")
         }
         else -> null
     }

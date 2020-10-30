@@ -44,25 +44,25 @@ fun buildNarrativeRelationshipLexicon(lexicon: Lexicon) {
 class WordWife: WordHandler(EntryWord("wife")) {
     override fun build(wordContext: WordContext): List<Demon> =
         lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
-            slot(HumanFields.GENDER, Gender.Female.name)
+            slot(HumanFields.Gender, Gender.Female.name)
             slot(Relationships.Name, Marriage.Concept.fieldName) {
                 possessiveRef(Marriage.Husband, gender = Gender.Male)
                 nextChar(Marriage.Wife.fieldName, relRole = "Wife")
-                checkRelationship(CoreFields.INSTANCE, waitForSlots = listOf(Marriage.Husband.fieldName, Marriage.Wife.fieldName))
+                checkRelationship(CoreFields.Instance, waitForSlots = listOf(Marriage.Husband.fieldName, Marriage.Wife.fieldName))
             }
-            innerInstan(CoreFields.INSTANCE.fieldName, observeSlot = Marriage.Wife.fieldName)
+            innerInstan(CoreFields.Instance, observeSlot = Marriage.Wife.fieldName)
         }.demons
 }
 
 class WordHusband: WordHandler(EntryWord("husband")) {
     override fun build(wordContext: WordContext): List<Demon> =
         lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
-            slot(HumanFields.GENDER, Gender.Male.name)
+            slot(HumanFields.Gender, Gender.Male.name)
             slot(Relationships.Name, Marriage.Concept.fieldName) {
                 possessiveRef(Marriage.Wife, gender = Gender.Female)
                 nextChar(Marriage.Husband.fieldName, relRole = "Husband")
-                checkRelationship(CoreFields.INSTANCE, waitForSlots = listOf(Marriage.Husband.fieldName, Marriage.Wife.fieldName))
+                checkRelationship(CoreFields.Instance, waitForSlots = listOf(Marriage.Husband.fieldName, Marriage.Wife.fieldName))
             }
-            innerInstan(CoreFields.INSTANCE.fieldName, observeSlot = Marriage.Husband.fieldName)
+            innerInstan(CoreFields.Instance, observeSlot = Marriage.Husband.fieldName)
         }.demons
 }

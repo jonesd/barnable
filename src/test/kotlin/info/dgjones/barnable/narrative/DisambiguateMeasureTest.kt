@@ -45,7 +45,7 @@ class DisambiguateMeasureTest {
         assertEquals(1, textProcessor.workingMemory.concepts.size)
         val toMeasure = textProcessor.workingMemory.concepts[0]
         assertEquals(Acts.ATRANS.name, toMeasure.name)
-        assertEquals("John", toMeasure.value(ActFields.Actor)?.valueName(HumanFields.FIRST_NAME))
+        assertEquals("John", toMeasure.value(ActFields.Actor)?.valueName(HumanFields.FirstName))
         assertEquals("tree", toMeasure.value(ActFields.Thing)?.valueName(CoreFields.Name))
     }
 }

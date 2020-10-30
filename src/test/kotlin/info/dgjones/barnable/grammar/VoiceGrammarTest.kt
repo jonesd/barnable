@@ -48,7 +48,7 @@ class ShouldMapPassiveAndActiveToSameConceptsTest {
 
     private fun verifyFredKickedBall(propel: Concept) {
         assertEquals(Acts.PROPEL.name, propel.name)
-        assertEquals("Fred", propel.value("actor")?.valueName(HumanFields.FIRST_NAME))
+        assertEquals("Fred", propel.value("actor")?.valueName(HumanFields.FirstName))
         assertEquals("ball", propel.value("thing")?.valueName("name"))
     }
 }
