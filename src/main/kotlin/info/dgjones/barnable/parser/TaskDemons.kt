@@ -18,7 +18,6 @@
 package info.dgjones.barnable.parser
 
 import info.dgjones.barnable.concept.*
-import info.dgjones.barnable.domain.general.Gender
 import info.dgjones.barnable.domain.general.HumanFields
 import info.dgjones.barnable.episodic.EpisodicMemory
 import info.dgjones.barnable.grammar.*

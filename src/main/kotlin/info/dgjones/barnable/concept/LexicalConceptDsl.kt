@@ -17,7 +17,6 @@
 
 package info.dgjones.barnable.concept
 
-import info.dgjones.barnable.domain.general.Gender
 import info.dgjones.barnable.domain.general.HumanFields
 import info.dgjones.barnable.domain.general.buildHuman
 import info.dgjones.barnable.episodic.EpisodicConcept
@@ -27,16 +26,15 @@ import info.dgjones.barnable.parser.*
 /* DSL to help build Concept as part of a word sense.
 It also triggers demons to populate the concept slots.
  */
-
-class LexicalRootBuilder(val wordContext: WordContext, private val headName: String) {
+class LexicalRootBuilder(val wordContext: WordContext, val headName: String) {
     val root = LexicalConceptBuilder(this, headName)
 
     val demons = mutableListOf<Demon>()
-    val variableSlots = mutableListOf<Slot>()
-    val completedSlots = mutableListOf<Slot>()
+    private val variableSlots = mutableListOf<Slot>()
+    private val completedSlots = mutableListOf<Slot>()
     val completedConceptHolders = mutableListOf<ConceptHolder>()
-    val disambiguations = mutableListOf<Demon>()
-    var totalSuccessfulDisambiguations = 0
+    private val disambiguations = mutableListOf<Demon>()
+    private var totalSuccessfulDisambiguations = 0
 
     fun build(): LexicalConcept {
         return LexicalConcept(wordContext, root.build(), demons, disambiguations)

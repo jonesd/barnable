@@ -34,7 +34,7 @@ typealias EpisodicConcept = Concept
 typealias EpisodicConceptMap = MutableMap<EpisodicInstance, EpisodicConcept>
 
 class IndexedNameGenerator {
-    val nextIndexes = mutableMapOf<String, Int>()
+    private val nextIndexes = mutableMapOf<String, Int>()
 
     fun episodicId(name: String): String {
         val index = nextIndexes.getOrDefault(name, 0)
@@ -47,15 +47,15 @@ class IndexedNameGenerator {
 
 
 class EpisodicMemory {
-    val indexGenerator = IndexedNameGenerator()
+    private val indexGenerator = IndexedNameGenerator()
 
-    val relationships = mutableMapOf<EpisodicInstance, EpisodicConcept>()
+    private val relationships = mutableMapOf<EpisodicInstance, EpisodicConcept>()
     val characters = mutableMapOf<EpisodicInstance, EpisodicConcept>()
     val mops = mutableMapOf<EpisodicInstance, EpisodicConcept>()
     val events = mutableMapOf<EpisodicInstance, EpisodicConcept>()
     val roleThemes = mutableMapOf<EpisodicInstance, EpisodicConcept>()
 
-    val scenarioMap = ScenarioMap()
+    private val scenarioMap = ScenarioMap()
 
     val concepts = mutableListOf<EpisodicConcept>()
 

@@ -67,7 +67,7 @@ class ModifierWord(word: String, val field: Fields, val value: String = word): W
             }
 
             override fun description(): String {
-                return "ModifierWord ${word}"
+                return "ModifierWord $word"
             }
         }
         //FIXME list of kinds is not complete

@@ -27,9 +27,9 @@ import info.dgjones.barnable.nlp.WordMorphologyBuilder
 * found.
 * */
 class Lexicon {
-    val wordMappings: MutableMap<String, MutableList<WordHandler>> = mutableMapOf()
+    private val wordMappings: MutableMap<String, MutableList<WordHandler>> = mutableMapOf()
 
-    val morphologicalMappings: MutableMap<String, MutableList<Pair<WordMorphology, WordHandler>>> = mutableMapOf()
+    private val morphologicalMappings: MutableMap<String, MutableList<Pair<WordMorphology, WordHandler>>> = mutableMapOf()
 
     fun addMapping(handler: WordHandler) {
         addDirectMappingsForInitialWord(handler)
