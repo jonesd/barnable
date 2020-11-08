@@ -33,7 +33,7 @@ See: InDepth p255/9.1
 class ScenarioMap {
     val scenarios = mutableMapOf<EpisodicInstance, EpisodicConcept>()
     val activeScenario: EpisodicConcept? = null
-    var currentEvent: EpisodicConcept? = null
+    private var currentEvent: EpisodicConcept? = null
 
     fun setCurrentEvent(concept: Concept, mainEvent: Boolean = false) {
         val event = concept.value(CoreFields.Event)

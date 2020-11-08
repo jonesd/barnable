@@ -24,43 +24,13 @@ import info.dgjones.barnable.grammar.*
 import info.dgjones.barnable.narrative.*
 
 class ExpectDemon(val matcher: ConceptMatcher, val direction: SearchDirection, wordContext: WordContext, val action: (ConceptHolder) -> Unit): Demon(wordContext) {
-    var found: ConceptHolder? = null
-
     override fun run() {
-        if (direction == SearchDirection.Before) {
-            (wordContext.wordIndex - 1 downTo 0).forEach {
-                found = updateFrom(found, wordContext, it)
-            }
-        } else {
-            (wordContext.wordIndex + 1 until wordContext.context.wordContexts.size).forEach {
-                found = updateFrom(found, wordContext, it)
+        searchContext(matcher, abortSearch = matchConjunction(), direction = direction, wordContext = wordContext) {
+            action(it)
+            if (it != null) {
+                active = false
             }
         }
-        val foundConcept = found
-        if (foundConcept?.value != null) {
-            action(foundConcept)
-            println("Found concept=$foundConcept for match=$matcher")
-            active = false
-        }
-    }
-
-    private fun updateFrom(existing: ConceptHolder?, wordContext: WordContext, index: Int): ConceptHolder? {
-        if (existing != null) {
-            return existing
-        }
-        val defHolder = wordContext.context.defHolderAtWordIndex(index)
-        val value = defHolder.value
-        if (isConjunction(value)) {
-            return null
-        }
-        if (matcher(value)) {
-            return defHolder
-        }
-        return null
-    }
-
-    private fun isConjunction(concept: Concept?): Boolean {
-        return matchConceptByHead(ParserKinds.Conjunction.name)(concept)
     }
 
     override fun description(): String {
@@ -170,7 +140,7 @@ class InnerInstanceDemon(val slotName: String, wordContext: WordContext, val act
     }
 }
 
-class CheckRelationshipDemon(var parent: Concept, var dependentSlotNames: List<String>, wordContext: WordContext, val action: (Concept?) -> Unit): Demon(wordContext) {
+class CheckRelationshipDemon(private var parent: Concept, private var dependentSlotNames: List<String>, wordContext: WordContext, val action: (Concept?) -> Unit): Demon(wordContext) {
     override fun run() {
         val rootConcept =  wordContext.defHolder.value
         if (rootConcept != null && isDependentSlotsComplete(parent, dependentSlotNames)) {
@@ -249,7 +219,7 @@ class EpisodicRoleCheck(val mop: Concept, wordContext: WordContext, val action: 
     }
 }
 
-class UpdateEventDemon(val episodicConcept: Concept, wordContext: WordContext, val action: (Concept?) -> Unit): Demon(wordContext) {
+class UpdateEventDemon(private val episodicConcept: Concept, wordContext: WordContext, val action: (Concept?) -> Unit): Demon(wordContext) {
     override fun run() {
         //FIXME should this also handle "having a meeting"
         if (wordContext.previousWord()?.equals("have", ignoreCase = true) == true) {

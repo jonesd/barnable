@@ -22,6 +22,7 @@ import info.dgjones.barnable.grammar.GrammarFields
 import info.dgjones.barnable.grammar.Preposition
 import info.dgjones.barnable.grammar.Voice
 import info.dgjones.barnable.grammar.matchPrepIn
+import info.dgjones.barnable.narrative.BodyParts
 import info.dgjones.barnable.narrative.InDepthUnderstandingConcepts
 import info.dgjones.barnable.parser.*
 
@@ -65,6 +66,15 @@ fun LexicalConceptBuilder.expectThing(slotName: Fields = ActFields.Thing, variab
     root.addDemon(demon)
 }
 
+fun LexicalConceptBuilder.instrumentByActorToThing(instrumentAct: Acts, instrumentThing: String = BodyParts.Fingers.name) {
+    slot(ActFields.Instrument.fieldName, instrumentAct.name) {
+        varReference(ActFields.Actor.fieldName, "actor")
+        slot(ActFields.Thing.fieldName, instrumentThing)
+        varReference(ActFields.To.fieldName, "thing")
+        slot(CoreFields.Kind.fieldName, InDepthUnderstandingConcepts.Act.name)
+    }
+}
+
 // Demons
 
 /** Search for a Human to fill an actor slot of the Act.
@@ -87,8 +97,8 @@ class ExpectActor(wordContext: WordContext, val action: (ConceptHolder) -> Unit)
                 action(it)
                 active = false
             } else if (it.value?.valueName(GrammarFields.Voice) == Voice.Passive.name) {
-                searchContext(actorMatcher, matchNever(), direction = SearchDirection.After, wordContext = wordContext) {
-                    action(it)
+                searchContext(actorMatcher, matchNever(), direction = SearchDirection.After, wordContext = wordContext) { actor ->
+                    action(actor)
                     active = false
                 }
             }
@@ -101,7 +111,7 @@ class ExpectActor(wordContext: WordContext, val action: (ConceptHolder) -> Unit)
 
 class ExpectThing(val thingMatcher: ConceptMatcher = matchConceptByHead(InDepthUnderstandingConcepts.PhysicalObject.name), wordContext: WordContext, val action: (ConceptHolder) -> Unit): Demon(wordContext) {
     override fun run() {
-        val byMatcher = matchPrepIn(listOf(Preposition.By.name))
+        val byMatcher = matchPrepIn(listOf(Preposition.By))
         val matcher = matchAny(listOf(
             // FIXME Really this should be triggered by actor search finding passive voice
             byMatcher,
@@ -112,8 +122,8 @@ class ExpectThing(val thingMatcher: ConceptMatcher = matchConceptByHead(InDepthU
                 action(it)
                 active = false
             } else if (byMatcher(it.value)) {
-                searchContext(thingMatcher, matchNever(), direction = SearchDirection.Before, wordContext = wordContext) {
-                    action(it)
+                searchContext(thingMatcher, matchNever(), direction = SearchDirection.Before, wordContext = wordContext) { thing ->
+                    action(thing)
                     active = false
                 }
             }

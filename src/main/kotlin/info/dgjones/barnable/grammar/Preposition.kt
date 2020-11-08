@@ -46,27 +46,21 @@ fun buildPrep(preposition: Preposition): Concept {
 }
 
 fun withPreposition(concept: Concept, preposition: Preposition) {
-    return withPreposition(concept, preposition.name)
+    concept.with(Slot(CoreFields.Is, Concept(preposition.name)))
 }
 
-fun withPreposition(concept: Concept, preposition: String) {
-    concept.with(Slot("is", Concept(preposition)))
-}
-
-fun matchPrepIn(preps: Collection<String>): ConceptMatcher {
-    return { c -> preps.contains(c?.valueName("is")) }
+fun matchPrepIn(preps: Collection<Preposition>): ConceptMatcher {
+    val prepNames = preps.map { it.name }
+    return { c -> prepNames.contains(c?.valueName(CoreFields.Is)) }
 }
 
 fun LexicalConceptBuilder.expectPrep(slotName: String, variableName: String? = null, preps: Collection<Preposition>, matcher: ConceptMatcher, direction: SearchDirection = SearchDirection.After) {
     val variableSlot = root.createVariable(slotName, variableName)
     concept.with(variableSlot)
     val matchers = matchAll(
-        listOf(
-        matchPrepIn(preps.map { it.name }),
-        matcher
+        listOf(matchPrepIn(preps), matcher)
     )
-    )
-    val demon = PrepDemon(matchers, SearchDirection.After, root.wordContext) {
+    val demon = PrepDemon(matchers, direction, root.wordContext) {
         root.completeVariable(variableSlot, it, this.episodicConcept)
     }
     root.addDemon(demon)
@@ -88,7 +82,7 @@ For example: John had lunch with George
  - With word will mark George as being related to the With preposition
  - Lunch looks for a following Human related to a With preposition
  */
-class PrepositionWord(val preposition: Preposition, val matchConcepts: Set<String>): WordHandler(EntryWord(preposition.name.toLowerCase())) {
+class PrepositionWord(private val preposition: Preposition, private val matchConcepts: Set<String>): WordHandler(EntryWord(preposition.name.toLowerCase())) {
     override fun build(wordContext: WordContext): List<Demon> {
         wordContext.defHolder.value = buildPrep(preposition)
         wordContext.defHolder.addFlag(ParserFlags.Ignore)
@@ -112,44 +106,15 @@ class PrepositionWord(val preposition: Preposition, val matchConcepts: Set<Strin
 // Demons
 
 class PrepDemon(val matcher: ConceptMatcher, val direction: SearchDirection = SearchDirection.Before, wordContext: WordContext, val action: (ConceptHolder) -> Unit): Demon(wordContext) {
-    var found: ConceptHolder? = null
-
     override fun run() {
-        if (direction == SearchDirection.Before) {
-            (wordContext.wordIndex - 1 downTo 0).forEach {
-                found = updateFrom(found, wordContext, it)
-            }
-        } else {
-            (wordContext.wordIndex + 1 until wordContext.context.wordContexts.size).forEach {
-                found = updateFrom(found, wordContext, it)
+        // FIXME may need to stop on clause boundary
+        searchContext(matcher, matchNever(), direction = direction, wordContext = wordContext) {
+            action(it)
+            if (it != null) {
+                active = false
             }
         }
-        val foundConcept = found
-        if (foundConcept?.value != null) {
-            action(foundConcept)
-            println("Prep found concept=$foundConcept for match=$matcher")
-            active = false
-        }
     }
-
-    private fun updateFrom(existing: ConceptHolder?, wordContext: WordContext, index: Int): ConceptHolder? {
-        if (existing != null) {
-            return existing
-        }
-        val defHolder = wordContext.context.defHolderAtWordIndex(index)
-        val value = defHolder.value
-        // if (isConjunction(value)) {
-        //    return null
-        //}
-        if (matcher(value)) {
-            return defHolder
-        }
-        return null
-    }
-
-    // private fun isConjunction(concept: Concept?): Boolean {
-    //    return matchConceptByKind(ParserKinds.Conjunction.name)(concept)
-    //}
 
     override fun description(): String {
         return "PrepDemon $matcher"

@@ -45,7 +45,7 @@ fun buildGeneralRoleThemeLexicon(lexicon: Lexicon) {
     lexicon.addMapping(RoleThemeWord("waitress", RoleTheme.RoleThemeWaiter, Gender.Female))
 }
 
-class RoleThemeWord(word: String, val roleTheme: RoleTheme, val gender: Gender? = null): WordHandler(EntryWord(word)) {
+class RoleThemeWord(word: String, private val roleTheme: RoleTheme, val gender: Gender? = null): WordHandler(EntryWord(word)) {
     override fun build(wordContext: WordContext): List<Demon> =
         lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
             slot(RoleThemeFields.RoleTheme, roleTheme.name)

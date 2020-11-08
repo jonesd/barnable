@@ -101,7 +101,7 @@ class WordMorphologyBuilder(val root: String) {
 
     // 1. Used to form adjectives from nouns, the adjectives having the sense of "like or characteristic of what is
     //      denoted by the noun".
-    //      [friendly, bloomly]
+    //      [friendly, ...]
     // 2. Used to form adjectives from nouns specifying time intervals, the adjectives having the sense of "occurring at
     //      such intervals".
     //      [monthly, daily]

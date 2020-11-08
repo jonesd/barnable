@@ -62,6 +62,6 @@ class PrepositionTest {
         assertNull(lunch.value(MopMealFields.EATER_B))
 
         val book = textProcessor.workingMemory.concepts[1]
-        assertEquals("book", book.valueName(CoreFields.Name))
+        assertEquals(PhysicalObjects.Book.title, book.valueName(CoreFields.Name))
     }
 }

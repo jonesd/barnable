@@ -52,7 +52,7 @@ class SuffixSDemon(wordContext: WordContext): Demon(wordContext) {
     override fun run() {
         val def = wordContext.def()
         if (def != null && def.value(GroupFields.GroupInstances) == null) {
-            def.value(GroupFields.GroupInstances, Concept(GroupConcept.`*multiple*`.name))
+            def.value(GroupFields.GroupInstances, Concept(GroupConcept.MultipleGroup.name))
             active = false
         }
     }

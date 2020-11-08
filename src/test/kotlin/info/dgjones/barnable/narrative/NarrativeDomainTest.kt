@@ -114,7 +114,7 @@ class NarrativeDomainTest {
         assertEquals(Acts.MTRANS.name, told.name)
         assertEquals("John", told.value(ActFields.Actor)?.valueName(HumanFields.FirstName))
         assertEquals("Bill", told.value(ActFields.To)?.valueName(HumanFields.FirstName))
-        assertEquals("S-Hunger", told.valueName(ActFields.Thing))
+        assertEquals(SatisfactionGoal.HungerSatisfactionGoal.name, told.valueName(ActFields.Thing))
 
     }
 

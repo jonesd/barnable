@@ -46,7 +46,7 @@ class SuffixTest {
         val quantity = textProcessor.workingMemory.concepts[0]
         assertEquals(QuantityConcept.Quantity.name, quantity.name)
 
-        assertEquals(GroupConcept.`*multiple*`.name, quantity.valueName(GroupFields.GroupInstances))
+        assertEquals(GroupConcept.MultipleGroup.name, quantity.valueName(GroupFields.GroupInstances))
     }
 
     //FIXME ING test

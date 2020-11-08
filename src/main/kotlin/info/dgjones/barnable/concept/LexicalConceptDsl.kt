@@ -26,7 +26,7 @@ import info.dgjones.barnable.parser.*
 /* DSL to help build Concept as part of a word sense.
 It also triggers demons to populate the concept slots.
  */
-class LexicalRootBuilder(val wordContext: WordContext, val headName: String) {
+class LexicalRootBuilder(val wordContext: WordContext, private val headName: String) {
     val root = LexicalConceptBuilder(this, headName)
 
     val demons = mutableListOf<Demon>()
@@ -137,7 +137,7 @@ class LexicalConceptBuilder(val root: LexicalRootBuilder, conceptName: String) {
     fun expectHead(slotName: String, variableName: String? = null, headValue: String, direction: SearchDirection = SearchDirection.After) {
         expectHead(slotName, variableName, listOf(headValue), direction)
     }
-    fun expectHead(slotName: String, variableName: String? = null, headValues: List<String>, direction: SearchDirection = SearchDirection.After) {
+    private fun expectHead(slotName: String, variableName: String? = null, headValues: List<String>, direction: SearchDirection = SearchDirection.After) {
         val variableSlot = root.createVariable(slotName, variableName)
         concept.with(variableSlot)
         val demon = ExpectDemon(matchConceptByHead(headValues), direction, root.wordContext) {

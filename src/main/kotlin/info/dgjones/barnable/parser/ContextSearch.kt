@@ -26,9 +26,11 @@ enum class SearchDirection {
     Before
 }
 
-/* Fundamental search function to navigate the sentence for concepts or words. If a match is found, then the action is called with the result */
+/*
+Fundamental search function to navigate the sentence for concepts or words.
+If a match is found, then the action is called with the result
+*/
 fun searchContext(matcher: ConceptMatcher, abortSearch: ConceptMatcher = matchNever(), matchPreviousWord: String? = null, direction: SearchDirection = SearchDirection.Before, wordContext: WordContext, distance: Int? = null, action: (ConceptHolder) -> Unit) {
-    var index = wordContext.wordIndex
     var found: ConceptHolder? = null
 
     fun isMatchWithSentenceWord(index: Int): Boolean {

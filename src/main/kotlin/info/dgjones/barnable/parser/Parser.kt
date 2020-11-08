@@ -37,19 +37,19 @@ fun runTextProcess(text: String, lexicon: Lexicon = buildInDepthUnderstandingLex
         return textProcessor
 }
 
-class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
+class TextProcessor(private val textModel: TextModel, val lexicon: Lexicon) {
     val workingMemory = WorkingMemory()
     val episodicMemory = EpisodicMemory()
-    var agenda = Agenda()
-    var qaMode = false
-    var qaMemory = WorkingMemory()
+    private var agenda = Agenda()
+    private var qaMode = false
+    private var qaMemory = WorkingMemory()
 
     fun runProcessor(): WorkingMemory {
         textModel.paragraphs.forEach { processParagraph(it) }
         return workingMemory
     }
 
-    fun processParagraph(paragraphModel: TextParagraph) {
+    private fun processParagraph(paragraphModel: TextParagraph) {
         paragraphModel.sentences.forEach { processSentence(it) }
         endParagraph()
     }
@@ -60,7 +60,7 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
         workingMemory.charactersRecent.clear()
     }
 
-    fun processSentence(sentence: TextSentence) {
+    private fun processSentence(sentence: TextSentence) {
         agenda = Agenda()
         val context = SentenceContext(sentence, workingMemory, episodicMemory, qaMode)
         println(sentence.text.toUpperCase())
@@ -146,9 +146,9 @@ class TextProcessor(val textModel: TextModel, val lexicon: Lexicon) {
 /* Decide which one of the wordHandlers is going to be run. Use disambiguation demons associated with each wordHandler
  to resolve which one. The first wordHandler to resolve all of their disambiguation demons wins.
  */
-class DisambiguationHandler(val wordContext: WordContext, val lexicalOptions: List<LexicalItem>, val agenda: Agenda) {
-    var disambiguationsByWordHandler = mutableMapOf<LexicalItem, MutableList<Demon>>()
-    var resolvedTo: LexicalItem? = null
+class DisambiguationHandler(val wordContext: WordContext, private val lexicalOptions: List<LexicalItem>, private val agenda: Agenda) {
+    private var disambiguationsByWordHandler = mutableMapOf<LexicalItem, MutableList<Demon>>()
+    private var resolvedTo: LexicalItem? = null
 
     fun startDisambiguations() {
         lexicalOptions.forEach { lexicalItem ->
@@ -220,7 +220,7 @@ class DisambiguationHandler(val wordContext: WordContext, val lexicalOptions: Li
 }
 
 data class WordContext(val wordIndex: Int, val word: String, val defHolder: ConceptHolder, val context: SentenceContext) {
-    var totalDemons = 0
+    private var totalDemons = 0
 
     fun previousWord() =
         if (wordIndex > 0) context.wordContexts[wordIndex - 1].word else null
@@ -262,8 +262,8 @@ class SentenceContext(val sentence: TextSentence, val workingMemory: WorkingMemo
 }
 
 class WorkingMemory {
-    var totalConceptHolders = 0
-    var totalVariables = 0
+    private var totalConceptHolders = 0
+    private var totalVariables = 0
     val concepts = mutableListOf<Concept>()
 
     val charactersRecent = mutableListOf<Concept>()
@@ -326,8 +326,8 @@ open class WordHandler(val word: EntryWord) {
 }
 
 open class EntryWord(val word: String, val expression: List<String> = listOf(word), val noSuffix: Boolean = false) {
-    val pastWords = mutableListOf<String>()
-    val extras = mutableListOf<String>()
+    private val pastWords = mutableListOf<String>()
+    private val extras = mutableListOf<String>()
 
     fun entries() = listOf(listOf(word), pastWords, extras).flatten()
 
@@ -342,9 +342,9 @@ open class EntryWord(val word: String, val expression: List<String> = listOf(wor
 }
 
 open class Demon(val wordContext: WordContext) {
-    val demonIndex = wordContext.nextDemonIndex()
+    private val demonIndex = wordContext.nextDemonIndex()
     var active = true
-    var children = mutableListOf<Demon>()
+    private var children = mutableListOf<Demon>()
 
     open fun run() {
         // Without an implementation - just deactivate

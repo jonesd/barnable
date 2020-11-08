@@ -30,7 +30,7 @@ sense is appropriate.
 
 See: InDepth p180
  */
-open class DisambiguationDemon(val disambiguationHandler: DisambiguationHandler, wordContext: WordContext): Demon(wordContext) {
+open class DisambiguationDemon(private val disambiguationHandler: DisambiguationHandler, wordContext: WordContext): Demon(wordContext) {
     fun disambiguationCompleted() {
         disambiguationHandler.disambiguationMatchCompleted(this)
         active = false
@@ -48,7 +48,7 @@ class DisambiguateUsingWord(val word: String, val matcher: ConceptMatcher, val d
     }
 }
 
-class DisambiguateUsingMatch(val matcher: ConceptMatcher, val direction: SearchDirection = SearchDirection.After, val distance: Int? = null, wordContext: WordContext, disambiguationHandler: DisambiguationHandler): DisambiguationDemon(disambiguationHandler, wordContext) {
+class DisambiguateUsingMatch(val matcher: ConceptMatcher, val direction: SearchDirection = SearchDirection.After, private val distance: Int? = null, wordContext: WordContext, disambiguationHandler: DisambiguationHandler): DisambiguationDemon(disambiguationHandler, wordContext) {
     override fun run() {
         searchContext(matcher, direction = direction, distance = distance, wordContext = wordContext) {
             disambiguationCompleted()

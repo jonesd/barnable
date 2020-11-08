@@ -123,12 +123,7 @@ class WordPickUp: WordHandler(EntryWord("pick", listOf("pick", "up"))) {
         lexicalConcept(wordContext, Acts.GRASP.name) {
             expectActor(variableName = "actor")
             expectThing(variableName = "thing")
-            slot(ActFields.Instrument.fieldName, Acts.MOVE.name) {
-                varReference(ActFields.Actor.fieldName, "actor")
-                slot(ActFields.Thing.fieldName, BodyParts.Fingers.name)
-                varReference(ActFields.To.fieldName, "thing")
-                slot(CoreFields.Kind.fieldName, InDepthUnderstandingConcepts.Act.name)
-            }
+            instrumentByActorToThing(Acts.MOVE, BodyParts.Fingers.name)
             slot(CoreFields.Kind.fieldName, InDepthUnderstandingConcepts.Act.name)
         }.demons
 
@@ -142,12 +137,7 @@ class WordPour: WordHandler(EntryWord("pour")) {
         lexicalConcept(wordContext, Acts.GRASP.name) {
             expectActor(variableName = "actor")
             expectThing(variableName = "thing", matcher = matchConceptByKind(PhysicalObjectKind.Liquid.name))
-            slot(ActFields.Instrument.fieldName, Acts.MOVE.name) {
-                varReference(ActFields.Actor.fieldName, "actor")
-                slot(ActFields.Thing.fieldName, BodyParts.Fingers.name)
-                varReference(ActFields.To.fieldName, "thing")
-                slot(CoreFields.Kind.fieldName, InDepthUnderstandingConcepts.Act.name)
-            }
+            instrumentByActorToThing(Acts.MOVE, BodyParts.Fingers.name)
             slot(CoreFields.Kind.fieldName, InDepthUnderstandingConcepts.Act.name)
         }.demons
 }
@@ -179,11 +169,7 @@ class WordKnock: WordHandler(EntryWord("knock")) {
             expectPrep("to", preps = setOf(Preposition.On), matcher = matchConceptByHead(setOf(
                 InDepthUnderstandingConcepts.Human.name, InDepthUnderstandingConcepts.PhysicalObject.name))
             )
-            slot(ActFields.Instrument.fieldName, Acts.PROPEL.name) {
-                slot(ActFields.Actor.fieldName, Force.Gravity.name)
-                varReference(ActFields.Thing.fieldName, "thing")
-                slot(CoreFields.Kind.fieldName, InDepthUnderstandingConcepts.Act.name)
-            }
+            instrumentByActorToThing(Acts.MOVE, BodyParts.Fingers.name)
             slot(CoreFields.Kind.fieldName, InDepthUnderstandingConcepts.Act.name)
         }.demons
 }
@@ -267,7 +253,7 @@ class WordWalk: WordHandler(EntryWord("walk")) {
 
 class WordHungry: WordHandler(EntryWord("hungry")) {
     override fun build(wordContext: WordContext): List<Demon> =
-        lexicalConcept(wordContext, SatisfactionGoal.`S-Hunger`.name) {
+        lexicalConcept(wordContext, SatisfactionGoal.HungerSatisfactionGoal.name) {
             slot(CoreFields.Kind, InDepthUnderstandingConcepts.Goal.name)
         }.demons
 }

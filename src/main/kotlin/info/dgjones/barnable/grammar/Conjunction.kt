@@ -17,10 +17,7 @@
 
 package info.dgjones.barnable.grammar
 
-import info.dgjones.barnable.concept.Concept
-import info.dgjones.barnable.concept.ConceptMatcher
-import info.dgjones.barnable.concept.Slot
-import info.dgjones.barnable.concept.matchConceptByHead
+import info.dgjones.barnable.concept.*
 import info.dgjones.barnable.parser.*
 
 
@@ -34,7 +31,7 @@ fun withConjunctionObj(concept: Concept, conjunction: Concept) {
 
 fun buildConjunction(conjunction: String): Concept {
     return Concept("conjunction")
-        .with(Slot("is", Concept(conjunction)))
+        .with(Slot(CoreFields.Is, Concept(conjunction)))
 }
 
 fun matchConjunction(): ConceptMatcher {

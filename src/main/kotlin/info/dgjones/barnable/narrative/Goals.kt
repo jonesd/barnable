@@ -18,28 +18,28 @@
 package info.dgjones.barnable.narrative
 
 enum class SatisfactionGoal {
-    `S-Sex`,
-    `S-Hunger`,
-    `S-Thirst`
+    SexSatisfactionGoal,
+    HungerSatisfactionGoal,
+    ThirstSatisfactionGoal
 }
 enum class DeltaGoal {
-    `D-Know`,
-    `D-Proximity`,
-    `D-ControlSomeone`,
-    `D-ControlSomething`
+    KnowDeltaGoal,
+    ProximityDeltaGoal,
+    ControlSomeoneDeltaGoal,
+    ControlSomethingDeltaGoal
 }
 enum class EntertainmentGoal {
-    `E-Company`,
-    `E-Travel`,
-    `E-Exercise`
+    CompanyEntertainmentGoal,
+    TravelEntertainmentGoal,
+    ExerciseEntertainmentGoal
 }
 enum class AchievementGoal {
-    `A-Good-Job`,
-    `A-Skill`
+    GoodJobAchievementGoal,
+    SkillAchievementGoal
 }
 enum class PreservationGoal {
-    `P-Health`,
-    `P-Comfort`,
-    `P-Appearance`,
-    `P-Finances`
+    HealthPreservationGoal,
+    ComfortPreservationGoal,
+    AppearancePreservationGoal,
+    FinancesPreservationGoal
 }

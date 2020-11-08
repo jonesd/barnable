@@ -26,7 +26,7 @@ import info.dgjones.barnable.episodic.EpisodicMemory
 import info.dgjones.barnable.parser.TextProcessor
 
 class QuestionProcessor(val textProcessor: TextProcessor) {
-    val answerGenerator = AnswerGenerator()
+    private val answerGenerator = AnswerGenerator()
 
     fun question(questionModel: TextModel): QuestionProcessorResult {
         // FIXME can we not share access to episodic memory (or get copy)
@@ -37,19 +37,16 @@ class QuestionProcessor(val textProcessor: TextProcessor) {
         return QuestionProcessorResult(sentenceResult, answer)
     }
 
-    fun generateAnswer(workingConcepts: List<Concept>, episodicMemory: EpisodicMemory): String {
+    private fun generateAnswer(workingConcepts: List<Concept>, episodicMemory: EpisodicMemory): String {
         if (workingConcepts.isNotEmpty() && workingConcepts[0].name == "WhoAnswer") {
             return generateWhoAnswer(workingConcepts[0], episodicMemory)
         }
         return "FIXME Do not know how to handle result"
     }
 
-    fun generateWhoAnswer(whoQuestion: Concept, episodicMemory: EpisodicMemory): String {
+    private fun generateWhoAnswer(whoQuestion: Concept, episodicMemory: EpisodicMemory): String {
         val specifiedCharacter = whoQuestion.value("actor")
-        val event = whoQuestion.value("act")
-        if (event == null) {
-            return "ERROR: Could not understand question"
-        }
+        val event = whoQuestion.value("act") ?: return "ERROR: Could not understand question"
         val humans = event.find(matchConceptByHead(InDepthUnderstandingConcepts.Human.name))
         val whoMatches = humans.filter { it.valueName(CoreFields.Instance) != specifiedCharacter?.valueName(CoreFields.Instance) }
         return if (whoMatches.isNotEmpty()) answerGenerator.generateHumanList(whoMatches) else "No one"

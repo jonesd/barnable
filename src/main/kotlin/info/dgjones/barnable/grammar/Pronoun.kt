@@ -56,7 +56,7 @@ class WordPronoun(word: String, val gender: Gender, val case: Case): WordHandler
         }.demons
 }
 
-class PronounWord(word: String, val genderMatch: Gender): WordHandler(EntryWord(word)) {
+class PronounWord(word: String, private val genderMatch: Gender): WordHandler(EntryWord(word)) {
     override fun build(wordContext: WordContext): List<Demon> {
         // FIXME partial implementation - also why not use demon
         wordContext.defHolder.addFlag(ParserFlags.Ignore)

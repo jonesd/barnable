@@ -20,7 +20,7 @@ package info.dgjones.barnable.domain.general
 import info.dgjones.barnable.concept.Fields
 
 enum class GroupConcept {
-    `*multiple*`
+    MultipleGroup
 }
 
 enum class GroupFields(override val fieldName: String): Fields {
