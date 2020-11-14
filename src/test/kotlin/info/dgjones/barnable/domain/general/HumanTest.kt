@@ -60,4 +60,5 @@ class HumanTest {
         Assertions.assertEquals(Gender.Male.name, human.valueName(HumanFields.Gender))
         Assertions.assertEquals("Snicklefritz", human.valueName(HumanFields.LastName))
     }
+
 }

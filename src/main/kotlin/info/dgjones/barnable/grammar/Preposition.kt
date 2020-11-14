@@ -107,7 +107,6 @@ class PrepositionWord(private val preposition: Preposition, private val matchCon
 
 class PrepDemon(val matcher: ConceptMatcher, val direction: SearchDirection = SearchDirection.Before, wordContext: WordContext, val action: (ConceptHolder) -> Unit): Demon(wordContext) {
     override fun run() {
-        // FIXME may need to stop on clause boundary
         searchContext(matcher, matchNever(), direction = direction, wordContext = wordContext) {
             action(it)
             if (it != null) {

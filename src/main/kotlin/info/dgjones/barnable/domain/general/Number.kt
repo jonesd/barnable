@@ -31,7 +31,6 @@ enum class NumberFields(override val fieldName: String): Fields {
 
 // Word Sense
 
-//FIXME introduce more flexible approach to quantity/numbers
 fun buildGeneralNumberLexicon(lexicon: Lexicon) {
     addNumber("one", 1, lexicon)
     addNumber("two", 2, lexicon)
@@ -53,8 +52,6 @@ fun buildGeneralNumberLexicon(lexicon: Lexicon) {
     addNumber("eighteen", 18, lexicon)
     addNumber("nineteen", 19, lexicon)
     addNumber("twenty", 20, lexicon)
-
-    // FIXME support "twenty one" etc....
 
     addNumber("dozen", 12, lexicon)
 }

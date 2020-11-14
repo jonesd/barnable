@@ -35,7 +35,6 @@ https://en.wiktionary.org/wiki/Appendix:Glossary#pronoun
  */
 
 fun buildGrammarPronounLexicon(lexicon: Lexicon) {
-    // FIXME not sure about these mappings...
     lexicon.addMapping(WordPronoun("hers", Gender.Female, Case.Possessive))
     lexicon.addMapping(WordPronoun("his", Gender.Male, Case.Possessive))
     lexicon.addMapping(WordPronoun("her", Gender.Female, Case.Possessive))

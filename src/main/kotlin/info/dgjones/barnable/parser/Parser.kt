@@ -71,7 +71,7 @@ class TextProcessor(private val textModel: TextModel, val lexicon: Lexicon) {
             val wordContext = WordContext(index, unitText, workingMemory.createDefHolder(), context)
             context.pushWord(wordContext)
             runWord(wordUnit, wordContext)
-            runDemons(context)
+            runDemons()
         }
         endSentence(context)
     }
@@ -128,7 +128,7 @@ class TextProcessor(private val textModel: TextModel, val lexicon: Lexicon) {
     }
 
     // Run each active demon. Repeat again if any were fired
-    private fun runDemons(context: SentenceContext) {
+    private fun runDemons() {
         do {
             var fired = false
             // Use most recently recreated first
@@ -162,7 +162,6 @@ class DisambiguationHandler(val wordContext: WordContext, private val lexicalOpt
                 resolveTo(noDisambiguationNeeded.first())
             }
             noDisambiguationNeeded.size > 1 -> {
-                // FIXME what to do? let them all work in parallel?
                 println("Disambiguation failed - multiple wordHandlers do not need disambiguation $noDisambiguationNeeded")
             }
             else -> {
@@ -194,7 +193,6 @@ class DisambiguationHandler(val wordContext: WordContext, private val lexicalOpt
     }
 
     // Currently build a suffix demon for each suffix of the expression
-    // FIXME should we remove duplicates?
     private fun buildSuffixDemons(lexicalItem: LexicalItem) =
         lexicalItem.morphologies.map { it.suffix }.mapNotNull { buildSuffixDemon(it, wordContext) }
 
@@ -235,11 +233,6 @@ data class WordContext(val wordIndex: Int, val word: String, val defHolder: Conc
 }
 
 class SentenceContext(val sentence: TextSentence, val workingMemory: WorkingMemory, val episodicMemory: EpisodicMemory, val qaMode: Boolean = false) {
-    //var currentWord: String = ""
-    //var nextWord: String = ""
-    //var previousWord: String = ""
-    //var currentWordIndex = -1;
-    // FIXME var currentDemon: Demon? = null
     var mostRecentObject: Concept? = null
     var mostRecentCharacter: Concept? = null
     var localCharacter: Concept? = null
@@ -247,10 +240,6 @@ class SentenceContext(val sentence: TextSentence, val workingMemory: WorkingMemo
 
     fun pushWord(wordContext: WordContext) {
         wordContexts.add(wordContext)
-        //currentWord = wordContext.word
-        //currentWordIndex += 1
-        //previousWord = if (currentWordIndex > 0) sentence.elements[currentWordIndex - 1].token.toLowerCase() else ""
-        //nextWord = if (currentWordIndex < sentence.elements.size - 1) sentence.elements[currentWordIndex + 1].token.toLowerCase() else ""
     }
 
     fun sentenceWordAtWordIndex(wordIndex: Int): String {

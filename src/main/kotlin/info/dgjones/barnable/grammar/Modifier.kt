@@ -70,7 +70,6 @@ class ModifierWord(word: String, val field: Fields, val value: String = word): W
                 return "ModifierWord $word"
             }
         }
-        //FIXME list of kinds is not complete
         val thingDemon = ExpectDemon(matchConceptByHead(listOf(InDepthUnderstandingConcepts.Human.name, InDepthUnderstandingConcepts.PhysicalObject.name)), SearchDirection.After, wordContext) {
             demon.thingHolder = it
         }

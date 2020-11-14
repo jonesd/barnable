@@ -38,8 +38,6 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     lexicon.addMapping(WordWas())
 
     lexicon.addMapping(WordTell())
-    // FIXME not sure whether should ignore that - its a subordinate conjunction and should link
-    // the Mtrans from "told" to the Ingest of "eats"
     lexicon.addMapping(WordIgnore(EntryWord("that")))
     lexicon.addMapping(WordEats())
 
@@ -63,10 +61,6 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
 
     // Disambiguate
     lexicon.addMapping(WordMeasureObject())
-
-    // FIXME lexicon.addMapping(WordWas())
-
-    lexicon.addMapping(WordAnother())
 
     // FIXME only for QA
     lexicon.addMapping(WordWho())
@@ -95,9 +89,6 @@ enum class BodyParts {
 enum class Force {
     Gravity
 }
-
-// FIXME how to define this? force
-val gravity = Concept("gravity")
 
 class WordHome: WordHandler(EntryWord("home")) {
     override fun build(wordContext: WordContext): List<Demon> =
@@ -258,18 +249,16 @@ class WordHungry: WordHandler(EntryWord("hungry")) {
         }.demons
 }
 
-// InDepth
 class WordLunch: WordHandler(EntryWord("lunch")) {
     override fun build(wordContext: WordContext): List<Demon> =
         lexicalConcept(wordContext, MopMeal.MopMeal.name) {
             expectHead(MopMealFields.EATER_A.fieldName, headValue = "Human", direction = SearchDirection.Before)
             expectPrep(MopMealFields.EATER_B.fieldName, preps = listOf(Preposition.With), matcher= matchConceptByHead(InDepthUnderstandingConcepts.Human.name))
-            slot(CoreFields.Event, MopMeal.EventEatMeal.name) // FIXME find associated event
+            slot(CoreFields.Event, MopMeal.EventEatMeal.name)
             checkMop(CoreFields.Instance.fieldName)
         }.demons
 }
 
-//FIXME differentiate between eat food vs eat meal?
 class WordEats: WordHandler(EntryWord("eat")) {
     override fun build(wordContext: WordContext): List<Demon> =
         lexicalConcept(wordContext, Acts.INGEST.name) {
@@ -294,16 +283,6 @@ class WordMeasureObject: WordHandler(EntryWord("measure")) {
             DisambiguateUsingMatch(matchConceptByHead(InDepthUnderstandingConcepts.PhysicalObject.name), SearchDirection.After, null, wordContext, disambiguationHandler)
         )
     }
-}
-
-// FIXME not sure what this is?
-class WordMan(word: String): WordHandler(EntryWord(word)) {
-    override fun build(wordContext: WordContext): List<Demon> =
-        lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
-            slot(HumanFields.FirstName, "")
-            slot(HumanFields.LastName, "")
-            slot(HumanFields.Gender, Gender.Male.name)
-        }.demons
 }
 
 /*
@@ -356,19 +335,4 @@ class WordWas : WordHandler(EntryWord("was")) {
         }
         return listOf(wasDisambiguation)
     }
-}
-
-// InDepth p150/5.4, p304
-class WordAnother: WordHandler(EntryWord("another")) {
-    //FIXME implement this?
-    override fun build(wordContext: WordContext): List<Demon> =
-        lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
-            slot(HumanFields.Gender, Gender.Female.name)
-            slot(Relationships.Name, Marriage.Concept.fieldName) {
-                possessiveRef(Marriage.Husband, gender = Gender.Male)
-                nextChar(Marriage.Wife.fieldName, relRole = "Wife")
-                checkRelationship(CoreFields.Instance, waitForSlots = listOf("husband", "wife"))
-            }
-            innerInstance(CoreFields.Instance, observeSlot = "wife")
-        }.demons
 }

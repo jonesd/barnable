@@ -22,13 +22,6 @@ import info.dgjones.barnable.domain.general.Gender
 import info.dgjones.barnable.domain.general.buildHuman
 import info.dgjones.barnable.parser.*
 
-
-//class WordWho: WordHandler(EntryWord("who")) {
-//    override fun build(wordContext: WordContext): List<Demon> {
-//        return listOf(WhoDemon(wordContext))
-//    }
-//}
-
 //FIXME only tries to handle simple ConceptCompletion involving a character and action
 class WordWho: WordHandler(EntryWord("who")) {
     override fun build(wordContext: WordContext): List<Demon> =

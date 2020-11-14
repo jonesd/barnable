@@ -29,8 +29,6 @@ class QuestionProcessor(val textProcessor: TextProcessor) {
     private val answerGenerator = AnswerGenerator()
 
     fun question(questionModel: TextModel): QuestionProcessorResult {
-        // FIXME can we not share access to episodic memory (or get copy)
-
         val sentenceResult = textProcessor.processQuestion(questionModel.initialSentence())
 
         val answer = generateAnswer(sentenceResult, textProcessor.episodicMemory)

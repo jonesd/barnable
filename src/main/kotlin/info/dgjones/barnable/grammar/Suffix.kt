@@ -29,7 +29,6 @@ fun buildSuffixDemon(suffix: String, wordContext: WordContext): Demon? {
         "ed" -> SuffixEdDemon(wordContext)
         "s" -> SuffixSDemon(wordContext)
         "ing" -> SuffixIngDemon(wordContext)
-        //FIXME implement other suffixes....
         else -> null
     }
 }

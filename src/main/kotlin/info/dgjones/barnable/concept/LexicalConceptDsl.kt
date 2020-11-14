@@ -74,9 +74,7 @@ class LexicalRootBuilder(val wordContext: WordContext, private val headName: Str
         }
         completedSlots.addAll(completeVariableSlots)
         variableSlots.removeAll(completeVariableSlots)
-        //if (variableSlots.isEmpty()) {
-            completedConceptHolders.forEach { it.addFlag(ParserFlags.Inside)  }
-        //}
+        completedConceptHolders.forEach { it.addFlag(ParserFlags.Inside)  }
     }
     fun disambiguationResult(result: Boolean) {
         this.totalSuccessfulDisambiguations += 1
@@ -192,10 +190,7 @@ class LexicalConceptBuilder(val root: LexicalRootBuilder, conceptName: String) {
                 root.wordContext.context.workingMemory.markAsRecentCharacter(concept)
             } else {
                 println("Creating character ${concept.valueName(HumanFields.FirstName)} in EP memory")
-                val human = buildHuman(concept.valueName(HumanFields.FirstName), concept.valueName(HumanFields.LastName), concept.valueName(HumanFields.Gender))
-                // val saveCharacterDemon = SaveCharacterDemon(root.wordContext)
                 root.wordContext.context.workingMemory.markAsRecentCharacter(concept)
-                //root.wordContext.context.episodicMemory.addConcept(human)
             }
         }
         root.addDemon(checkCharacterDemon)
