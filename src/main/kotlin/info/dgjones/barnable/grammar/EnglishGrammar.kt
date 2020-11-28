@@ -26,6 +26,9 @@ enum class GrammarFields(override val fieldName: String): Fields {
     Voice("voice")
 }
 
+enum class Clause {
+    Boundary
+}
 enum class ParserKinds {
     Conjunction
 }

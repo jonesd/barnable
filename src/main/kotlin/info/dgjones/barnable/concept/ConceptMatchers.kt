@@ -17,16 +17,31 @@
 
 package info.dgjones.barnable.concept
 
+import info.dgjones.barnable.domain.general.GroupFields
 import info.dgjones.barnable.grammar.Case
 
 typealias ConceptMatcher = (Concept?) -> Boolean
 
+fun matchGroupInstanceType(kind: String): ConceptMatcher {
+    return matchConceptValueName(GroupFields.ElementsType, kind)
+}
+fun matchGroupInstanceType(kinds: Collection<String>): ConceptMatcher {
+    return matchConceptValueName(GroupFields.ElementsType.fieldName, kinds)
+}
 fun matchConceptByHead(kind: String): ConceptMatcher {
     return { c -> c?.name == kind }
 }
 
 fun matchConceptByHead(kinds: Collection<String>): ConceptMatcher {
     return { c -> kinds.contains(c?.name)}
+}
+
+fun matchConceptByHeadOrGroup(kind: String): ConceptMatcher {
+    return matchAny(listOf(matchConceptByHead(kind), matchGroupInstanceType(kind)))
+}
+
+fun matchConceptByHeadOrGroup(kinds: Collection<String>): ConceptMatcher {
+    return matchAny(listOf(matchConceptByHead(kinds), matchGroupInstanceType(kinds)))
 }
 
 fun matchConceptByKind(kind: String): ConceptMatcher {
@@ -51,6 +66,10 @@ fun matchConceptValueName(slot: Fields, match: String): ConceptMatcher {
 
 fun matchConceptValueName(slot: String, match: String): ConceptMatcher {
     return { c -> c?.valueName(slot) == match }
+}
+
+fun matchConceptValueName(slot: String, matches: Collection<String>): ConceptMatcher {
+    return { c -> matches.contains(c?.valueName(slot)) }
 }
 
 fun matchAny(matchers: List<ConceptMatcher>): ConceptMatcher {

@@ -223,7 +223,7 @@ class WordGo: WordHandler(EntryWord("go").past("went")) {
     override fun build(wordContext: WordContext): List<Demon> =
         lexicalConcept(wordContext, Acts.PTRANS.name) {
             expectActor()
-            expectHead(ActFields.To.fieldName, headValue = InDepthUnderstandingConcepts.Location.name)
+            expectHead(ActFields.To.fieldName, headValues = listOf(InDepthUnderstandingConcepts.Location.name, InDepthUnderstandingConcepts.Setting.name))
             slot(CoreFields.Kind, InDepthUnderstandingConcepts.Act.name)
         }.demons
 }
@@ -232,7 +232,7 @@ class WordWalk: WordHandler(EntryWord("walk")) {
     override fun build(wordContext: WordContext): List<Demon> =
         lexicalConcept(wordContext, Acts.PTRANS.name) {
             expectActor(variableName = "actor")
-            expectHead(ActFields.To.fieldName, headValue = InDepthUnderstandingConcepts.Location.name)
+            expectHead(ActFields.To.fieldName, headValues = listOf(InDepthUnderstandingConcepts.Location.name, InDepthUnderstandingConcepts.Setting.name))
             slot(ActFields.Instrument.fieldName, Acts.MOVE.name) {
                 varReference(ActFields.Actor.fieldName, "actor")
                 slot(ActFields.Thing.fieldName, BodyParts.Legs.name)

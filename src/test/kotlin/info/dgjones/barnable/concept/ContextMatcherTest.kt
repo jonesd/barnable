@@ -17,6 +17,7 @@
 
 package info.dgjones.barnable.concept
 
+import info.dgjones.barnable.domain.general.*
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -165,5 +166,26 @@ class MatchNeverTest {
     @Test
     fun `Not even for null`() {
         assertFalse(matchNever()(null))
+    }
+}
+
+class MatchConceptByHeadOrGroup {
+    @Test
+    fun `Matches Group instance head`() {
+        val humans = buildGroup(listOf(buildHuman("george"), buildHuman("fred")))
+        assertTrue(matchConceptByHeadOrGroup(HumanConcept.Human.name)(humans))
+    }
+    @Test
+    fun `MisMatches Group instance head`() {
+        val humans = buildGroup(listOf(buildHuman("george"), buildHuman("fred")))
+        assertFalse(matchConceptByHeadOrGroup(PhysicalObjectKind.PhysicalObject.name)(humans))
+    }
+    @Test
+    fun `Can match by head name`() {
+        assertTrue(matchConceptByHeadOrGroup("testHead")(Concept("testHead")))
+    }
+    @Test
+    fun `Match by head needs full match`() {
+        assertFalse(matchConceptByHeadOrGroup("testHead")(Concept("otherHead")))
     }
 }

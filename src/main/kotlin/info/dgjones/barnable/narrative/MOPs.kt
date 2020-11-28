@@ -23,6 +23,10 @@ import info.dgjones.barnable.concept.Fields
 import info.dgjones.barnable.episodic.EpisodicConcept
 import info.dgjones.barnable.episodic.EpisodicMemory
 
+enum class MopFields(override val fieldName: String): Fields {
+    MOP("mop")
+}
+
 enum class MopService {
     MopService
 }

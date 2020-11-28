@@ -16,13 +16,24 @@
  */
 
 package info.dgjones.barnable.domain.general
-
-import info.dgjones.barnable.concept.Fields
+import info.dgjones.barnable.concept.*
 
 enum class GroupConcept {
+    Group,
     MultipleGroup
 }
 
 enum class GroupFields(override val fieldName: String): Fields {
-    GroupInstances("group-instances")
+    GroupInstances("groupInstances"),
+    Elements("elements"),
+    ElementsType("elementsType")
+}
+
+fun buildGroup(elements: List<Concept>): Concept {
+    val root = Concept(GroupConcept.Group.name)
+    val elementsField = Concept("values")
+    root.with(Slot(GroupFields.Elements, elementsField))
+    elements.forEachIndexed { index, element -> elementsField.with(Slot(index.toString(), element))}
+    elements.firstOrNull()?.let { root.value(GroupFields.ElementsType, extractConceptHead.transform(it)) }
+    return root
 }

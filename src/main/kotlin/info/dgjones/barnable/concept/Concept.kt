@@ -18,7 +18,8 @@
 package info.dgjones.barnable.concept
 
 data class Concept(val name: String) {
-    private val slots = mutableMapOf<String, Slot>()
+    // Use linked map to preserve addition order - allowing simple "list" order
+    private val slots = linkedMapOf<String, Slot>()
 
     companion object {
         const val VARIABLE_PREFIX = "*VAR."
@@ -59,7 +60,6 @@ data class Concept(val name: String) {
     }
 
     fun with(slot: Slot): Concept {
-        // FIXME what if slot is already present?
         slots[slot.name] = slot
         return this
     }
@@ -122,6 +122,14 @@ data class Concept(val name: String) {
     fun printIndented(indent: Int = 1): String {
         val indentString = " ".repeat(indent * 2)
         return "($name ${slots.values.map{it.printIndented(indent + 1)}.joinToString(separator = "\n$indentString") { it }})"
+    }
+
+    fun with(child: Concept?) {
+        with(Slot(slots.size.toString(), child))
+    }
+
+    fun children(): List<Concept?> {
+        return slots.map { (name, slot) -> slot.value }.toList()
     }
 }
 

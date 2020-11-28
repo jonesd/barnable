@@ -18,6 +18,8 @@
 package info.dgjones.barnable.grammar
 
 import info.dgjones.barnable.concept.*
+import info.dgjones.barnable.domain.general.*
+import info.dgjones.barnable.narrative.InDepthUnderstandingConcepts
 import info.dgjones.barnable.parser.*
 
 
@@ -41,13 +43,56 @@ fun matchConjunction(): ConceptMatcher {
 // Word Senses
 
 fun buildGrammarConjunctionLexicon(lexicon: Lexicon) {
-    lexicon.addMapping(WordAnd())
+    lexicon.addMapping(WordAndBuildGroup())
+    lexicon.addMapping(WordComma())
 }
 
 class WordAnd: WordHandler(EntryWord("and")) {
     override fun build(wordContext: WordContext): List<Demon> {
-        // FIXME should be expanded upon
-        wordContext.defHolder.value = buildConjunction(Conjunction.And.name)
+        // Only handles grouper
+        wordContext.defHolder.value = Concept(GroupConcept.Group.name)
+        // wordContext.defHolder.value = buildConjunction(Conjunction.And.name)
+        return listOf(IgnoreDemon(wordContext))
+    }
+}
+
+/*
+Handle the scenario of "george and harold" producting a group of two persons
+ */
+class WordAndBuildGroup: WordHandler(EntryWord("and")) {
+    private val matchingHeads = listOf(InDepthUnderstandingConcepts.Human.name, InDepthUnderstandingConcepts.PhysicalObject.name)
+    override fun build(wordContext: WordContext): List<Demon> =
+        lexicalConcept(wordContext, GroupConcept.Group.name) {
+            slot(GroupFields.Elements, "values") {
+                expectHead("0", "exemplar", matchingHeads, markMatchIgnored = true, direction = SearchDirection.Before)
+                expectHead("1", null, matchingHeads, markMatchIgnored = true, direction = SearchDirection.After)
+            }
+            varReference(GroupFields.ElementsType.fieldName, "exemplar", extractConceptHead)
+        }.demons
+
+    override fun disambiguationDemons(wordContext: WordContext,disambiguationHandler: DisambiguationHandler): List<Demon> {
+        return listOf(
+            DisambiguateUsingMatch(
+                matchConceptByHead(matchingHeads),
+                SearchDirection.Before,
+                1,
+                wordContext,
+                disambiguationHandler
+            ),
+            DisambiguateUsingMatch(
+                matchConceptByHead(matchingHeads),
+                SearchDirection.After,
+                1,
+                wordContext,
+                disambiguationHandler
+            )
+        )
+    }
+}
+
+class WordComma: WordHandler(EntryWord(",")) {
+    override fun build(wordContext: WordContext): List<Demon> {
+        wordContext.defHolder.value = Concept(Clause.Boundary.name)
         return listOf(IgnoreDemon(wordContext))
     }
 }

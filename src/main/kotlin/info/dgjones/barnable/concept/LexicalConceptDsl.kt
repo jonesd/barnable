@@ -18,8 +18,8 @@
 package info.dgjones.barnable.concept
 
 import info.dgjones.barnable.domain.general.HumanFields
-import info.dgjones.barnable.domain.general.buildHuman
 import info.dgjones.barnable.episodic.EpisodicConcept
+import info.dgjones.barnable.narrative.ConceptAccessor
 import info.dgjones.barnable.narrative.MopMealFields
 import info.dgjones.barnable.parser.*
 
@@ -33,6 +33,7 @@ class LexicalRootBuilder(val wordContext: WordContext, private val headName: Str
     private val variableSlots = mutableListOf<Slot>()
     private val completedSlots = mutableListOf<Slot>()
     val completedConceptHolders = mutableListOf<ConceptHolder>()
+    private val variableExpressions = mutableMapOf<Slot, ConceptTransformer>()
     private val disambiguations = mutableListOf<Demon>()
     private var totalSuccessfulDisambiguations = 0
 
@@ -42,14 +43,15 @@ class LexicalRootBuilder(val wordContext: WordContext, private val headName: Str
 
     // FIXME shouldn't associate this state that lives on beyond build() to builder
     // should create new holder instead
-    fun createVariable(slotName: Fields, variableName: String? = null): Slot {
-        return createVariable(slotName.fieldName, variableName)
+    fun createVariable(slotName: Fields, variableName: String? = null, expression: ConceptTransformer? = null): Slot {
+        return createVariable(slotName.fieldName, variableName, expression)
     }
-    fun createVariable(slotName: String, variableName: String? = null): Slot {
+    fun createVariable(slotName: String, variableName: String? = null, expression: ConceptTransformer? = null): Slot {
         val nameOrNextVariableNumber = variableName ?: wordContext.context.workingMemory.nextVariableIndex().toString()
         val conceptVariable = createConceptVariable(nameOrNextVariableNumber)
         val slot = Slot(slotName, conceptVariable)
         variableSlots.add(slot)
+        expression?.let { variableExpressions[slot] = expression }
         return slot
     }
     fun completeVariable(variableSlot: Slot, value: Concept, wordContext: WordContext, episodicConcept: EpisodicConcept? = null) {
@@ -63,7 +65,7 @@ class LexicalRootBuilder(val wordContext: WordContext, private val headName: Str
         val completeVariableSlots = variableSlots.filter { it.value?.name == variableName }
         //FIXME can multiple demons update the same value here?
         completeVariableSlots.forEach {
-            it.value = valueHolder.value
+            it.value = evaluateExpression(it, valueHolder.value)
             // FIXME better way to triggered updating - spawn demon instead
             episodicConcept?.let { episodicConcept ->
                 // FIXME not sure about this qa hack?
@@ -75,6 +77,13 @@ class LexicalRootBuilder(val wordContext: WordContext, private val headName: Str
         completedSlots.addAll(completeVariableSlots)
         variableSlots.removeAll(completeVariableSlots)
         completedConceptHolders.forEach { it.addFlag(ParserFlags.Inside)  }
+    }
+    private fun evaluateExpression(slot: Slot, value: Concept?): Concept? {
+        if (value == null) {
+            return null
+        }
+        val conceptTransformer = variableExpressions[slot]
+        return if (conceptTransformer != null) conceptTransformer.transform(value) else value
     }
     fun disambiguationResult(result: Boolean) {
         this.totalSuccessfulDisambiguations += 1
@@ -132,14 +141,17 @@ class LexicalConceptBuilder(val root: LexicalRootBuilder, conceptName: String) {
     fun build(): Concept {
         return concept
     }
-    fun expectHead(slotName: String, variableName: String? = null, headValue: String, direction: SearchDirection = SearchDirection.After) {
-        expectHead(slotName, variableName, listOf(headValue), direction)
+    fun expectHead(slotName: String, variableName: String? = null, headValue: String, markMatchIgnored: Boolean = false, direction: SearchDirection = SearchDirection.After) {
+        expectHead(slotName, variableName, listOf(headValue), markMatchIgnored, direction)
     }
-    private fun expectHead(slotName: String, variableName: String? = null, headValues: List<String>, direction: SearchDirection = SearchDirection.After) {
+    fun expectHead(slotName: String, variableName: String? = null, headValues: List<String>, markMatchIgnored: Boolean = false, direction: SearchDirection = SearchDirection.After) {
         val variableSlot = root.createVariable(slotName, variableName)
         concept.with(variableSlot)
         val demon = ExpectDemon(matchConceptByHead(headValues), direction, root.wordContext) {
             root.completeVariable(variableSlot, it, this.episodicConcept)
+            if (markMatchIgnored) {
+                it.value = null
+            }
         }
         root.addDemon(demon)
     }
@@ -266,8 +278,8 @@ class LexicalConceptBuilder(val root: LexicalRootBuilder, conceptName: String) {
         root.addDemon(demon)
     }
 
-    fun varReference(slotName: String, variableName: String) {
-        val variableSlot = root.createVariable(slotName, variableName)
+    fun varReference(slotName: String, variableName: String, expression: ConceptTransformer? = null) {
+        val variableSlot = root.createVariable(slotName, variableName, expression)
         concept.with(variableSlot)
     }
 }

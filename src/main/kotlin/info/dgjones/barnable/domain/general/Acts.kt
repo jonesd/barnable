@@ -87,13 +87,14 @@ fun LexicalConceptBuilder.instrumentByActorToThing(instrumentAct: Acts, instrume
  */
 class ExpectActor(wordContext: WordContext, val action: (ConceptHolder) -> Unit): Demon(wordContext) {
     override fun run() {
-        val actorMatcher = matchConceptByHead(InDepthUnderstandingConcepts.Human.name)
+        val matchingValues = InDepthUnderstandingConcepts.Human.name
+        val actorMatcher = matchConceptByHeadOrGroup(matchingValues)
         val matcher = matchAny(listOf(
             matchConceptValueName(GrammarFields.Voice, Voice.Passive.name),
             actorMatcher
         ))
         searchContext(matcher, matchNever(), direction = SearchDirection.Before, wordContext = wordContext) {
-            if (it.value?.name == InDepthUnderstandingConcepts.Human.name) {
+            if (actorMatcher(it.value)) {
                 action(it)
                 active = false
             } else if (it.value?.valueName(GrammarFields.Voice) == Voice.Passive.name) {
