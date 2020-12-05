@@ -19,12 +19,11 @@ package info.dgjones.barnable.grammar
 
 import info.dgjones.barnable.concept.CoreFields
 import info.dgjones.barnable.domain.general.*
-import info.dgjones.barnable.narrative.MopMeal
-import info.dgjones.barnable.narrative.MopMealFields
+import info.dgjones.barnable.narrative.InDepthUnderstandingConcepts
 import info.dgjones.barnable.narrative.buildInDepthUnderstandingLexicon
 import info.dgjones.barnable.parser.runTextProcess
+import jdk.nashorn.internal.ir.annotations.Ignore
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -34,7 +33,47 @@ class ConjunctionTest {
     @Nested
     inner class BuildGroup {
         @Test
-        fun `Builds group with two humans`() {
+        fun `List of two humans`() {
+            val textProcessor = runTextProcess("Fred and George", lexicon)
+
+            assertEquals(1, textProcessor.workingMemory.concepts.size)
+            val group = textProcessor.workingMemory.concepts.first()
+            val actors = group.value(GroupFields.Elements)?.children()
+            assertEquals(2, actors?.size)
+            assertEquals("Fred", actors?.get(0)?.valueName(HumanFields.FirstName))
+            assertEquals("George", actors?.get(1)?.valueName(HumanFields.FirstName))
+            assertEquals(InDepthUnderstandingConcepts.Human.name, group.valueName(GroupFields.ElementsType))
+        }
+
+        @Test
+        fun `List of three humans`() {
+            val textProcessor = runTextProcess("Jane, Fred and George", lexicon)
+
+            assertEquals(1, textProcessor.workingMemory.concepts.size)
+            val group = textProcessor.workingMemory.concepts.first()
+            val actors = group.value(GroupFields.Elements)?.children()
+            assertEquals(3, actors?.size)
+            assertEquals("Jane", actors?.get(0)?.valueName(HumanFields.FirstName))
+            assertEquals("Fred", actors?.get(1)?.valueName(HumanFields.FirstName))
+            assertEquals("George", actors?.get(2)?.valueName(HumanFields.FirstName))
+            assertEquals(InDepthUnderstandingConcepts.Human.name, group.valueName(GroupFields.ElementsType))
+        }
+
+        @Test
+        fun `List of two physical objects`() {
+            val textProcessor = runTextProcess("ball and book", lexicon)
+
+            assertEquals(1, textProcessor.workingMemory.concepts.size)
+            val group = textProcessor.workingMemory.concepts.first()
+            val elements = group.value(GroupFields.Elements)?.children()
+            assertEquals(2, elements?.size)
+            assertEquals("ball", elements?.get(0)?.valueName(CoreFields.Name))
+            assertEquals("book", elements?.get(1)?.valueName(CoreFields.Name))
+            assertEquals(InDepthUnderstandingConcepts.PhysicalObject.name, group.valueName(GroupFields.ElementsType))
+        }
+
+        @Test
+        fun `Action with two human actors`() {
             val textProcessor = runTextProcess("Fred and George went to the restaurant.", lexicon)
 
             assertEquals(1, textProcessor.workingMemory.concepts.size)
@@ -45,12 +84,38 @@ class ConjunctionTest {
             assertEquals("Fred", actors?.get(0)?.valueName(HumanFields.FirstName))
             assertEquals("George", actors?.get(1)?.valueName(HumanFields.FirstName))
 
-            assertEquals("Setting", ptrans.valueName("to"));
-            assertEquals("restaurant", ptrans.value("to")?.valueName(CoreFields.Name));
-//            val group = ptrans.valueName(C)
-//            assertEquals(PhysicalObjectKind.PhysicalObject.name, concept.valueName(CoreFields.Kind))
-//            assertEquals("book", concept.valueName(CoreFields.Name))
-//            assertEquals("red", concept.valueName(ColourFields.Colour))
+            assertEquals(InDepthUnderstandingConcepts.Setting.name, ptrans.valueName(ActFields.To));
+            assertEquals("restaurant", ptrans.value(ActFields.To)?.valueName(CoreFields.Name));
+        }
+
+        @Test
+        fun `Action with two physical objects `() {
+            val textProcessor = runTextProcess("Fred picked up the ball and book and dropped them in the box.", lexicon)
+
+            assertEquals(1, textProcessor.workingMemory.concepts.size)
+            val ptrans = textProcessor.workingMemory.concepts.first()
+            assertEquals(GroupConcept.Group.name, ptrans.valueName(ActFields.Actor))
+            val actors = ptrans.value(ActFields.To)?.value(GroupFields.Elements)?.children()
+            assertEquals(2, actors?.size)
+            assertEquals("ball", actors?.get(0)?.valueName(CoreFields.Name))
+            assertEquals("book", actors?.get(1)?.valueName(CoreFields.Name))
+        }
+
+        @Test
+        fun `Action with three human actors`() {
+            val textProcessor = runTextProcess("Jane, Fred and George went to the restaurant.", lexicon)
+
+            assertEquals(1, textProcessor.workingMemory.concepts.size)
+            val ptrans = textProcessor.workingMemory.concepts.first()
+            assertEquals(GroupConcept.Group.name, ptrans.valueName(ActFields.Actor))
+            val actors = ptrans.value(ActFields.Actor)?.value(GroupFields.Elements)?.children()
+            assertEquals(3, actors?.size)
+            assertEquals("Jane", actors?.get(0)?.valueName(HumanFields.FirstName))
+            assertEquals("Fred", actors?.get(1)?.valueName(HumanFields.FirstName))
+            assertEquals("George", actors?.get(2)?.valueName(HumanFields.FirstName))
+
+            assertEquals(InDepthUnderstandingConcepts.Setting.name, ptrans.valueName(ActFields.To));
+            assertEquals("restaurant", ptrans.value(ActFields.To)?.valueName(CoreFields.Name));
         }
     }
 }

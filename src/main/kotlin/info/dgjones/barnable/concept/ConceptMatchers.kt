@@ -80,6 +80,10 @@ fun matchAll(matchers: List<ConceptMatcher>): ConceptMatcher {
     return { c -> matchers.all { it(c) }}
 }
 
+fun matchNot(matcher: ConceptMatcher): ConceptMatcher {
+    return { c -> !matcher(c)}
+}
+
 fun matchNever(): ConceptMatcher {
     return { _ -> false}
 }

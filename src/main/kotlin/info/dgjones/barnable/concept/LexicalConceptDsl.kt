@@ -34,6 +34,7 @@ class LexicalRootBuilder(val wordContext: WordContext, private val headName: Str
     private val completedSlots = mutableListOf<Slot>()
     val completedConceptHolders = mutableListOf<ConceptHolder>()
     private val variableExpressions = mutableMapOf<Slot, ConceptTransformer>()
+    val overwriteHolderWithMatchedVariable = mutableMapOf<String, Concept>()
     private val disambiguations = mutableListOf<Demon>()
     private var totalSuccessfulDisambiguations = 0
 
@@ -77,6 +78,9 @@ class LexicalRootBuilder(val wordContext: WordContext, private val headName: Str
         completedSlots.addAll(completeVariableSlots)
         variableSlots.removeAll(completeVariableSlots)
         completedConceptHolders.forEach { it.addFlag(ParserFlags.Inside)  }
+        overwriteHolderWithMatchedVariable[variableName]?.let {
+            valueHolder.value?.shareStateFrom(it)
+        }
     }
     private fun evaluateExpression(slot: Slot, value: Concept?): Concept? {
         if (value == null) {
@@ -281,6 +285,11 @@ class LexicalConceptBuilder(val root: LexicalRootBuilder, conceptName: String) {
     fun varReference(slotName: String, variableName: String, expression: ConceptTransformer? = null) {
         val variableSlot = root.createVariable(slotName, variableName, expression)
         concept.with(variableSlot)
+    }
+
+    fun replaceWordContextWithCurrent(variableName: String) {
+        val fullVariableName = createConceptVariable(variableName).name
+        root.overwriteHolderWithMatchedVariable[fullVariableName] = concept
     }
 }
 

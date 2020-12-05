@@ -17,10 +17,11 @@
 
 package info.dgjones.barnable.grammar
 
+import info.dgjones.barnable.concept.Concept
 import info.dgjones.barnable.parser.*
 
 fun buildGrammarPunctuationLexicon(lexicon: Lexicon) {
-    lexicon.addMapping(PunctuationComma())
+    // See Conjunction instead.... lexicon.addMapping(PunctuationComma())
     lexicon.addMapping(PunctuationPeriod())
     lexicon.addMapping(PunctuationExclamation())
     lexicon.addMapping(PunctuationQuestion())
@@ -28,10 +29,13 @@ fun buildGrammarPunctuationLexicon(lexicon: Lexicon) {
     lexicon.addMapping(PunctuationSemicolon())
 }
 
+/**
+ * Mark entry as a boundary
+ */
 class PunctuationComma: WordHandler(EntryWord(",", noSuffix = true)) {
     override fun build(wordContext: WordContext): List<Demon> {
-        println("NotYetImplemented: Punctuation $word.word")
-        return super.build(wordContext)
+        wordContext.defHolder.value = Concept(Clause.Boundary.name)
+        return listOf(IgnoreDemon(wordContext))
     }
 }
 

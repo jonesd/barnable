@@ -160,69 +160,6 @@ class ConceptTest {
             assertEquals("valueC", root.valueName("c"))
         }
     }
-}
-
-class SlotTest {
-    @Test
-    fun `create with field string and value`() {
-        val slot = Slot("someName", Concept("someValue"))
-        assertEquals("someName", slot.name)
-        assertEquals("someValue", slot.value?.name)
-    }
-    @Test
-    fun `create with fieldName and value`() {
-        val slot = Slot(CoreFields.Instance, Concept("someValue"))
-        assertEquals("instance", slot.name)
-        assertEquals("someValue", slot.value?.name)
-    }
-    @Nested
-    inner class CopySlotToAnotherConcept {
-        @Test
-        fun `copy slot to another concept as new slot`() {
-            val slot = Slot("someName", Concept("someValue"))
-            val bareConcept = Concept("bare")
-
-            // test
-            slot.copyValue(bareConcept)
-
-            assertEquals("someValue", bareConcept.valueName("someName"))
-        }
-
-        @Test
-        fun `overwrite slot value in another concept`() {
-            val slot = Slot("someName", Concept("someValue"))
-            val bareConcept = Concept("bare")
-                .value("someName", Concept("originalValue"))
-
-            // test
-            slot.copyValue(bareConcept)
-
-            assertEquals("someValue", bareConcept.valueName("someName"))
-        }
-    }
-    @Nested
-    inner class DuplicateResolved {
-        @Test
-        fun `Duplicate plain slot`() {
-            val source = Slot("someName", Concept("someValue"))
-
-            val duplicated = source.duplicateResolvedValue()
-
-            assertEquals("someName", duplicated.name)
-            assertEquals("someValue", duplicated.value?.name)
-            assertNotSame(duplicated.value, source.value)
-        }
-
-        @Test
-        fun `Duplicate preserves null concepts`() {
-            val source = Slot("someName", null)
-
-            val duplicated = source.duplicateResolvedValue()
-
-            assertEquals("someName", duplicated.name)
-            assertNull(duplicated.value)
-        }
-    }
 
     @Nested
     inner class KeyValue {
@@ -261,6 +198,134 @@ class SlotTest {
 
             val keyValue = root.selectKeyValue(listOf("b", "a"))
             assertEquals("root", keyValue)
+        }
+    }
+
+    @Nested
+    inner class ShareStateFrom {
+        @Test
+        fun `no-op when sharing from same concept`() {
+            var root = Concept("root")
+            val originalRoot = root
+            root.value("a", Concept("childA"))
+            root.value("b", Concept("childB"))
+
+            root.shareStateFrom(root)
+
+            assertSame(root, originalRoot)
+        }
+
+        @Test
+        fun `replace root name and childen with aliased values from another concept`() {
+            val root = Concept("root")
+                .value("a", Concept("valueA"))
+                .value("b", Concept("valueB"))
+            root.value("a")?.value("aa", Concept("valueAA"))
+
+            var replace = Concept("otherRoot")
+                .value("z", Concept("valueZ"))
+
+            val originalRoot = root
+
+            // test
+            root.shareStateFrom(replace)
+
+            // root node content replaced from otherRoot
+            assertSame(originalRoot, root)
+            assertNotSame(replace, root)
+            assertEquals("otherRoot", root.name)
+            // content matches replace
+            assertEquals("otherRoot", root.name)
+            assertEquals("valueZ", root.valueName("z"))
+            // original roots slots should be removed
+            assertEquals(null, root.valueName("a"))
+        }
+        @Test
+        fun `ensure original root concept is duplicated rather than shared when already present in newRoot`() {
+            val root = Concept("root")
+                .value("a", Concept("valueA"))
+                .value("b", Concept("valueB"))
+            root.value("a")?.value("aa", Concept("valueAA"))
+
+            val replace = Concept("enclosingRoot")
+                .value("childRoot", root)
+                .value("childRoot2", Concept("childRoot2Concept"))
+
+            // test
+            root.shareStateFrom(replace)
+
+            assertNotSame(replace, root)
+            assertEquals("enclosingRoot", root.name)
+            // child root should be duplicated - to present loops
+            val childRoot = root.value("childRoot")
+            assertEquals("root", childRoot?.name)
+            assertNotSame(root, childRoot)
+        }
+    }
+}
+
+class SlotTest {
+    @Test
+    fun `create with field string and value`() {
+        val slot = Slot("someName", Concept("someValue"))
+        assertEquals("someName", slot.name)
+        assertEquals("someValue", slot.value?.name)
+    }
+
+    @Test
+    fun `create with fieldName and value`() {
+        val slot = Slot(CoreFields.Instance, Concept("someValue"))
+        assertEquals("instance", slot.name)
+        assertEquals("someValue", slot.value?.name)
+    }
+
+    @Nested
+    inner class CopySlotToAnotherConcept {
+        @Test
+        fun `copy slot to another concept as new slot`() {
+            val slot = Slot("someName", Concept("someValue"))
+            val bareConcept = Concept("bare")
+
+            // test
+            slot.copyValue(bareConcept)
+
+            assertEquals("someValue", bareConcept.valueName("someName"))
+        }
+
+        @Test
+        fun `overwrite slot value in another concept`() {
+            val slot = Slot("someName", Concept("someValue"))
+            val bareConcept = Concept("bare")
+                .value("someName", Concept("originalValue"))
+
+            // test
+            slot.copyValue(bareConcept)
+
+            assertEquals("someValue", bareConcept.valueName("someName"))
+        }
+    }
+
+    @Nested
+    inner class DuplicateResolved {
+        @Test
+        fun `Duplicate plain slot`() {
+            val source = Slot("someName", Concept("someValue"))
+
+            val duplicated = source.duplicateResolvedValue()
+
+            assertEquals("someName", duplicated.name)
+            assertEquals("someValue", duplicated.value?.name)
+            assertNotSame(duplicated.value, source.value)
+        }
+
+        @Test
+        fun `Duplicate preserves null concepts`() {
+            val source = Slot("someName", null)
+
+            val duplicated = source.duplicateResolvedValue()
+
+            assertEquals("someName", duplicated.name)
+            assertNull(duplicated.value)
         }
     }
 }

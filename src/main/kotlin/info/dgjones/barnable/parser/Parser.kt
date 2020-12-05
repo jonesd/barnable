@@ -162,7 +162,7 @@ class DisambiguationHandler(val wordContext: WordContext, private val lexicalOpt
                 resolveTo(noDisambiguationNeeded.first())
             }
             noDisambiguationNeeded.size > 1 -> {
-                println("Disambiguation failed - multiple wordHandlers do not need disambiguation $noDisambiguationNeeded")
+                println("ERROR Disambiguation failed - multiple wordHandlers do not need disambiguation $noDisambiguationNeeded for ${wordContext.word}")
             }
             else -> {
                 disambiguationsByWordHandler.forEach { (wordHandler, disambiguationDemons) ->

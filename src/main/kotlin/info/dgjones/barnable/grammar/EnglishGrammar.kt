@@ -63,16 +63,9 @@ fun buildEnglishGrammarLexicon(lexicon: Lexicon) {
     buildGrammarPropositionLexicon(lexicon)
     buildGrammarPunctuationLexicon(lexicon)
 
-    lexicon.addMapping(WordIt())
     lexicon.addMapping(WordHave())
     lexicon.addMapping(WordIgnore(EntryWord("a").and("an")))
     lexicon.addMapping(WordIgnore(EntryWord("the")))
-}
-
-class WordIt: WordHandler(EntryWord("it")) {
-    override fun build(wordContext: WordContext): List<Demon> {
-        return listOf(FindObjectReferenceDemon(wordContext))
-    }
 }
 
 /*

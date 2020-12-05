@@ -35,17 +35,27 @@ https://en.wiktionary.org/wiki/Appendix:Glossary#pronoun
  */
 
 fun buildGrammarPronounLexicon(lexicon: Lexicon) {
-    lexicon.addMapping(WordPronoun("hers", Gender.Female, Case.Possessive))
-    lexicon.addMapping(WordPronoun("his", Gender.Male, Case.Possessive))
-    lexicon.addMapping(WordPronoun("her", Gender.Female, Case.Possessive))
-    lexicon.addMapping(WordPronoun("him", Gender.Male, Case.Objective))
-
-    // FIXME why aren't these WordPronoun?
-    lexicon.addMapping(PronounWord("he", Gender.Male))
-    lexicon.addMapping(PronounWord("she", Gender.Female))
+    buildPersonalPronouns(lexicon)
+    buildThingPronouns(lexicon)
 }
 
-class WordPronoun(word: String, val gender: Gender, val case: Case): WordHandler(EntryWord(word)) {
+private fun buildPersonalPronouns(lexicon: Lexicon) {
+    lexicon.addMapping(WordPersonalPronoun("hers", Gender.Female, Case.Possessive))
+    lexicon.addMapping(WordPersonalPronoun("his", Gender.Male, Case.Possessive))
+    lexicon.addMapping(WordPersonalPronoun("her", Gender.Female, Case.Possessive))
+    lexicon.addMapping(WordPersonalPronoun("him", Gender.Male, Case.Objective))
+
+    // FIXME why aren't these WordPronoun?
+    lexicon.addMapping(PersonalPronounWord("he", Gender.Male))
+    lexicon.addMapping(PersonalPronounWord("she", Gender.Female))
+}
+
+private fun buildThingPronouns(lexicon: Lexicon) {
+    lexicon.addMapping(WordIt())
+    lexicon.addMapping(WordThem())
+}
+
+class WordPersonalPronoun(word: String, val gender: Gender, val case: Case): WordHandler(EntryWord(word)) {
     override fun build(wordContext: WordContext): List<Demon> =
         lexicalConcept(wordContext, InDepthUnderstandingConcepts.Ref.name) {
             ignoreHolder()
@@ -55,7 +65,7 @@ class WordPronoun(word: String, val gender: Gender, val case: Case): WordHandler
         }.demons
 }
 
-class PronounWord(word: String, private val genderMatch: Gender): WordHandler(EntryWord(word)) {
+class PersonalPronounWord(word: String, private val genderMatch: Gender): WordHandler(EntryWord(word)) {
     override fun build(wordContext: WordContext): List<Demon> {
         // FIXME partial implementation - also why not use demon
         wordContext.defHolder.addFlag(ParserFlags.Ignore)
@@ -75,5 +85,19 @@ class PronounWord(word: String, private val genderMatch: Gender): WordHandler(En
             }
         }
         return listOf()
+    }
+}
+
+class WordIt: WordHandler(EntryWord("it")) {
+    // FIXME singular
+    override fun build(wordContext: WordContext): List<Demon> {
+        return listOf(FindObjectReferenceDemon(wordContext))
+    }
+}
+
+class WordThem: WordHandler(EntryWord("them")) {
+    //FIXME plural
+    override fun build(wordContext: WordContext): List<Demon> {
+        return listOf(FindObjectReferenceDemon(wordContext))
     }
 }

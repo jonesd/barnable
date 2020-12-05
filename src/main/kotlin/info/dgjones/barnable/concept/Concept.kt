@@ -17,9 +17,9 @@
 
 package info.dgjones.barnable.concept
 
-data class Concept(val name: String) {
+data class Concept(var name: String) {
     // Use linked map to preserve addition order - allowing simple "list" order
-    private val slots = linkedMapOf<String, Slot>()
+    private var slots = linkedMapOf<String, Slot>()
 
     companion object {
         const val VARIABLE_PREFIX = "*VAR."
@@ -80,6 +80,35 @@ data class Concept(val name: String) {
         } else {
             slots.forEach { it.value.value?.findCollect(matcher, matched)}
         }
+    }
+
+    /* Radical state change - alias name and slots with the supplied concept */
+    fun shareStateFrom(concept: Concept) {
+        concept.duplicateChildMatch(this)
+        name = concept.name
+        val originalSlots = slots
+        slots = concept.slots
+        concept.slots = originalSlots
+    }
+
+    fun duplicateChildMatch(child: Concept): Concept? {
+        slots.forEach {
+            val slotConcept = it.value.value
+            if (slotConcept === child) {
+                val duplicated = Concept(child.name)
+                child.slots.forEach { childSlot ->
+                    duplicated.value(childSlot.key, childSlot.value.value)
+                }
+                it.value.value = duplicated
+                return duplicated
+            } else if (slotConcept != null) {
+                val duplicated = slotConcept.duplicateChildMatch(child)
+                if (duplicated != null) {
+                    return duplicated
+                }
+            }
+        }
+        return null
     }
 
     fun replaceSlotValues(matcher: ConceptMatcher, replace: String?) {

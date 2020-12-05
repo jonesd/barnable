@@ -189,3 +189,10 @@ class MatchConceptByHeadOrGroup {
         assertFalse(matchConceptByHeadOrGroup("testHead")(Concept("otherHead")))
     }
 }
+
+class MatchConceptNot {
+    @Test
+    fun `Should negate matcher result`() {
+        assertFalse(matchNot(matchAlways())(Concept("anything")))
+    }
+}

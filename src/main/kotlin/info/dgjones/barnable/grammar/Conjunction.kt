@@ -21,6 +21,7 @@ import info.dgjones.barnable.concept.*
 import info.dgjones.barnable.domain.general.*
 import info.dgjones.barnable.narrative.InDepthUnderstandingConcepts
 import info.dgjones.barnable.parser.*
+import sun.invoke.util.ValueConversions
 
 
 enum class Conjunction {
@@ -44,7 +45,9 @@ fun matchConjunction(): ConceptMatcher {
 
 fun buildGrammarConjunctionLexicon(lexicon: Lexicon) {
     lexicon.addMapping(WordAndBuildGroup())
-    lexicon.addMapping(WordComma())
+    lexicon.addMapping(WordAndAddToGroup())
+    lexicon.addMapping(WordCommaBuildGroup())
+    lexicon.addMapping(WordCommaBoundary())
 }
 
 class WordAnd: WordHandler(EntryWord("and")) {
@@ -57,7 +60,7 @@ class WordAnd: WordHandler(EntryWord("and")) {
 }
 
 /*
-Handle the scenario of "george and harold" producting a group of two persons
+Handle the scenario of "george and harold" forming a group of two persons
  */
 class WordAndBuildGroup: WordHandler(EntryWord("and")) {
     private val matchingHeads = listOf(InDepthUnderstandingConcepts.Human.name, InDepthUnderstandingConcepts.PhysicalObject.name)
@@ -68,6 +71,9 @@ class WordAndBuildGroup: WordHandler(EntryWord("and")) {
                 expectHead("1", null, matchingHeads, markMatchIgnored = true, direction = SearchDirection.After)
             }
             varReference(GroupFields.ElementsType.fieldName, "exemplar", extractConceptHead)
+            saveAsObject()
+            replaceWordContextWithCurrent("exemplar")
+            //ignoreHolder()
         }.demons
 
     override fun disambiguationDemons(wordContext: WordContext,disambiguationHandler: DisambiguationHandler): List<Demon> {
@@ -90,9 +96,89 @@ class WordAndBuildGroup: WordHandler(EntryWord("and")) {
     }
 }
 
-class WordComma: WordHandler(EntryWord(",")) {
-    override fun build(wordContext: WordContext): List<Demon> {
-        wordContext.defHolder.value = Concept(Clause.Boundary.name)
-        return listOf(IgnoreDemon(wordContext))
+class WordAndAddToGroup: WordHandler(EntryWord("and")) {
+    private val matchingHeads = listOf(InDepthUnderstandingConcepts.Human.name, InDepthUnderstandingConcepts.PhysicalObject.name)
+    override fun build(wordContext: WordContext): List<Demon> =
+        lexicalConcept(wordContext, "Ignore") {
+            addToGroup(matchConceptByHead(matchingHeads), SearchDirection.After)
+            ignoreHolder()
+         }.demons
+
+    override fun disambiguationDemons(wordContext: WordContext,disambiguationHandler: DisambiguationHandler): List<Demon> {
+        return listOf(
+            DisambiguateUsingMatch(
+                matchConceptByHead(GroupConcept.Group.name),
+                SearchDirection.Before,
+                distance = null,
+                wordContext,
+                disambiguationHandler
+            ),
+            DisambiguateUsingMatch(
+                matchConceptByHead(matchingHeads),
+                SearchDirection.After,
+                1,
+                wordContext,
+                disambiguationHandler
+            )
+        )
+    }
+}
+
+class WordCommaBuildGroup: WordHandler(EntryWord(",", noSuffix = true)) {
+    private val matchingHeads = listOf(InDepthUnderstandingConcepts.Human.name, InDepthUnderstandingConcepts.PhysicalObject.name)
+    override fun build(wordContext: WordContext): List<Demon> =
+        lexicalConcept(wordContext, GroupConcept.Group.name) {
+            slot(GroupFields.Elements, "values") {
+                expectHead("0", "exemplar", matchingHeads, markMatchIgnored = true, direction = SearchDirection.Before)
+                expectHead("1", null, matchingHeads, markMatchIgnored = true, direction = SearchDirection.After)
+            }
+            varReference(GroupFields.ElementsType.fieldName, "exemplar", extractConceptHead)
+            saveAsObject()
+        }.demons
+
+    override fun disambiguationDemons(wordContext: WordContext,disambiguationHandler: DisambiguationHandler): List<Demon> {
+        return listOf(
+            DisambiguateUsingMatch(
+                matchConceptByHead(matchingHeads),
+                SearchDirection.Before,
+                1,
+                wordContext,
+                disambiguationHandler
+            ),
+            DisambiguateUsingMatch(
+                matchConceptByHead(matchingHeads),
+                SearchDirection.After,
+                1,
+                wordContext,
+                disambiguationHandler
+            )
+        )
+    }
+}
+
+class WordCommaBoundary: WordHandler(EntryWord(",", noSuffix = true)) {
+    private val matchingHeads = listOf(InDepthUnderstandingConcepts.Human.name, InDepthUnderstandingConcepts.PhysicalObject.name)
+    override fun build(wordContext: WordContext): List<Demon> =
+        lexicalConcept(wordContext, Clause.Boundary.name) {
+            ignoreHolder()
+        }.demons
+
+    override fun disambiguationDemons(wordContext: WordContext,disambiguationHandler: DisambiguationHandler): List<Demon> {
+        return listOf(
+            DisambiguateUsingMatch(
+                matchNot(matchConceptByHead(matchingHeads)),
+                SearchDirection.Before,
+                1,
+                wordContext,
+                disambiguationHandler
+            ),
+            DisambiguateUsingMatch(
+                matchNot(matchConceptByHead(matchingHeads)),
+                SearchDirection.After,
+                1,
+                wordContext,
+                disambiguationHandler
+            )
+        )
     }
 }

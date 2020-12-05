@@ -16,7 +16,11 @@
  */
 
 package info.dgjones.barnable.domain.general
+
 import info.dgjones.barnable.concept.*
+import info.dgjones.barnable.parser.*
+
+/* Group concepts hold a list of other concept of the same head value */
 
 enum class GroupConcept {
     Group,
@@ -36,4 +40,46 @@ fun buildGroup(elements: List<Concept>): Concept {
     elements.forEachIndexed { index, element -> elementsField.with(Slot(index.toString(), element))}
     elements.firstOrNull()?.let { root.value(GroupFields.ElementsType, extractConceptHead.transform(it)) }
     return root
+}
+
+fun addConceptToHomogenousGroup(group: Concept, concept: Concept): Boolean {
+    if (group.valueName(GroupFields.ElementsType) == concept.name) {
+        group.value(GroupFields.Elements)?.let { elements ->
+            elements.value(elements.children().size.toString(), concept)
+            return true
+        }
+    } else {
+        print("ERROR element $concept does not match group type $group")
+    }
+    return false
+}
+
+fun LexicalConceptBuilder.addToGroup(matcher: ConceptMatcher, direction: SearchDirection = SearchDirection.After,) {
+    val demon = AddToGroupDemon(matcher, direction, root.wordContext) { elementHolder ->
+        elementHolder.value = null
+        elementHolder.addFlag(ParserFlags.Inside)
+    }
+    root.addDemon(demon)
+}
+
+/* Find the matcher element and add it to the predecessor group. Pass the found element as the demon resulting action */
+class AddToGroupDemon(val matcher: ConceptMatcher, val direction: SearchDirection = SearchDirection.After, wordContext: WordContext, val action: (ConceptHolder) -> Unit): Demon(wordContext) {
+    override fun run() {
+        searchContext(matcher, matchNever(), direction = direction, wordContext = wordContext) { elementHolder ->
+            elementHolder.value?.let { element ->
+                searchContext(matchConceptByHead(GroupConcept.Group.name), matchNever(), direction = SearchDirection.Before, wordContext = wordContext) { groupHolder ->
+                    groupHolder.value?.let { group ->
+                        if (addConceptToHomogenousGroup(group, element)) {
+                            active = false
+                            println("Added $element to group $group")
+                            action(elementHolder)
+                        }
+                    }
+                }
+            }
+        }
+    }
+    override fun description(): String {
+        return "Match concept and add to the predecessor Group, assuming head type matches"
+    }
 }
