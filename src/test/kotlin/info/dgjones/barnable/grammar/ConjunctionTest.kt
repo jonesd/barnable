@@ -108,8 +108,8 @@ class ConjunctionTest {
             assertEquals(GroupConcept.Group.name, droppedThings?.name)
             val droppedElements = droppedThings?.value(GroupFields.Elements)?.children()
             assertEquals(2, pickedUpElements?.size)
-            assertEquals("ball", pickedUpElements?.get(0)?.valueName(CoreFields.Name))
-            assertEquals("book", pickedUpElements?.get(1)?.valueName(CoreFields.Name))
+            assertEquals("ball", droppedElements?.get(0)?.valueName(CoreFields.Name))
+            assertEquals("book", droppedElements?.get(1)?.valueName(CoreFields.Name))
             assertEquals("box", dropped.value(ActFields.To)?.valueName(CoreFields.Name))
         }
 
