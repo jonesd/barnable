@@ -366,7 +366,8 @@ open class Demon(val wordContext: WordContext) {
 
 class DemonComment(val test: String, val act: String)
 
-data class ConceptHolder(val instanceNumber: Int, var value: Concept? = null) {
+data class ConceptHolder(val instanceNumber: Int) {
+    var value: Concept? = null
     private val flags = mutableListOf<ParserFlags>()
 
     fun addFlag(flag: ParserFlags) {

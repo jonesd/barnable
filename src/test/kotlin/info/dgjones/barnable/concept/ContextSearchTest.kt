@@ -156,7 +156,8 @@ class SearchContextTest {
     }
 
     private fun withWordContext(wordIndex: Int, conceptHead: String, sentenceContext: SentenceContext): WordContext {
-        val conceptHolder = ConceptHolder(wordIndex, Concept(conceptHead).value("index", Concept("index=$wordIndex")))
+        val conceptHolder = ConceptHolder(wordIndex)
+        conceptHolder.value = Concept(conceptHead).value("index", Concept("index=$wordIndex"))
         val wordContext = WordContext(wordIndex, "word$wordIndex", conceptHolder, sentenceContext)
         sentenceContext.pushWord(wordContext)
         return wordContext

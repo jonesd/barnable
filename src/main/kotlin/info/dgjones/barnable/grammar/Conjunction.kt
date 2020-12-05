@@ -21,7 +21,6 @@ import info.dgjones.barnable.concept.*
 import info.dgjones.barnable.domain.general.*
 import info.dgjones.barnable.narrative.InDepthUnderstandingConcepts
 import info.dgjones.barnable.parser.*
-import sun.invoke.util.ValueConversions
 
 
 enum class Conjunction {
@@ -67,13 +66,13 @@ class WordAndBuildGroup: WordHandler(EntryWord("and")) {
     override fun build(wordContext: WordContext): List<Demon> =
         lexicalConcept(wordContext, GroupConcept.Group.name) {
             slot(GroupFields.Elements, "values") {
-                expectHead("0", "exemplar", matchingHeads, markMatchIgnored = true, direction = SearchDirection.Before)
-                expectHead("1", null, matchingHeads, markMatchIgnored = true, direction = SearchDirection.After)
+                expectHead("0", "exemplar", matchingHeads, clearHolderOnCompletion = false, markAsInside = false, direction = SearchDirection.Before)
+                expectHead("1", null, matchingHeads, clearHolderOnCompletion = true, direction = SearchDirection.After)
             }
             varReference(GroupFields.ElementsType.fieldName, "exemplar", extractConceptHead)
-            saveAsObject()
             replaceWordContextWithCurrent("exemplar")
-            //ignoreHolder()
+            // only want to save as resolution... saveAsObject()
+            ignoreHolder()
         }.demons
 
     override fun disambiguationDemons(wordContext: WordContext,disambiguationHandler: DisambiguationHandler): List<Demon> {
@@ -96,6 +95,9 @@ class WordAndBuildGroup: WordHandler(EntryWord("and")) {
     }
 }
 
+/*
+Handle the scenario of "fred, george and mary" where the "and" will add mary to a Group formed from "fred, george"
+ */
 class WordAndAddToGroup: WordHandler(EntryWord("and")) {
     private val matchingHeads = listOf(InDepthUnderstandingConcepts.Human.name, InDepthUnderstandingConcepts.PhysicalObject.name)
     override fun build(wordContext: WordContext): List<Demon> =
@@ -129,8 +131,8 @@ class WordCommaBuildGroup: WordHandler(EntryWord(",", noSuffix = true)) {
     override fun build(wordContext: WordContext): List<Demon> =
         lexicalConcept(wordContext, GroupConcept.Group.name) {
             slot(GroupFields.Elements, "values") {
-                expectHead("0", "exemplar", matchingHeads, markMatchIgnored = true, direction = SearchDirection.Before)
-                expectHead("1", null, matchingHeads, markMatchIgnored = true, direction = SearchDirection.After)
+                expectHead("0", "exemplar", matchingHeads, clearHolderOnCompletion = true, direction = SearchDirection.Before)
+                expectHead("1", null, matchingHeads, clearHolderOnCompletion = true, direction = SearchDirection.After)
             }
             varReference(GroupFields.ElementsType.fieldName, "exemplar", extractConceptHead)
             saveAsObject()

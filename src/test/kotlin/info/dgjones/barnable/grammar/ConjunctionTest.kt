@@ -22,7 +22,6 @@ import info.dgjones.barnable.domain.general.*
 import info.dgjones.barnable.narrative.InDepthUnderstandingConcepts
 import info.dgjones.barnable.narrative.buildInDepthUnderstandingLexicon
 import info.dgjones.barnable.parser.runTextProcess
-import jdk.nashorn.internal.ir.annotations.Ignore
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -92,13 +91,26 @@ class ConjunctionTest {
         fun `Action with two physical objects `() {
             val textProcessor = runTextProcess("Fred picked up the ball and book and dropped them in the box.", lexicon)
 
-            assertEquals(1, textProcessor.workingMemory.concepts.size)
-            val ptrans = textProcessor.workingMemory.concepts.first()
-            assertEquals(GroupConcept.Group.name, ptrans.valueName(ActFields.Actor))
-            val actors = ptrans.value(ActFields.To)?.value(GroupFields.Elements)?.children()
-            assertEquals(2, actors?.size)
-            assertEquals("ball", actors?.get(0)?.valueName(CoreFields.Name))
-            assertEquals("book", actors?.get(1)?.valueName(CoreFields.Name))
+            assertEquals(2, textProcessor.workingMemory.concepts.size)
+            // picked up the ball and book
+            val pickedUp = textProcessor.workingMemory.concepts.first()
+            assertEquals("Fred", pickedUp.value(ActFields.Actor)?.valueName(HumanFields.FirstName))
+            val pickedUpThings = pickedUp.value(ActFields.Thing)
+            assertEquals(GroupConcept.Group.name, pickedUpThings?.name)
+            val pickedUpElements = pickedUpThings?.value(GroupFields.Elements)?.children()
+            assertEquals(2, pickedUpElements?.size)
+            assertEquals("ball", pickedUpElements?.get(0)?.valueName(CoreFields.Name))
+            assertEquals("book", pickedUpElements?.get(1)?.valueName(CoreFields.Name))
+            // dropped them in the box
+            val dropped = textProcessor.workingMemory.concepts[1]
+            assertEquals("Fred", dropped.value(ActFields.Actor)?.valueName(HumanFields.FirstName))
+            val droppedThings = dropped.value(ActFields.Thing)
+            assertEquals(GroupConcept.Group.name, droppedThings?.name)
+            val droppedElements = droppedThings?.value(GroupFields.Elements)?.children()
+            assertEquals(2, pickedUpElements?.size)
+            assertEquals("ball", pickedUpElements?.get(0)?.valueName(CoreFields.Name))
+            assertEquals("book", pickedUpElements?.get(1)?.valueName(CoreFields.Name))
+            assertEquals("box", dropped.value(ActFields.To)?.valueName(CoreFields.Name))
         }
 
         @Test

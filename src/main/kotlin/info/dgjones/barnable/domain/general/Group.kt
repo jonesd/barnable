@@ -30,7 +30,8 @@ enum class GroupConcept {
 enum class GroupFields(override val fieldName: String): Fields {
     GroupInstances("groupInstances"),
     Elements("elements"),
-    ElementsType("elementsType")
+    ElementsType("elementsType"),
+    Next("next")
 }
 
 fun buildGroup(elements: List<Concept>): Concept {

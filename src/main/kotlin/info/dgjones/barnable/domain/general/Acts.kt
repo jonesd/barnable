@@ -57,7 +57,7 @@ fun LexicalConceptBuilder.expectActor(slotName: Fields = ActFields.Actor, variab
     root.addDemon(demon)
 }
 
-fun LexicalConceptBuilder.expectThing(slotName: Fields = ActFields.Thing, variableName: String? = null, matcher: ConceptMatcher = matchConceptByHead(InDepthUnderstandingConcepts.PhysicalObject.name)) {
+fun LexicalConceptBuilder.expectThing(slotName: Fields = ActFields.Thing, variableName: String? = null, matcher: ConceptMatcher = matchConceptByHeadOrGroup(InDepthUnderstandingConcepts.PhysicalObject.name)) {
     val variableSlot = root.createVariable(slotName, variableName)
     concept.with(variableSlot)
     val demon = ExpectThing(matcher, root.wordContext) {

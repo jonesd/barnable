@@ -19,7 +19,6 @@ package info.dgjones.barnable.concept
 
 import info.dgjones.barnable.domain.general.HumanFields
 import info.dgjones.barnable.episodic.EpisodicConcept
-import info.dgjones.barnable.narrative.ConceptAccessor
 import info.dgjones.barnable.narrative.MopMealFields
 import info.dgjones.barnable.parser.*
 
@@ -59,10 +58,12 @@ class LexicalRootBuilder(val wordContext: WordContext, private val headName: Str
         val conceptHolder = wordContext.context.workingMemory.createDefHolder(value)
         completeVariable(variableSlot, conceptHolder, episodicConcept)
     }
-    fun completeVariable(variableSlot: Slot, valueHolder: ConceptHolder, episodicConcept: EpisodicConcept? = null) {
+    fun completeVariable(variableSlot: Slot, valueHolder: ConceptHolder, episodicConcept: EpisodicConcept? = null, markAsInside: Boolean = true) {
         if (!variableSlot.isVariable()) return
         val variableName = variableSlot.value?.name ?: return
-        completedConceptHolders.add(valueHolder)
+        if (markAsInside) {
+            completedConceptHolders.add(valueHolder)
+        }
         val completeVariableSlots = variableSlots.filter { it.value?.name == variableName }
         //FIXME can multiple demons update the same value here?
         completeVariableSlots.forEach {
@@ -80,6 +81,10 @@ class LexicalRootBuilder(val wordContext: WordContext, private val headName: Str
         completedConceptHolders.forEach { it.addFlag(ParserFlags.Inside)  }
         overwriteHolderWithMatchedVariable[variableName]?.let {
             valueHolder.value?.shareStateFrom(it)
+            // FIXME assuming object...
+            valueHolder.value?.let { v ->
+                wordContext.context.mostRecentObject = v
+            }
         }
     }
     private fun evaluateExpression(slot: Slot, value: Concept?): Concept? {
@@ -145,15 +150,15 @@ class LexicalConceptBuilder(val root: LexicalRootBuilder, conceptName: String) {
     fun build(): Concept {
         return concept
     }
-    fun expectHead(slotName: String, variableName: String? = null, headValue: String, markMatchIgnored: Boolean = false, direction: SearchDirection = SearchDirection.After) {
-        expectHead(slotName, variableName, listOf(headValue), markMatchIgnored, direction)
+    fun expectHead(slotName: String, variableName: String? = null, headValue: String, clearHolderOnCompletion: Boolean = false, markAsInside: Boolean = true, direction: SearchDirection = SearchDirection.After) {
+        expectHead(slotName, variableName, listOf(headValue), clearHolderOnCompletion, markAsInside, direction)
     }
-    fun expectHead(slotName: String, variableName: String? = null, headValues: List<String>, markMatchIgnored: Boolean = false, direction: SearchDirection = SearchDirection.After) {
+    fun expectHead(slotName: String, variableName: String? = null, headValues: List<String>, clearHolderOnCompletion: Boolean = false, markAsInside: Boolean = true, direction: SearchDirection = SearchDirection.After) {
         val variableSlot = root.createVariable(slotName, variableName)
         concept.with(variableSlot)
         val demon = ExpectDemon(matchConceptByHead(headValues), direction, root.wordContext) {
-            root.completeVariable(variableSlot, it, this.episodicConcept)
-            if (markMatchIgnored) {
+            root.completeVariable(variableSlot, it, this.episodicConcept, markAsInside = markAsInside)
+            if (clearHolderOnCompletion) {
                 it.value = null
             }
         }
