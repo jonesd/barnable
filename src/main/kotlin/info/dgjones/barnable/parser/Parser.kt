@@ -368,7 +368,7 @@ class DemonComment(val test: String, val act: String)
 
 data class ConceptHolder(val instanceNumber: Int) {
     var value: Concept? = null
-    private val flags = mutableListOf<ParserFlags>()
+    private val flags = mutableSetOf<ParserFlags>()
 
     fun addFlag(flag: ParserFlags) {
         flags.add(flag)
