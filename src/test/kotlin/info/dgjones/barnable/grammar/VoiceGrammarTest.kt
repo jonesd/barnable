@@ -29,7 +29,7 @@ class ShouldMapPassiveAndActiveToSameConceptsTest {
     val lexicon = buildInDepthUnderstandingLexicon()
 
     @Test
-    fun `Active Voice `() {
+    fun `Active Voice word order`() {
         val textProcessor = runTextProcess("Fred kicked the ball.", lexicon)
 
         assertEquals(1, textProcessor.workingMemory.concepts.size)
@@ -38,7 +38,7 @@ class ShouldMapPassiveAndActiveToSameConceptsTest {
     }
 
     @Test
-    fun `Passive Voice - The ball was kicked by Fred`() {
+    fun `Passive Voice word order`() {
         val textProcessor = runTextProcess("The ball was kicked by Fred.", lexicon)
 
         assertEquals(1, textProcessor.workingMemory.concepts.size)

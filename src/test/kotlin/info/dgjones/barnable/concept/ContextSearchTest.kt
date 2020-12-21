@@ -131,6 +131,20 @@ class SearchContextTest {
     }
 
     @Test
+    fun `Can abort search`() {
+        val sentenceContext = withSentenceContext(3)
+        val currentWord = withWordContext(0, "zero", sentenceContext)
+        withWordContext(1, "one", sentenceContext)
+        withWordContext(2, "abortHere", sentenceContext)
+        withWordContext(3, "testHead", sentenceContext)
+        var called = false
+        searchContext(matcher, matchConceptByHead("abortHere"), null, SearchDirection.After, currentWord) {
+            called = true
+        }
+        assertFalse(called) {"should not have been able to reach testHead"}
+    }
+
+    @Test
     fun `Can limit distance of match concept before`() {
         val sentenceContext = withSentenceContext(3)
         withWordContext(0, "testHead", sentenceContext)

@@ -32,26 +32,33 @@ If a match is found, then the action is called with the result
 */
 fun searchContext(matcher: ConceptMatcher, abortSearch: ConceptMatcher = matchNever(), matchPreviousWord: String? = null, direction: SearchDirection = SearchDirection.Before, wordContext: WordContext, distance: Int? = null, action: (ConceptHolder) -> Unit) {
     var found: ConceptHolder? = null
+    var searchAborted = false
 
     fun isMatchWithSentenceWord(index: Int): Boolean {
         return (matchPreviousWord != null && index >= 0 && wordContext.context.sentenceWordAtWordIndex(index) == matchPreviousWord)
     }
+
+    // Only allow matches within 'distance' param from current word
+    fun isOutsideAllowedDistance(index: Int, distance: Int?) =
+        distance != null && abs(index - wordContext.wordIndex) > distance
+
+    // Require previous word to 'matchPreviousWord' param
+    fun isMissingPreviousWordMatch(index: Int) =
+        matchPreviousWord != null && !isMatchWithSentenceWord(index - 1)
+
     fun updateFrom(existing: ConceptHolder?, wordContext: WordContext, index: Int): ConceptHolder? {
         if (existing?.value != null) {
             return existing
         }
-        if (distance != null && abs(index - wordContext.wordIndex) > distance) {
-            // failed as outside distance range
-            return null
-        }
-        if (matchPreviousWord != null && !isMatchWithSentenceWord(index - 1)) {
-            // failed to include match on previous sentence word
+        if (searchAborted
+            || isOutsideAllowedDistance(index, distance)
+            || isMissingPreviousWordMatch(index)) {
             return null
         }
         val defHolder = wordContext.context.defHolderAtWordIndex(index)
         val value = defHolder.value
         if (abortSearch(value)) {
-            // FIXME should not search any farther in this direction
+            searchAborted = true
             return null
         }
         if (matcher(value)) {
@@ -60,15 +67,18 @@ fun searchContext(matcher: ConceptMatcher, abortSearch: ConceptMatcher = matchNe
         return null
     }
 
-    if (direction == SearchDirection.Before) {
-        (wordContext.wordIndex - 1 downTo 0).forEach {
-            found = updateFrom(found, wordContext, it)
-        }
-    } else {
-        (wordContext.wordIndex + 1 until wordContext.context.wordContexts.size).forEach {
-            found = updateFrom(found, wordContext, it)
+    fun wordIterator(): IntProgression {
+        return if (direction == SearchDirection.Before) {
+            wordContext.wordIndex - 1 downTo 0
+        } else {
+            wordContext.wordIndex + 1 until wordContext.context.wordContexts.size
         }
     }
+
+    wordIterator().forEach {
+        found = updateFrom(found, wordContext, it)
+    }
+
     val foundConcept = found
     if (foundConcept?.value != null) {
         action(foundConcept)
