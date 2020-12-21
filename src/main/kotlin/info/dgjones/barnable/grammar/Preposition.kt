@@ -18,7 +18,7 @@
 package info.dgjones.barnable.grammar
 
 import info.dgjones.barnable.concept.*
-import info.dgjones.barnable.narrative.InDepthUnderstandingConcepts
+import info.dgjones.barnable.domain.general.GeneralConcepts
 import info.dgjones.barnable.parser.*
 
 /*
@@ -70,9 +70,9 @@ fun LexicalConceptBuilder.expectPrep(slotName: String, variableName: String? = n
 
 fun buildGrammarPropositionLexicon(lexicon: Lexicon) {
     // FIXME InDepth p304 "with" also needs to "determine social activity"
-    lexicon.addMapping(PrepositionWord(Preposition.With, setOf(InDepthUnderstandingConcepts.Human.name)))
-    lexicon.addMapping(PrepositionWord(Preposition.In, setOf(InDepthUnderstandingConcepts.PhysicalObject.name, InDepthUnderstandingConcepts.Setting.name)))
-    lexicon.addMapping(PrepositionWord(Preposition.By, setOf(InDepthUnderstandingConcepts.Setting.name)))
+    lexicon.addMapping(PrepositionWord(Preposition.With, setOf(GeneralConcepts.Human.name)))
+    lexicon.addMapping(PrepositionWord(Preposition.In, setOf(GeneralConcepts.PhysicalObject.name, GeneralConcepts.Setting.name)))
+    lexicon.addMapping(PrepositionWord(Preposition.By, setOf(GeneralConcepts.Setting.name)))
 }
 
 /*

@@ -21,7 +21,6 @@ import info.dgjones.barnable.concept.Concept
 import info.dgjones.barnable.concept.Fields
 import info.dgjones.barnable.concept.Slot
 import info.dgjones.barnable.concept.matchConceptByKind
-import info.dgjones.barnable.narrative.InDepthUnderstandingConcepts
 import info.dgjones.barnable.parser.*
 
 enum class TimeFields(override val fieldName: String): Fields {
@@ -75,7 +74,7 @@ class WordYesterday: WordHandler(EntryWord("yesterday")) {
                 return "Modify Act before to be occur Yesterday"
             }
         }
-        val actDemon = ExpectDemon(matchConceptByKind(InDepthUnderstandingConcepts.Act.name), SearchDirection.Before, wordContext) {
+        val actDemon = ExpectDemon(matchConceptByKind(GeneralConcepts.Act.name), SearchDirection.Before, wordContext) {
             demon.actHolder = it
         }
 

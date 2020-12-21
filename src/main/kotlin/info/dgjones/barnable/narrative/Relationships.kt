@@ -20,6 +20,7 @@ package info.dgjones.barnable.narrative
 import info.dgjones.barnable.concept.*
 import info.dgjones.barnable.domain.general.Gender
 import info.dgjones.barnable.domain.general.HumanFields
+import info.dgjones.barnable.domain.general.GeneralConcepts
 import info.dgjones.barnable.episodic.innerInstance
 import info.dgjones.barnable.grammar.possessiveRef
 import info.dgjones.barnable.parser.*
@@ -43,7 +44,7 @@ fun buildNarrativeRelationshipLexicon(lexicon: Lexicon) {
 
 class WordWife: WordHandler(EntryWord("wife")) {
     override fun build(wordContext: WordContext): List<Demon> =
-        lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
+        lexicalConcept(wordContext, GeneralConcepts.Human.name) {
             slot(HumanFields.Gender, Gender.Female.name)
             slot(Relationships.Name, Marriage.Concept.fieldName) {
                 possessiveRef(Marriage.Husband, gender = Gender.Male)
@@ -56,7 +57,7 @@ class WordWife: WordHandler(EntryWord("wife")) {
 
 class WordHusband: WordHandler(EntryWord("husband")) {
     override fun build(wordContext: WordContext): List<Demon> =
-        lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
+        lexicalConcept(wordContext, GeneralConcepts.Human.name) {
             slot(HumanFields.Gender, Gender.Male.name)
             slot(Relationships.Name, Marriage.Concept.fieldName) {
                 possessiveRef(Marriage.Wife, gender = Gender.Female)

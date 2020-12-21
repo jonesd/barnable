@@ -18,7 +18,6 @@
 package info.dgjones.barnable.domain.general
 
 import info.dgjones.barnable.concept.*
-import info.dgjones.barnable.narrative.InDepthUnderstandingConcepts
 import info.dgjones.barnable.parser.*
 
 enum class HumanConcept {
@@ -46,7 +45,7 @@ fun characterMatcher(human: Concept): ConceptMatcher =
 
 fun characterMatcher(firstName: String?, lastName: String?, gender: String?, roleTheme: String?): ConceptMatcher =
     ConceptMatcherBuilder()
-        .with(matchConceptByHead(InDepthUnderstandingConcepts.Human.name))
+        .with(matchConceptByHead(GeneralConcepts.Human.name))
         .matchSetField(HumanFields.FirstName, firstName)
         .matchSetField(HumanFields.LastName, lastName)
         .matchSetField(RoleThemeFields.RoleTheme, roleTheme)
@@ -61,10 +60,10 @@ fun characterMatcherWithInstance(human: Concept): ConceptMatcher =
 
 
 fun LexicalConceptBuilder.human(firstName: String = "", lastName: String = "", gender: Gender? = null, initializer: LexicalConceptBuilder.() -> Unit): Concept {
-    val child = LexicalConceptBuilder(root, InDepthUnderstandingConcepts.Human.name)
+    val child = LexicalConceptBuilder(root, GeneralConcepts.Human.name)
     child.slot(HumanFields.FirstName, firstName)
 
-    return Concept(InDepthUnderstandingConcepts.Human.name)
+    return Concept(GeneralConcepts.Human.name)
         .with(Slot(HumanFields.FirstName, Concept(firstName)))
         .with(Slot(HumanFields.LastName, Concept(lastName)))
         //FIXME empty concept doesn't seem helpful
@@ -72,7 +71,7 @@ fun LexicalConceptBuilder.human(firstName: String = "", lastName: String = "", g
 }
 
 fun buildHuman(firstName: String? = "", lastName: String? = "", gender: String? = null): Concept {
-    return Concept(InDepthUnderstandingConcepts.Human.name)
+    return Concept(GeneralConcepts.Human.name)
         .with(Slot(HumanFields.FirstName, Concept(firstName ?: "")))
         .with(Slot(HumanFields.LastName, Concept(lastName ?: "")))
         .with(Slot(HumanFields.Gender, Concept(gender ?: "")))
@@ -96,7 +95,7 @@ fun buildGeneralHumanLexicon(lexicon: Lexicon) {
 
 class WordPerson(val human: Concept, word: String = human.valueName(HumanFields.FirstName)?:"unknown"): WordHandler(EntryWord(word)) {
     override fun build(wordContext: WordContext): List<Demon> =
-        lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
+        lexicalConcept(wordContext, GeneralConcepts.Human.name) {
             slot(HumanFields.FirstName, human.valueName(HumanFields.FirstName) ?: "")
             lastName(HumanFields.LastName)
             slot(HumanFields.Gender, human.valueName(HumanFields.Gender)?: "")
@@ -117,7 +116,7 @@ fun LexicalConceptBuilder.lastName(slotName: Fields, variableName: String? = nul
 
 class LastNameDemon(wordContext: WordContext, val action: (Concept?) -> Unit): Demon(wordContext) {
     override fun run() {
-        val matcher = matchConceptByHead(InDepthUnderstandingConcepts.UnknownWord.name)
+        val matcher = matchConceptByHead(GeneralConcepts.UnknownWord.name)
         searchContext(matcher, matchNever(), direction = SearchDirection.After, distance = 1, wordContext = wordContext) { holder ->
             holder.value?.let {
                 val lastName = it.value("word")

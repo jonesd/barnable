@@ -21,7 +21,7 @@ import info.dgjones.barnable.concept.CoreFields
 import info.dgjones.barnable.concept.lexicalConcept
 import info.dgjones.barnable.domain.general.Gender
 import info.dgjones.barnable.domain.general.HumanFields
-import info.dgjones.barnable.narrative.InDepthUnderstandingConcepts
+import info.dgjones.barnable.domain.general.GeneralConcepts
 import info.dgjones.barnable.parser.*
 
 /*
@@ -57,7 +57,7 @@ private fun buildThingPronouns(lexicon: Lexicon) {
 
 class WordPersonalPronoun(word: String, val gender: Gender, val case: Case): WordHandler(EntryWord(word)) {
     override fun build(wordContext: WordContext): List<Demon> =
-        lexicalConcept(wordContext, InDepthUnderstandingConcepts.Ref.name) {
+        lexicalConcept(wordContext, GeneralConcepts.Ref.name) {
             ignoreHolder()
             slot(GrammarFields.Case, case.name)
             slot(HumanFields.Gender, gender.name)

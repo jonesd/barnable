@@ -22,7 +22,7 @@ import info.dgjones.barnable.domain.general.HumanFields
 import info.dgjones.barnable.domain.general.RoleThemeFields
 import info.dgjones.barnable.domain.general.characterMatcher
 import info.dgjones.barnable.domain.general.humanKeyValue
-import info.dgjones.barnable.narrative.InDepthUnderstandingConcepts
+import info.dgjones.barnable.domain.general.GeneralConcepts
 import info.dgjones.barnable.narrative.Marriage
 import info.dgjones.barnable.narrative.MopMeal
 import info.dgjones.barnable.narrative.MopMealFields
@@ -140,7 +140,7 @@ class EpisodicMemory {
     fun episodicRoleCheck(episodicConcept: EpisodicConcept, slotUpdate: Slot) {
         when (episodicConcept.name) {
             MopMeal.MopMeal.name -> updateMopMeal(episodicConcept, slotUpdate)
-            InDepthUnderstandingConcepts.Human.name -> updateCharacter(episodicConcept, slotUpdate)
+            GeneralConcepts.Human.name -> updateCharacter(episodicConcept, slotUpdate)
             else -> {
                 println("EP WARNING! Unhandled episodicConcept update ${episodicConcept.name}")
             }
@@ -175,7 +175,7 @@ class EpisodicMemory {
                 return episodicCharacter
             }
         }
-        val character = EpisodicConcept(InDepthUnderstandingConcepts.Human.name)
+        val character = EpisodicConcept(GeneralConcepts.Human.name)
         if (human != null) {
             character.with(human.duplicateResolvedSlot(HumanFields.FirstName))
             character.with(human.duplicateResolvedSlot(HumanFields.LastName))

@@ -19,7 +19,7 @@ package info.dgjones.barnable.grammar
 
 import info.dgjones.barnable.concept.CoreFields
 import info.dgjones.barnable.domain.general.*
-import info.dgjones.barnable.narrative.InDepthUnderstandingConcepts
+import info.dgjones.barnable.domain.general.GeneralConcepts
 import info.dgjones.barnable.narrative.buildInDepthUnderstandingLexicon
 import info.dgjones.barnable.parser.runTextProcess
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -41,7 +41,7 @@ class ConjunctionTest {
             assertEquals(2, actors?.size)
             assertEquals("Fred", actors?.get(0)?.valueName(HumanFields.FirstName))
             assertEquals("George", actors?.get(1)?.valueName(HumanFields.FirstName))
-            assertEquals(InDepthUnderstandingConcepts.Human.name, group.valueName(GroupFields.ElementsType))
+            assertEquals(GeneralConcepts.Human.name, group.valueName(GroupFields.ElementsType))
         }
 
         @Test
@@ -55,7 +55,7 @@ class ConjunctionTest {
             assertEquals("Jane", actors?.get(0)?.valueName(HumanFields.FirstName))
             assertEquals("Fred", actors?.get(1)?.valueName(HumanFields.FirstName))
             assertEquals("George", actors?.get(2)?.valueName(HumanFields.FirstName))
-            assertEquals(InDepthUnderstandingConcepts.Human.name, group.valueName(GroupFields.ElementsType))
+            assertEquals(GeneralConcepts.Human.name, group.valueName(GroupFields.ElementsType))
         }
 
         @Test
@@ -68,7 +68,7 @@ class ConjunctionTest {
             assertEquals(2, elements?.size)
             assertEquals("ball", elements?.get(0)?.valueName(CoreFields.Name))
             assertEquals("book", elements?.get(1)?.valueName(CoreFields.Name))
-            assertEquals(InDepthUnderstandingConcepts.PhysicalObject.name, group.valueName(GroupFields.ElementsType))
+            assertEquals(GeneralConcepts.PhysicalObject.name, group.valueName(GroupFields.ElementsType))
         }
 
         @Test
@@ -83,7 +83,7 @@ class ConjunctionTest {
             assertEquals("Fred", actors?.get(0)?.valueName(HumanFields.FirstName))
             assertEquals("George", actors?.get(1)?.valueName(HumanFields.FirstName))
 
-            assertEquals(InDepthUnderstandingConcepts.Setting.name, ptrans.valueName(ActFields.To));
+            assertEquals(GeneralConcepts.Setting.name, ptrans.valueName(ActFields.To));
             assertEquals("restaurant", ptrans.value(ActFields.To)?.valueName(CoreFields.Name));
         }
 
@@ -126,7 +126,7 @@ class ConjunctionTest {
             assertEquals("Fred", actors?.get(1)?.valueName(HumanFields.FirstName))
             assertEquals("George", actors?.get(2)?.valueName(HumanFields.FirstName))
 
-            assertEquals(InDepthUnderstandingConcepts.Setting.name, ptrans.valueName(ActFields.To));
+            assertEquals(GeneralConcepts.Setting.name, ptrans.valueName(ActFields.To));
             assertEquals("restaurant", ptrans.value(ActFields.To)?.valueName(CoreFields.Name));
         }
     }

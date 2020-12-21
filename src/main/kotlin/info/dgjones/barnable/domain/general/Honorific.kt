@@ -20,7 +20,6 @@ package info.dgjones.barnable.domain.general
 import info.dgjones.barnable.concept.CoreFields
 import info.dgjones.barnable.concept.lexicalConcept
 import info.dgjones.barnable.concept.matchConceptByHead
-import info.dgjones.barnable.narrative.InDepthUnderstandingConcepts
 import info.dgjones.barnable.parser.*
 
 /**
@@ -42,7 +41,7 @@ fun buildGeneralHonorificLexicon(lexicon: Lexicon) {
 
 class TitleWord(word: String, val gender: Gender): WordHandler(EntryWord(word, noSuffix = true)) {
     override fun build(wordContext: WordContext): List<Demon> =
-        lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
+        lexicalConcept(wordContext, GeneralConcepts.Human.name) {
             slot(HumanFields.FirstName, "")
             lastName(HumanFields.LastName)
             slot(HumanFields.Gender, gender.name)
@@ -52,7 +51,7 @@ class TitleWord(word: String, val gender: Gender): WordHandler(EntryWord(word, n
 
     override fun disambiguationDemons(wordContext: WordContext, disambiguationHandler: DisambiguationHandler): List<Demon> {
         return listOf(
-            DisambiguateUsingMatch(matchConceptByHead(listOf(InDepthUnderstandingConcepts.UnknownWord.name)), SearchDirection.After, 1, wordContext, disambiguationHandler)
+            DisambiguateUsingMatch(matchConceptByHead(listOf(GeneralConcepts.UnknownWord.name)), SearchDirection.After, 1, wordContext, disambiguationHandler)
         )
     }
 }

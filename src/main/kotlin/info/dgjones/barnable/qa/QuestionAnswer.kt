@@ -20,7 +20,7 @@ package info.dgjones.barnable.qa
 import info.dgjones.barnable.concept.Concept
 import info.dgjones.barnable.concept.CoreFields
 import info.dgjones.barnable.concept.matchConceptByHead
-import info.dgjones.barnable.narrative.InDepthUnderstandingConcepts
+import info.dgjones.barnable.domain.general.GeneralConcepts
 import info.dgjones.barnable.nlp.TextModel
 import info.dgjones.barnable.episodic.EpisodicMemory
 import info.dgjones.barnable.parser.TextProcessor
@@ -45,7 +45,7 @@ class QuestionProcessor(val textProcessor: TextProcessor) {
     private fun generateWhoAnswer(whoQuestion: Concept, episodicMemory: EpisodicMemory): String {
         val specifiedCharacter = whoQuestion.value("actor")
         val event = whoQuestion.value("act") ?: return "ERROR: Could not understand question"
-        val humans = event.find(matchConceptByHead(InDepthUnderstandingConcepts.Human.name))
+        val humans = event.find(matchConceptByHead(GeneralConcepts.Human.name))
         val whoMatches = humans.filter { it.valueName(CoreFields.Instance) != specifiedCharacter?.valueName(CoreFields.Instance) }
         return if (whoMatches.isNotEmpty()) answerGenerator.generateHumanList(whoMatches) else "No one"
     }

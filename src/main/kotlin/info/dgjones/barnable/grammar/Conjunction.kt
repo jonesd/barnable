@@ -19,7 +19,7 @@ package info.dgjones.barnable.grammar
 
 import info.dgjones.barnable.concept.*
 import info.dgjones.barnable.domain.general.*
-import info.dgjones.barnable.narrative.InDepthUnderstandingConcepts
+import info.dgjones.barnable.domain.general.GeneralConcepts
 import info.dgjones.barnable.parser.*
 
 
@@ -62,7 +62,7 @@ class WordAnd: WordHandler(EntryWord("and")) {
 Handle the scenario of "george and harold" forming a group of two persons
  */
 class WordAndBuildGroup: WordHandler(EntryWord("and")) {
-    private val matchingHeads = listOf(InDepthUnderstandingConcepts.Human.name, InDepthUnderstandingConcepts.PhysicalObject.name)
+    private val matchingHeads = listOf(GeneralConcepts.Human.name, GeneralConcepts.PhysicalObject.name)
     override fun build(wordContext: WordContext): List<Demon> =
         lexicalConcept(wordContext, GroupConcept.Group.name) {
             slot(GroupFields.Elements, "values") {
@@ -99,7 +99,7 @@ class WordAndBuildGroup: WordHandler(EntryWord("and")) {
 Handle the scenario of "fred, george and mary" where the "and" will add mary to a Group formed from "fred, george"
  */
 class WordAndAddToGroup: WordHandler(EntryWord("and")) {
-    private val matchingHeads = listOf(InDepthUnderstandingConcepts.Human.name, InDepthUnderstandingConcepts.PhysicalObject.name)
+    private val matchingHeads = listOf(GeneralConcepts.Human.name, GeneralConcepts.PhysicalObject.name)
     override fun build(wordContext: WordContext): List<Demon> =
         lexicalConcept(wordContext, "Ignore") {
             addToGroup(matchConceptByHead(matchingHeads), SearchDirection.After)
@@ -127,7 +127,7 @@ class WordAndAddToGroup: WordHandler(EntryWord("and")) {
 }
 
 class WordCommaBuildGroup: WordHandler(EntryWord(",", noSuffix = true)) {
-    private val matchingHeads = listOf(InDepthUnderstandingConcepts.Human.name, InDepthUnderstandingConcepts.PhysicalObject.name)
+    private val matchingHeads = listOf(GeneralConcepts.Human.name, GeneralConcepts.PhysicalObject.name)
     override fun build(wordContext: WordContext): List<Demon> =
         lexicalConcept(wordContext, GroupConcept.Group.name) {
             slot(GroupFields.Elements, "values") {
@@ -159,7 +159,7 @@ class WordCommaBuildGroup: WordHandler(EntryWord(",", noSuffix = true)) {
 }
 
 class WordCommaBoundary: WordHandler(EntryWord(",", noSuffix = true)) {
-    private val matchingHeads = listOf(InDepthUnderstandingConcepts.Human.name, InDepthUnderstandingConcepts.PhysicalObject.name)
+    private val matchingHeads = listOf(GeneralConcepts.Human.name, GeneralConcepts.PhysicalObject.name)
     override fun build(wordContext: WordContext): List<Demon> =
         lexicalConcept(wordContext, Clause.Boundary.name) {
             ignoreHolder()

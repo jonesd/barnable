@@ -20,7 +20,7 @@ package info.dgjones.barnable.parser
 import info.dgjones.barnable.concept.*
 import info.dgjones.barnable.domain.general.HumanFields
 import info.dgjones.barnable.narrative.HumanAccessor
-import info.dgjones.barnable.narrative.InDepthUnderstandingConcepts
+import info.dgjones.barnable.domain.general.GeneralConcepts
 
 // Find matching human in episodic memory, and associate concept
 // InDepth p185
@@ -103,7 +103,7 @@ class SaveCharacterDemon(wordContext: WordContext): Demon(wordContext){
 
 class NextCharacterDemon(wordContext: WordContext, val action: (ConceptHolder) -> Unit): Demon(wordContext) {
     override fun run() {
-        val matcher = matchConceptByHead(InDepthUnderstandingConcepts.Human.name)
+        val matcher = matchConceptByHead(GeneralConcepts.Human.name)
         searchContext(matcher, matchNever(), direction = SearchDirection.After, wordContext = wordContext) {
             if (it.value != null) {
                 active = false

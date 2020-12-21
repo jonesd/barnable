@@ -68,18 +68,6 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     return lexicon
 }
 
-enum class InDepthUnderstandingConcepts {
-    Act,
-    Human,
-    PhysicalObject,
-    Setting,
-    Location,
-    Goal,
-    Plan,
-    Ref,
-    UnknownWord
-}
-
 enum class BodyParts {
     Legs,
     Fingers,
@@ -102,7 +90,7 @@ open class ConceptAccessor(val concept: Concept)
 
 class HumanAccessor(concept: Concept): ConceptAccessor(concept) {
     fun isCompatible(): Boolean {
-        return concept.name == InDepthUnderstandingConcepts.Human.name
+        return concept.name == GeneralConcepts.Human.name
     }
     fun firstName(): String? {
         return concept.valueName(HumanFields.FirstName)
@@ -115,7 +103,7 @@ class WordPickUp: WordHandler(EntryWord("pick", listOf("pick", "up"))) {
             expectActor(variableName = "actor")
             expectThing(variableName = "thing")
             instrumentByActorToThing(Acts.MOVE, BodyParts.Fingers.name)
-            slot(CoreFields.Kind.fieldName, InDepthUnderstandingConcepts.Act.name)
+            slot(CoreFields.Kind.fieldName, GeneralConcepts.Act.name)
         }.demons
 
     fun description(): String {
@@ -129,7 +117,7 @@ class WordPour: WordHandler(EntryWord("pour")) {
             expectActor(variableName = "actor")
             expectThing(variableName = "thing", matcher = matchConceptByKind(PhysicalObjectKind.Liquid.name))
             instrumentByActorToThing(Acts.MOVE, BodyParts.Fingers.name)
-            slot(CoreFields.Kind.fieldName, InDepthUnderstandingConcepts.Act.name)
+            slot(CoreFields.Kind.fieldName, GeneralConcepts.Act.name)
         }.demons
 }
 
@@ -140,14 +128,14 @@ class WordDrop: WordHandler(EntryWord("drop")) {
             expectThing(variableName = "thing")
             varReference(ActFields.From.fieldName, "actor")
             expectPrep(ActFields.To.fieldName, preps = setOf(Preposition.In, Preposition.Into, Preposition.On), matcher = matchConceptByHead(setOf(
-                InDepthUnderstandingConcepts.Human.name, InDepthUnderstandingConcepts.PhysicalObject.name))
+                GeneralConcepts.Human.name, GeneralConcepts.PhysicalObject.name))
             )
             slot(ActFields.Instrument.fieldName, Acts.PROPEL.name) {
                 slot(ActFields.Actor.fieldName, Force.Gravity.name)
                 varReference(ActFields.Thing.fieldName, "thing")
-                slot(CoreFields.Kind.fieldName, InDepthUnderstandingConcepts.Act.name)
+                slot(CoreFields.Kind.fieldName, GeneralConcepts.Act.name)
             }
-            slot(CoreFields.Kind.fieldName, InDepthUnderstandingConcepts.Act.name)
+            slot(CoreFields.Kind.fieldName, GeneralConcepts.Act.name)
         }.demons
 }
 
@@ -158,10 +146,10 @@ class WordKnock: WordHandler(EntryWord("knock")) {
             expectActor(variableName = "actor")
             expectThing(variableName = "thing")
             expectPrep("to", preps = setOf(Preposition.On), matcher = matchConceptByHead(setOf(
-                InDepthUnderstandingConcepts.Human.name, InDepthUnderstandingConcepts.PhysicalObject.name))
+                GeneralConcepts.Human.name, GeneralConcepts.PhysicalObject.name))
             )
             instrumentByActorToThing(Acts.MOVE, BodyParts.Fingers.name)
-            slot(CoreFields.Kind.fieldName, InDepthUnderstandingConcepts.Act.name)
+            slot(CoreFields.Kind.fieldName, GeneralConcepts.Act.name)
         }.demons
 }
 
@@ -171,14 +159,14 @@ class WordKick: WordHandler(EntryWord("kick")) {
             expectActor(variableName = "actor")
             expectThing(variableName = "thing")
             expectPrep("to", preps = setOf(Preposition.To), matcher = matchConceptByHead(setOf(
-                InDepthUnderstandingConcepts.Human.name, InDepthUnderstandingConcepts.PhysicalObject.name))
+                GeneralConcepts.Human.name, GeneralConcepts.PhysicalObject.name))
             )
             slot(ActFields.Instrument.fieldName, Acts.MOVE.name) {
                 slot(ActFields.Actor.fieldName, BodyParts.Foot.name)
                 varReference(ActFields.Thing.fieldName, "thing")
-                slot(CoreFields.Kind, InDepthUnderstandingConcepts.Act.name)
+                slot(CoreFields.Kind, GeneralConcepts.Act.name)
             }
-            slot(CoreFields.Kind, InDepthUnderstandingConcepts.Act.name)
+            slot(CoreFields.Kind, GeneralConcepts.Act.name)
         }.demons
 }
 
@@ -188,8 +176,8 @@ class WordGive: WordHandler(EntryWord("give")) {
             expectActor(variableName = "actor")
             expectThing()
             varReference(ActFields.From.fieldName, "actor")
-            expectHead(ActFields.To.fieldName, headValue = InDepthUnderstandingConcepts.Human.name)
-            slot(CoreFields.Kind, InDepthUnderstandingConcepts.Act.name)
+            expectHead(ActFields.To.fieldName, headValue = GeneralConcepts.Human.name)
+            slot(CoreFields.Kind, GeneralConcepts.Act.name)
         }.demons
 }
 
@@ -201,10 +189,10 @@ class WordKiss: WordHandler(EntryWord("kiss")) {
             slot(ActFields.Instrument.fieldName, Acts.MOVE.name) {
                 slot(ActFields.Actor.fieldName, BodyParts.Lips.name)
                 slot(ActFields.Thing.fieldName, PhysicalObjectKind.BodyPart.name)
-                slot(CoreFields.Kind, InDepthUnderstandingConcepts.Act.name)
+                slot(CoreFields.Kind, GeneralConcepts.Act.name)
             }
-            expectHead(ActFields.To.fieldName, headValue = InDepthUnderstandingConcepts.Human.name)
-            slot(CoreFields.Kind, InDepthUnderstandingConcepts.Act.name)
+            expectHead(ActFields.To.fieldName, headValue = GeneralConcepts.Human.name)
+            slot(CoreFields.Kind, GeneralConcepts.Act.name)
         }.demons
 }
 
@@ -212,10 +200,10 @@ class WordTell: WordHandler(EntryWord("tell").past("told")) {
     override fun build(wordContext: WordContext): List<Demon> =
         lexicalConcept(wordContext, Acts.MTRANS.name) {
             expectActor(variableName = "actor")
-            expectThing(matcher = matchConceptByKind(listOf(InDepthUnderstandingConcepts.Act.name, InDepthUnderstandingConcepts.Goal.name, InDepthUnderstandingConcepts.Plan.name)))
+            expectThing(matcher = matchConceptByKind(listOf(GeneralConcepts.Act.name, GeneralConcepts.Goal.name, GeneralConcepts.Plan.name)))
             varReference(ActFields.From.fieldName, "actor")
-            expectHead(ActFields.To.fieldName, headValue = InDepthUnderstandingConcepts.Human.name)
-            slot(CoreFields.Kind, InDepthUnderstandingConcepts.Act.name)
+            expectHead(ActFields.To.fieldName, headValue = GeneralConcepts.Human.name)
+            slot(CoreFields.Kind, GeneralConcepts.Act.name)
         }.demons
 }
 
@@ -223,8 +211,8 @@ class WordGo: WordHandler(EntryWord("go").past("went")) {
     override fun build(wordContext: WordContext): List<Demon> =
         lexicalConcept(wordContext, Acts.PTRANS.name) {
             expectActor()
-            expectHead(ActFields.To.fieldName, headValues = listOf(InDepthUnderstandingConcepts.Location.name, InDepthUnderstandingConcepts.Setting.name))
-            slot(CoreFields.Kind, InDepthUnderstandingConcepts.Act.name)
+            expectHead(ActFields.To.fieldName, headValues = listOf(GeneralConcepts.Location.name, GeneralConcepts.Setting.name))
+            slot(CoreFields.Kind, GeneralConcepts.Act.name)
         }.demons
 }
 
@@ -232,20 +220,20 @@ class WordWalk: WordHandler(EntryWord("walk")) {
     override fun build(wordContext: WordContext): List<Demon> =
         lexicalConcept(wordContext, Acts.PTRANS.name) {
             expectActor(variableName = "actor")
-            expectHead(ActFields.To.fieldName, headValues = listOf(InDepthUnderstandingConcepts.Location.name, InDepthUnderstandingConcepts.Setting.name))
+            expectHead(ActFields.To.fieldName, headValues = listOf(GeneralConcepts.Location.name, GeneralConcepts.Setting.name))
             slot(ActFields.Instrument.fieldName, Acts.MOVE.name) {
                 varReference(ActFields.Actor.fieldName, "actor")
                 slot(ActFields.Thing.fieldName, BodyParts.Legs.name)
-                slot(CoreFields.Kind, InDepthUnderstandingConcepts.Act.name)
+                slot(CoreFields.Kind, GeneralConcepts.Act.name)
             }
-            slot(CoreFields.Kind, InDepthUnderstandingConcepts.Act.name)
+            slot(CoreFields.Kind, GeneralConcepts.Act.name)
         }.demons
 }
 
 class WordHungry: WordHandler(EntryWord("hungry")) {
     override fun build(wordContext: WordContext): List<Demon> =
         lexicalConcept(wordContext, SatisfactionGoal.HungerSatisfactionGoal.name) {
-            slot(CoreFields.Kind, InDepthUnderstandingConcepts.Goal.name)
+            slot(CoreFields.Kind, GeneralConcepts.Goal.name)
         }.demons
 }
 
@@ -253,7 +241,8 @@ class WordLunch: WordHandler(EntryWord("lunch")) {
     override fun build(wordContext: WordContext): List<Demon> =
         lexicalConcept(wordContext, MopMeal.MopMeal.name) {
             expectHead(MopMealFields.EATER_A.fieldName, headValue = "Human", direction = SearchDirection.Before)
-            expectPrep(MopMealFields.EATER_B.fieldName, preps = listOf(Preposition.With), matcher= matchConceptByHead(InDepthUnderstandingConcepts.Human.name))
+            expectPrep(MopMealFields.EATER_B.fieldName, preps = listOf(Preposition.With), matcher= matchConceptByHead(
+                GeneralConcepts.Human.name))
             slot(CoreFields.Event, MopMeal.EventEatMeal.name)
             checkMop(CoreFields.Instance.fieldName)
         }.demons
@@ -264,7 +253,7 @@ class WordEats: WordHandler(EntryWord("eat")) {
         lexicalConcept(wordContext, Acts.INGEST.name) {
             expectActor()
             expectThing(matcher = matchConceptByKind(listOf(PhysicalObjectKind.Food.name)))
-            slot(CoreFields.Kind, InDepthUnderstandingConcepts.Act.name)
+            slot(CoreFields.Kind, GeneralConcepts.Act.name)
         }.demons
 }
 
@@ -274,13 +263,13 @@ class WordMeasureObject: WordHandler(EntryWord("measure")) {
             expectActor(variableName = "actor")
             expectThing()
             varReference(ActFields.From.fieldName, "actor")
-            slot(CoreFields.Kind, InDepthUnderstandingConcepts.Act.name)
+            slot(CoreFields.Kind, GeneralConcepts.Act.name)
         }.demons
 
     override fun disambiguationDemons(wordContext: WordContext, disambiguationHandler: DisambiguationHandler): List<Demon> {
         return listOf(
-            DisambiguateUsingMatch(matchConceptByHead(InDepthUnderstandingConcepts.Human.name), SearchDirection.Before, null, wordContext, disambiguationHandler),
-            DisambiguateUsingMatch(matchConceptByHead(InDepthUnderstandingConcepts.PhysicalObject.name), SearchDirection.After, null, wordContext, disambiguationHandler)
+            DisambiguateUsingMatch(matchConceptByHead(GeneralConcepts.Human.name), SearchDirection.Before, null, wordContext, disambiguationHandler),
+            DisambiguateUsingMatch(matchConceptByHead(GeneralConcepts.PhysicalObject.name), SearchDirection.After, null, wordContext, disambiguationHandler)
         )
     }
 }
@@ -313,7 +302,7 @@ class WordWas : WordHandler(EntryWord("was")) {
         wordContext.defHolder.addFlag(ParserFlags.Ignore)
         val matcher = matchAny(
             listOf(
-                matchConceptByKind(InDepthUnderstandingConcepts.Act.name),
+                matchConceptByKind(GeneralConcepts.Act.name),
                 matchConceptValueName(GrammarFields.Aspect, Aspect.Progressive.name)
             )
         )

@@ -18,7 +18,7 @@
 package info.dgjones.barnable.grammar
 
 import info.dgjones.barnable.concept.*
-import info.dgjones.barnable.narrative.InDepthUnderstandingConcepts
+import info.dgjones.barnable.domain.general.GeneralConcepts
 import info.dgjones.barnable.parser.*
 
 /**
@@ -70,7 +70,7 @@ class ModifierWord(word: String, val field: Fields, val value: String = word): W
                 return "ModifierWord $word"
             }
         }
-        val thingDemon = ExpectDemon(matchConceptByHead(listOf(InDepthUnderstandingConcepts.Human.name, InDepthUnderstandingConcepts.PhysicalObject.name)), SearchDirection.After, wordContext) {
+        val thingDemon = ExpectDemon(matchConceptByHead(listOf(GeneralConcepts.Human.name, GeneralConcepts.PhysicalObject.name)), SearchDirection.After, wordContext) {
             demon.thingHolder = it
         }
         return listOf(demon, thingDemon)

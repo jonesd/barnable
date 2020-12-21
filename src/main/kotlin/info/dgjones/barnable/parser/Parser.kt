@@ -22,7 +22,7 @@ import info.dgjones.barnable.concept.lexicalConcept
 import info.dgjones.barnable.concept.matchUnresolvedVariables
 import info.dgjones.barnable.episodic.EpisodicMemory
 import info.dgjones.barnable.grammar.buildSuffixDemon
-import info.dgjones.barnable.narrative.InDepthUnderstandingConcepts
+import info.dgjones.barnable.domain.general.GeneralConcepts
 import info.dgjones.barnable.narrative.buildInDepthUnderstandingLexicon
 import info.dgjones.barnable.nlp.*
 
@@ -339,7 +339,7 @@ class IgnoreDemon(wordContext: WordContext): Demon(wordContext) {
 
 class WordUnknown(word: String): WordHandler(EntryWord(word)) {
     override fun build(wordContext: WordContext): List<Demon> {
-        val lexicalConcept = lexicalConcept(wordContext, InDepthUnderstandingConcepts.UnknownWord.name) {
+        val lexicalConcept = lexicalConcept(wordContext, GeneralConcepts.UnknownWord.name) {
             ignoreHolder()
             slot("word", wordContext.word)
         }

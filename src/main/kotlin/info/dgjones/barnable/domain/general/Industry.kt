@@ -17,12 +17,9 @@
 
 package info.dgjones.barnable.domain.general
 
-import info.dgjones.barnable.concept.Concept
 import info.dgjones.barnable.concept.CoreFields
 import info.dgjones.barnable.concept.lexicalConcept
-import info.dgjones.barnable.narrative.InDepthUnderstandingConcepts
 import info.dgjones.barnable.narrative.MopFields
-import info.dgjones.barnable.narrative.MopMeal
 import info.dgjones.barnable.narrative.MopRestaurant
 import info.dgjones.barnable.parser.*
 
@@ -54,7 +51,7 @@ class WordEatingPlace(val eatingPlace: EatingPlaces): WordHandler(
     EntryWord(eatingPlace.title)
 ) {
     override fun build(wordContext: WordContext): List<Demon> =
-        lexicalConcept(wordContext, InDepthUnderstandingConcepts.Setting.name) {
+        lexicalConcept(wordContext, GeneralConcepts.Setting.name) {
             slot(MopFields.MOP, MopRestaurant.MopRestaurant.name)
             slot(CoreFields.Name, eatingPlace.title)
         }.demons

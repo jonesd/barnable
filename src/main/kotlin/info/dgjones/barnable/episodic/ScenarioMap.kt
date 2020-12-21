@@ -20,7 +20,7 @@ package info.dgjones.barnable.episodic
 import info.dgjones.barnable.concept.Concept
 import info.dgjones.barnable.concept.CoreFields
 import info.dgjones.barnable.concept.matchConceptByHead
-import info.dgjones.barnable.narrative.InDepthUnderstandingConcepts
+import info.dgjones.barnable.domain.general.GeneralConcepts
 
 /*
 Scenario Map records the instantiated scenarios, the participants present in each scenario,
@@ -37,7 +37,7 @@ class ScenarioMap {
 
     fun setCurrentEvent(concept: Concept, mainEvent: Boolean = false) {
         val event = concept.value(CoreFields.Event)
-        val participants = concept.find(matchConceptByHead(InDepthUnderstandingConcepts.Human.name))
+        val participants = concept.find(matchConceptByHead(GeneralConcepts.Human.name))
         this.currentEvent = event
     }
 }

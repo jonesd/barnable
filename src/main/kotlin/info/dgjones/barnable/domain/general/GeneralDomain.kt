@@ -19,6 +19,8 @@ package info.dgjones.barnable.domain.general
 
 import info.dgjones.barnable.parser.Lexicon
 
+
+
 fun buildGeneralDomainLexicon(lexicon: Lexicon) {
     buildGeneralPhysicalObjectsLexicon(lexicon)
     buildGeneralFoodLexicon(lexicon)
@@ -31,4 +33,16 @@ fun buildGeneralDomainLexicon(lexicon: Lexicon) {
     buildGeneralQuantityLexicon(lexicon)
     buildGeneralColourLexicon(lexicon)
     buildGeneralIndustryLexicon(lexicon)
+}
+
+enum class GeneralConcepts {
+    Act,
+    Human,
+    PhysicalObject,
+    Setting,
+    Location,
+    Goal,
+    Plan,
+    Ref,
+    UnknownWord
 }

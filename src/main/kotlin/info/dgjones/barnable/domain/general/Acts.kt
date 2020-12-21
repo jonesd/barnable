@@ -23,7 +23,6 @@ import info.dgjones.barnable.grammar.Preposition
 import info.dgjones.barnable.grammar.Voice
 import info.dgjones.barnable.grammar.matchPrepIn
 import info.dgjones.barnable.narrative.BodyParts
-import info.dgjones.barnable.narrative.InDepthUnderstandingConcepts
 import info.dgjones.barnable.parser.*
 
 enum class ActFields(override val fieldName: String): Fields {
@@ -57,7 +56,8 @@ fun LexicalConceptBuilder.expectActor(slotName: Fields = ActFields.Actor, variab
     root.addDemon(demon)
 }
 
-fun LexicalConceptBuilder.expectThing(slotName: Fields = ActFields.Thing, variableName: String? = null, matcher: ConceptMatcher = matchConceptByHeadOrGroup(InDepthUnderstandingConcepts.PhysicalObject.name)) {
+fun LexicalConceptBuilder.expectThing(slotName: Fields = ActFields.Thing, variableName: String? = null, matcher: ConceptMatcher = matchConceptByHeadOrGroup(
+    GeneralConcepts.PhysicalObject.name)) {
     val variableSlot = root.createVariable(slotName, variableName)
     concept.with(variableSlot)
     val demon = ExpectThing(matcher, root.wordContext) {
@@ -71,7 +71,7 @@ fun LexicalConceptBuilder.instrumentByActorToThing(instrumentAct: Acts, instrume
         varReference(ActFields.Actor.fieldName, "actor")
         slot(ActFields.Thing.fieldName, instrumentThing)
         varReference(ActFields.To.fieldName, "thing")
-        slot(CoreFields.Kind.fieldName, InDepthUnderstandingConcepts.Act.name)
+        slot(CoreFields.Kind.fieldName, GeneralConcepts.Act.name)
     }
 }
 
@@ -87,7 +87,7 @@ fun LexicalConceptBuilder.instrumentByActorToThing(instrumentAct: Acts, instrume
  */
 class ExpectActor(wordContext: WordContext, val action: (ConceptHolder) -> Unit): Demon(wordContext) {
     override fun run() {
-        val matchingValues = InDepthUnderstandingConcepts.Human.name
+        val matchingValues = GeneralConcepts.Human.name
         val actorMatcher = matchConceptByHeadOrGroup(matchingValues)
         val matcher = matchAny(listOf(
             matchConceptValueName(GrammarFields.Voice, Voice.Passive.name),
@@ -110,7 +110,7 @@ class ExpectActor(wordContext: WordContext, val action: (ConceptHolder) -> Unit)
     }
 }
 
-class ExpectThing(val thingMatcher: ConceptMatcher = matchConceptByHead(InDepthUnderstandingConcepts.PhysicalObject.name), wordContext: WordContext, val action: (ConceptHolder) -> Unit): Demon(wordContext) {
+class ExpectThing(val thingMatcher: ConceptMatcher = matchConceptByHead(GeneralConcepts.PhysicalObject.name), wordContext: WordContext, val action: (ConceptHolder) -> Unit): Demon(wordContext) {
     override fun run() {
         val byMatcher = matchPrepIn(listOf(Preposition.By))
         val matcher = matchAny(listOf(

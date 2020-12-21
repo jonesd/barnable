@@ -20,7 +20,6 @@ package info.dgjones.barnable.domain.general
 import info.dgjones.barnable.concept.CoreFields
 import info.dgjones.barnable.concept.Fields
 import info.dgjones.barnable.concept.lexicalConcept
-import info.dgjones.barnable.narrative.InDepthUnderstandingConcepts
 import info.dgjones.barnable.parser.*
 
 /*
@@ -47,7 +46,7 @@ fun buildGeneralRoleThemeLexicon(lexicon: Lexicon) {
 
 class RoleThemeWord(word: String, private val roleTheme: RoleTheme, val gender: Gender? = null): WordHandler(EntryWord(word)) {
     override fun build(wordContext: WordContext): List<Demon> =
-        lexicalConcept(wordContext, InDepthUnderstandingConcepts.Human.name) {
+        lexicalConcept(wordContext, GeneralConcepts.Human.name) {
             slot(RoleThemeFields.RoleTheme, roleTheme.name)
             gender?.let {
                 slot(HumanFields.Gender, gender.name)
