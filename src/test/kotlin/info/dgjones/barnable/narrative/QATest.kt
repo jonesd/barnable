@@ -54,7 +54,7 @@ class QATest {
     inner class ConceptCompletionTest {
 
         @Test
-        fun `Question - Who did John eat lunch with?`() {
+        fun `Question - Who did John eat lunch with`() {
             val textProcessor = runTextProcess("John had lunch with George .", lexicon)
 
             assertEquals(1, textProcessor.workingMemory.concepts.size)
@@ -78,7 +78,7 @@ class QATest {
         }
 
         @Test
-        fun `Question - Who ate lunch?`() {
+        fun `Question - Who ate lunch`() {
             val textProcessor = runTextProcess("John had lunch with George .", lexicon)
 
             // Question

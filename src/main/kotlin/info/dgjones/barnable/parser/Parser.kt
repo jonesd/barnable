@@ -71,7 +71,7 @@ class TextProcessor(private val textModel: TextModel, val lexicon: Lexicon) {
             val wordContext = WordContext(index, unitText, workingMemory.createDefHolder(), context)
             context.pushWord(wordContext)
             runWord(wordUnit, wordContext)
-            runDemons()
+            agenda.runDemons()
         }
         endSentence(context)
     }
@@ -125,21 +125,6 @@ class TextProcessor(private val textModel: TextModel, val lexicon: Lexicon) {
         wordContext.context.wordContexts.forEachIndexed { index, wordContext ->
             println("--- ${wordContext.word} ==> ${wordContext.defHolder.value}")
         }
-    }
-
-    // Run each active demon. Repeat again if any were fired
-    private fun runDemons() {
-        do {
-            var fired = false
-            // Use most recently recreated first
-            agenda.activeDemons().reversed().forEach {
-                it.run()
-                if (!it.active) {
-                    println("Killed demon=$it")
-                    fired = true
-                }
-            }
-        } while (fired)
     }
 }
 
@@ -292,19 +277,6 @@ class WorkingMemory {
     }
 }
 
-class Agenda {
-
-    val demons = mutableListOf<Demon>()
-
-    fun withDemon(index: Int, demon: Demon) {
-        demons.add(demon)
-    }
-
-    fun activeDemons(): List<Demon> {
-        return demons.filter { it.active }
-    }
-}
-
 open class WordHandler(val word: EntryWord) {
     open fun build(wordContext: WordContext): List<Demon> {
         return listOf()
@@ -329,42 +301,6 @@ open class EntryWord(val word: String, val expression: List<String> = listOf(wor
         return this
     }
 }
-
-open class Demon(val wordContext: WordContext) {
-    private val demonIndex = wordContext.nextDemonIndex()
-    var active = true
-    private var children = mutableListOf<Demon>()
-
-    open fun run() {
-        // Without an implementation - just deactivate
-        active = false
-    }
-
-    /* Stop the Demon from being scheduled to run again.
-    Will not stop a currently running demon */
-    fun deactivate() {
-        active = false
-    }
-
-    // Runtime comment to understand processing
-    open fun comment(): DemonComment {
-        return DemonComment("demon: $this", "")
-    }
-
-    open fun addChild(child: Demon) {
-        children.add(child)
-    }
-
-    override fun toString(): String {
-        return "{demon${wordContext.defHolder.instanceNumber}/${demonIndex}=${description()}, active=$active}"
-    }
-
-    open fun description(): String {
-        return ""
-    }
-}
-
-class DemonComment(val test: String, val act: String)
 
 data class ConceptHolder(val instanceNumber: Int) {
     var value: Concept? = null

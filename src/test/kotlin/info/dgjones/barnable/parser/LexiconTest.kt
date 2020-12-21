@@ -54,7 +54,7 @@ class LexiconTest {
     @Test
     fun `returns empty list when no matches for word`() {
         val lexicon = Lexicon()
-        val handler = withWordMapping(lexicon, "test")
+        withWordMapping(lexicon, "test")
 
         // test
         val lexicalItems = lexicon.lookupInitialWord("otherWord")
@@ -131,7 +131,7 @@ class LexiconTest {
     @Test
     fun `maps a stream of input words to lexical items fails if subsequent input words do not match`() {
         val lexicon = Lexicon()
-        val handler0 = withWordMapping(lexicon, "one", listOf("one", "two"))
+        withWordMapping(lexicon, "one", listOf("one", "two"))
 
         // test
         val lexicalItems = lexicon.lookupNextEntry(listOf("one", "other", "other2"))
@@ -145,7 +145,7 @@ class LexiconTest {
         val handler0 = withWordMapping(lexicon, "one", listOf("one", "two"))
         val handler1 = withWordMapping(lexicon, "one")
 
-        val handler2 = withWordMapping(lexicon, "one", listOf("one", "other"))
+        withWordMapping(lexicon, "one", listOf("one", "other"))
 
         // test
         val lexicalItems = lexicon.lookupNextEntry(listOf("one", "two", "three"))
@@ -164,7 +164,7 @@ class LexiconTest {
     fun `no suffix words should only match entry word`() {
         val lexicon = Lexicon()
         val handlerMrs = withWordMapping(lexicon, "mrs", noSuffix = true)
-        val handlerMr = withWordMapping(lexicon, "mr", noSuffix = true)
+        withWordMapping(lexicon, "mr", noSuffix = true)
 
         // test
         val lexicalItems = lexicon.lookupInitialWord("mrs")
@@ -179,7 +179,7 @@ class LexiconTest {
     @Test
     fun `should not generate suffixes for noSuffix word`() {
         val lexicon = Lexicon()
-        val handlerMr = withWordMapping(lexicon, "mr", noSuffix = true)
+        withWordMapping(lexicon, "mr", noSuffix = true)
 
         // test
         val lexicalItems = lexicon.lookupInitialWord("mrs")

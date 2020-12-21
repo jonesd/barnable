@@ -33,6 +33,7 @@ class LexicalConceptBuilderTest {
         val sentenceContext = SentenceContext(TextSentence("test", listOf(testElement)), workingMemory, EpisodicMemory())
         val wordContext = WordContext(0, "test", defHolder, sentenceContext)
 
+        // test
         val lexicalConcept = lexicalConcept(wordContext, "MTRANS") {
             slot("actor", "human") {
                 slot("name", "mary")

@@ -50,8 +50,8 @@ class TextSplitterTest {
     @Test
     fun `Favour longer expressions`() {
         val lexicon = Lexicon()
-        val handler0 = withWordMapping(lexicon, "zero")
-        val handler1 = withWordMapping(lexicon, "one")
+        withWordMapping(lexicon, "zero")
+        withWordMapping(lexicon, "one")
         val handler2 = withWordMapping(lexicon, "two")
         val handler01 = withWordMapping(lexicon, "zero", listOf("zero", "one"))
         val textSplitter = TextSplitter(lexicon)
