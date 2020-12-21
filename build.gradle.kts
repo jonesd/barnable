@@ -16,8 +16,8 @@
  */
 
 plugins {
-    kotlin("jvm") version "1.4.10"
-    id("org.jetbrains.dokka") version "1.4.10"
+    kotlin("jvm") version "1.4.20"
+    id("org.jetbrains.dokka") version "1.4.20"
 }
 
 group = "info.dgjones.barnable"
@@ -31,6 +31,7 @@ repositories {
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
     testImplementation("org.junit.jupiter:junit-jupiter:5.6.2")
+    testImplementation("io.mockk:mockk:1.10.3-jdk8")
 }
 
 tasks {
