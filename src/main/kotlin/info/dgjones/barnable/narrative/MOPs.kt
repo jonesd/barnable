@@ -17,11 +17,11 @@
 
 package info.dgjones.barnable.narrative
 
-import info.dgjones.barnable.concept.Concept
-import info.dgjones.barnable.concept.CoreFields
-import info.dgjones.barnable.concept.Fields
+import info.dgjones.barnable.concept.*
 import info.dgjones.barnable.episodic.EpisodicConcept
 import info.dgjones.barnable.episodic.EpisodicMemory
+import info.dgjones.barnable.parser.Demon
+import info.dgjones.barnable.parser.WordContext
 
 enum class MopFields(override val fieldName: String): Fields {
     MOP("mop")
@@ -61,4 +61,57 @@ fun EpisodicMemory.checkOrCreateMop(concept: Concept): EpisodicConcept {
         else -> null
     }
     return mop
+}
+
+// Lexical
+
+fun LexicalConceptBuilder.checkMop(slotName: String, variableName: String? = null) {
+    val variableSlot = root.createVariable(slotName, variableName)
+    concept.with(variableSlot)
+    val checkMopDemon = CheckMopDemon(concept, root.wordContext) { episodicMop ->
+        if (episodicMop != null) {
+            val episodicInstance = episodicMop.value(CoreFields.Instance)
+            root.completeVariable(variableSlot, root.wordContext.context.workingMemory.createDefHolder(episodicInstance))
+            this.episodicConcept = episodicMop
+            copyCompletedSlot(MopMealFields.EATER_A, episodicMop, concept)
+            copyCompletedSlot(MopMealFields.EATER_B, episodicMop, concept)
+            copyCompletedSlot(CoreFields.Event, episodicMop, concept)
+//            } else {
+//                println("Creating mop ${concept.name} in EP memory")
+//                val human = buildHuman(concept.valueName("firstName"), concept.valueName("lastName"), concept.valueName("gender"))
+//                // val saveCharacterDemon = SaveCharacterDemon(root.wordContext)
+//                root.wordContext.context.episodicMemory.addConcept(human)
+        }
+    }
+    root.addDemon(checkMopDemon)
+    // checkOrCreateMop
+}
+
+class CheckMopDemon(val mop: Concept, wordContext: WordContext, val action: (Concept?) -> Unit): Demon(wordContext) {
+    override fun run() {
+        val matchedMop = wordContext.context.episodicMemory.checkOrCreateMop(mop)
+        action(matchedMop)
+
+        active = false
+    }
+    override fun description(): String {
+        return "CheckMOP from episodic with ${mop.name}"
+    }
+}
+
+class EpisodicRoleCheck(val mop: Concept, wordContext: WordContext, val action: (Concept?) -> Unit): Demon(wordContext) {
+    override fun run() {
+        val matchedMop = wordContext.context.episodicMemory.checkOrCreateMop(mop)
+        action(matchedMop)
+        active = false
+    }
+    override fun description(): String {
+        return "CheckMOP from episodic with ${mop.name}"
+    }
+}
+
+// InDepth p185
+fun checkEpisodicRelationship(parent: Concept, episodicMemory: EpisodicMemory): String {
+    return episodicMemory.checkOrCreateRelationship(parent)
+    // FIXME also assume new relationship
 }

@@ -158,7 +158,7 @@ data class Concept(var name: String) {
     }
 
     fun children(): List<Concept?> {
-        return slots.map { (name, slot) -> slot.value }.toList()
+        return slots.map { (_, slot) -> slot.value }.toList()
     }
 }
 

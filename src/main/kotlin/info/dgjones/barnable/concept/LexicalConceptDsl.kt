@@ -186,103 +186,12 @@ class LexicalConceptBuilder(val root: LexicalRootBuilder, conceptName: String) {
         }
         root.addDemon(demon)
     }
+
     fun expectKind(slotName: String, variableName: String? = null, kinds: List<String>, direction: SearchDirection = SearchDirection.After) {
         val variableSlot = root.createVariable(slotName, variableName)
         concept.with(variableSlot)
         val demon = ExpectDemon(matchConceptByKind(kinds), direction, root.wordContext) {
             root.completeVariable(variableSlot, it, this.episodicConcept)
-        }
-        root.addDemon(demon)
-    }
-
-    // Find matching human in episodic memory, and associate concept
-    // InDepth p185
-    fun checkCharacter(slotName: String, variableName: String? = null) {
-        val variableSlot = root.createVariable(slotName, variableName)
-        concept.with(variableSlot)
-        val checkCharacterDemon = CheckCharacterDemon(concept, root.wordContext) { episodicCharacter ->
-            if (episodicCharacter != null) {
-                val episodicInstance = episodicCharacter.value(CoreFields.Instance)
-                root.completeVariable(variableSlot, root.wordContext.context.workingMemory.createDefHolder(episodicInstance))
-                this.episodicConcept = episodicCharacter
-                copyCompletedSlot(HumanFields.FirstName, episodicCharacter, concept)
-                copyCompletedSlot(HumanFields.LastName, episodicCharacter, concept)
-                copyCompletedSlot(HumanFields.Gender, episodicCharacter, concept)
-                root.wordContext.context.workingMemory.markAsRecentCharacter(concept)
-            } else {
-                println("Creating character ${concept.valueName(HumanFields.FirstName)} in EP memory")
-                root.wordContext.context.workingMemory.markAsRecentCharacter(concept)
-            }
-        }
-        root.addDemon(checkCharacterDemon)
-    }
-
-    fun checkMop(slotName: String, variableName: String? = null) {
-        val variableSlot = root.createVariable(slotName, variableName)
-        concept.with(variableSlot)
-        val checkMopDemon = CheckMopDemon(concept, root.wordContext) { episodicMop ->
-            if (episodicMop != null) {
-                val episodicInstance = episodicMop.value(CoreFields.Instance)
-                root.completeVariable(variableSlot, root.wordContext.context.workingMemory.createDefHolder(episodicInstance))
-                this.episodicConcept = episodicMop
-                copyCompletedSlot(MopMealFields.EATER_A, episodicMop, concept)
-                copyCompletedSlot(MopMealFields.EATER_B, episodicMop, concept)
-                copyCompletedSlot(CoreFields.Event, episodicMop, concept)
-//            } else {
-//                println("Creating mop ${concept.name} in EP memory")
-//                val human = buildHuman(concept.valueName("firstName"), concept.valueName("lastName"), concept.valueName("gender"))
-//                // val saveCharacterDemon = SaveCharacterDemon(root.wordContext)
-//                root.wordContext.context.episodicMemory.addConcept(human)
-            }
-        }
-        root.addDemon(checkMopDemon)
-        // checkOrCreateMop
-    }
-
-    // Find recent character with matching gender in Working Memory
-    // May be replaced by better value using knowledge layer
-    // InDepth p185
-    fun findCharacter(slotName: String, variableName: String? = null) {
-        val variableSlot = root.createVariable(slotName, variableName)
-        concept.with(variableSlot)
-        val demon = FindCharacterDemon(concept.valueName(HumanFields.Gender), root.wordContext) {
-            if (it != null) {
-                root.completeVariable(variableSlot, it, root.wordContext, this.episodicConcept)
-            }
-        }
-        root.addDemon(demon)
-    }
-
-    fun nextChar(slotName: String, variableName: String? = null, relRole: String? = null) {
-        val variableSlot = root.createVariable(slotName, variableName)
-        concept.with(variableSlot)
-        val demon = NextCharacterDemon(root.wordContext) {
-            if (it != null) {
-                root.completeVariable(variableSlot, it, this.episodicConcept)
-            }
-        }
-        root.addDemon(demon)
-    }
-
-    fun innerInstance(slotName: Fields, variableName: String? = null, observeSlot: String) {
-        val variableSlot = root.createVariable(slotName, variableName)
-        concept.with(variableSlot)
-        val demon = InnerInstanceDemon(observeSlot, root.wordContext) {
-            if (it != null) {
-                root.completeVariable(variableSlot, it, root.wordContext, this.episodicConcept)
-            }
-        }
-        root.addDemon(demon)
-    }
-
-    // InDepth p185
-    fun checkRelationship(slotName: Fields, variableName: String? = null, waitForSlots: List<String>) {
-        val variableSlot = root.createVariable(slotName.fieldName, variableName)
-        concept.with(variableSlot)
-        val demon = CheckRelationshipDemon(concept, waitForSlots, root.wordContext) {
-            if (it != null) {
-                root.completeVariable(variableSlot, it, root.wordContext, this.episodicConcept)
-            }
         }
         root.addDemon(demon)
     }

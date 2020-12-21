@@ -205,4 +205,3 @@ class EpisodicMemory {
 }
 
 data class EpisodicConceptHolder(val instance: EpisodicInstance, val concept: Concept)
-

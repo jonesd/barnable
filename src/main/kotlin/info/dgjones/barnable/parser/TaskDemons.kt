@@ -27,153 +27,13 @@ class ExpectDemon(val matcher: ConceptMatcher, val direction: SearchDirection, w
     override fun run() {
         searchContext(matcher, abortSearch = matchConjunction(), direction = direction, wordContext = wordContext) {
             action(it)
-            if (it != null) {
-                active = false
-            }
+            active = false
         }
     }
 
     override fun description(): String {
         return "ExpectDemon $direction $action"
     }
-}
-
-/* Find matching character in episodic memory. Only runs once */
-class CheckCharacterDemon(val human: Concept, wordContext: WordContext, val action: (Concept?) -> Unit): Demon(wordContext) {
-    override fun run() {
-        val matchedCharacter = wordContext.context.episodicMemory.checkOrCreateCharacter(human)
-        action(matchedCharacter)
-        active = false
-    }
-    override fun description(): String {
-        return "CheckCharacter from episodic with ${human.valueName(HumanFields.FirstName)} ${human.valueName(HumanFields.Gender)}"
-    }
-}
-
-class CheckMopDemon(val mop: Concept, wordContext: WordContext, val action: (Concept?) -> Unit): Demon(wordContext) {
-    override fun run() {
-        val matchedMop = wordContext.context.episodicMemory.checkOrCreateMop(mop)
-        action(matchedMop)
-
-        active = false
-    }
-    override fun description(): String {
-        return "CheckMOP from episodic with ${mop.name}"
-    }
-}
-
-// Search working memory for tentative character based on gender
-// InDepth p182
-class FindCharacterDemon(val gender: String?, wordContext: WordContext, val action: (Concept?) -> Unit): Demon(wordContext) {
-    override fun run() {
-        if (gender != null) {
-            val matchedCharacter = wordContext.context.workingMemory.findCharacterByGender(gender)
-            action(matchedCharacter)
-            active = false
-        }
-    }
-
-    override fun description(): String {
-        return "FindCharacter from working memory gender=$gender"
-    }
-}
-
-class SaveCharacterDemon(wordContext: WordContext): Demon(wordContext){
-    override fun run() {
-        val character = wordContext.def()
-        if (character != null && HumanAccessor(character).isCompatible()) {
-            wordContext.context.workingMemory.markAsRecentCharacter(character)
-            active = false
-        } else {
-            println("SaveCharacter failed as def = $character")
-        }
-    }
-
-    override fun description(): String {
-        return "SaveCharacter ${wordContext.def()}"
-    }
-}
-
-class SaveObjectDemon(wordContext: WordContext): Demon(wordContext) {
-    override fun run() {
-        val o = wordContext.def()
-        if (o != null) {
-            wordContext.context.mostRecentObject = o
-            active = false
-        }
-    }
-
-    override fun description(): String {
-        return "SaveObject def=${wordContext.def()}"
-    }
-}
-
-class FindObjectReferenceDemon(wordContext: WordContext): Demon(wordContext) {
-    override fun run() {
-        if (!wordContext.isDefSet()) {
-            wordContext.defHolder.value = wordContext.context.mostRecentObject
-            println("updated word=${wordContext.word} to def=${wordContext.def()}")
-        }
-        if (wordContext.isDefSet()) {
-            active = false
-        }
-    }
-}
-
-/* Assign the Instance slot value of the resolved concept */
-class InnerInstanceDemon(val slotName: String, wordContext: WordContext, val action: (Concept?) -> Unit): Demon(wordContext) {
-    var conceptAccessor: ConceptSlotAccessor? = null
-    override fun run() {
-        wordContext.defHolder.value?.let { rootConcept ->
-            conceptPathResolvedValue(rootConcept, slotName)?.let { parentConcept ->
-                val instanceConcept = parentConcept.value(CoreFields.Instance)
-                if (isConceptResolved(instanceConcept)) {
-                    active = false
-                    action(instanceConcept)
-                }
-            }
-        }
-    }
-
-    override fun description(): String {
-        return "When the inner ${CoreFields.Instance} of $slotName has been bound\nThen use it to bind the demon's role"
-    }
-}
-
-class CheckRelationshipDemon(private var parent: Concept, private var dependentSlotNames: List<String>, wordContext: WordContext, val action: (Concept?) -> Unit): Demon(wordContext) {
-    override fun run() {
-        val rootConcept =  wordContext.defHolder.value
-        if (rootConcept != null && isDependentSlotsComplete(parent, dependentSlotNames)) {
-            val instance = checkEpisodicRelationship(parent, wordContext.context.episodicMemory)
-            active = false
-            action(Concept(instance))
-        }
-    }
-    override fun description(): String {
-        return "CheckRelationship waitingFor $dependentSlotNames"
-    }
-}
-
-fun isDependentSlotsComplete(parent: Concept, childrenSlotNames: List<String>): Boolean {
-    // FIXME PERFORMANCE try and cache the conceptAccessors
-    return childrenSlotNames.all { conceptPathResolvedValue(parent, it) != null }
-}
-
-fun conceptPathResolvedValue(parent: Concept?, slotName: String): Concept? {
-    parent?.let {
-        buildConceptPathAccessor(parent, slotName)?.invoke()?.let { concept ->
-            if (isConceptResolved(concept)) {
-                return concept
-            }
-        }
-    }
-    return null
-}
-
-// InDepth p185
-fun checkEpisodicRelationship(parent: Concept, episodicMemory: EpisodicMemory): String {
-    return episodicMemory.checkOrCreateRelationship(parent)
-    // FIXME also assume new relationship
 }
 
 class InsertAfterDemon(val matcher: ConceptMatcher, wordContext: WordContext, val action: (ConceptHolder) -> Unit): Demon(wordContext) {
@@ -191,34 +51,6 @@ class InsertAfterDemon(val matcher: ConceptMatcher, wordContext: WordContext, va
     }
 }
 
-class NextCharacterDemon(wordContext: WordContext, val action: (ConceptHolder) -> Unit): Demon(wordContext) {
-    override fun run() {
-        val matcher = matchConceptByHead(InDepthUnderstandingConcepts.Human.name)
-        searchContext(matcher, matchNever(), direction = SearchDirection.After, wordContext = wordContext) {
-            if (it.value != null) {
-                active = false
-                action(it)
-            }
-            //FIXME also look for unattached preceding Human
-        }
-    }
-
-    override fun description(): String {
-        return "NextCharacter"
-    }
-}
-
-class EpisodicRoleCheck(val mop: Concept, wordContext: WordContext, val action: (Concept?) -> Unit): Demon(wordContext) {
-    override fun run() {
-        val matchedMop = wordContext.context.episodicMemory.checkOrCreateMop(mop)
-        action(matchedMop)
-        active = false
-    }
-    override fun description(): String {
-        return "CheckMOP from episodic with ${mop.name}"
-    }
-}
-
 class UpdateEventDemon(private val episodicConcept: Concept, wordContext: WordContext, val action: (Concept?) -> Unit): Demon(wordContext) {
     override fun run() {
         //FIXME should this also handle "having a meeting"
@@ -233,4 +65,20 @@ class UpdateEventDemon(private val episodicConcept: Concept, wordContext: WordCo
     override fun description(): String {
         return "UpdateEvent if HAVE precedes: set as main event, update scenario map"
     }
+}
+
+fun isDependentSlotsComplete(parent: Concept, childrenSlotNames: List<String>): Boolean {
+    // FIXME PERFORMANCE try and cache the conceptAccessors
+    return childrenSlotNames.all { conceptPathResolvedValue(parent, it) != null }
+}
+
+fun conceptPathResolvedValue(parent: Concept?, slotName: String): Concept? {
+    parent?.let {
+        buildConceptPathAccessor(parent, slotName)?.invoke()?.let { concept ->
+            if (isConceptResolved(concept)) {
+                return concept
+            }
+        }
+    }
+    return null
 }

@@ -17,11 +17,10 @@
 
 package info.dgjones.barnable.narrative
 
-import info.dgjones.barnable.concept.CoreFields
-import info.dgjones.barnable.concept.Fields
-import info.dgjones.barnable.concept.lexicalConcept
+import info.dgjones.barnable.concept.*
 import info.dgjones.barnable.domain.general.Gender
 import info.dgjones.barnable.domain.general.HumanFields
+import info.dgjones.barnable.episodic.innerInstance
 import info.dgjones.barnable.grammar.possessiveRef
 import info.dgjones.barnable.parser.*
 
@@ -66,4 +65,32 @@ class WordHusband: WordHandler(EntryWord("husband")) {
             }
             innerInstance(CoreFields.Instance, observeSlot = Marriage.Husband.fieldName)
         }.demons
+}
+
+// Lexical
+
+// InDepth p185
+fun LexicalConceptBuilder.checkRelationship(slotName: Fields, variableName: String? = null, waitForSlots: List<String>) {
+    val variableSlot = root.createVariable(slotName.fieldName, variableName)
+    concept.with(variableSlot)
+    val demon = CheckRelationshipDemon(concept, waitForSlots, root.wordContext) {
+        if (it != null) {
+            root.completeVariable(variableSlot, it, root.wordContext, this.episodicConcept)
+        }
+    }
+    root.addDemon(demon)
+}
+
+class CheckRelationshipDemon(private var parent: Concept, private var dependentSlotNames: List<String>, wordContext: WordContext, val action: (Concept?) -> Unit): Demon(wordContext) {
+    override fun run() {
+        val rootConcept =  wordContext.defHolder.value
+        if (rootConcept != null && isDependentSlotsComplete(parent, dependentSlotNames)) {
+            val instance = checkEpisodicRelationship(parent, wordContext.context.episodicMemory)
+            active = false
+            action(Concept(instance))
+        }
+    }
+    override fun description(): String {
+        return "CheckRelationship waitingFor $dependentSlotNames"
+    }
 }
