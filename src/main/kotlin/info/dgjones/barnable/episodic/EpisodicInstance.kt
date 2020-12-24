@@ -28,7 +28,7 @@ fun LexicalConceptBuilder.innerInstance(slotName: Fields, variableName: String? 
     concept.with(variable.slot())
     val demon = InnerInstanceDemon(observeSlot, root.wordContext) {
         if (it != null) {
-            variable.complete(root.createDefHolder(it), root.wordContext, this.episodicConcept)
+            root.completeVariable(variable, it, this.episodicConcept)
         }
     }
     root.addDemon(demon)

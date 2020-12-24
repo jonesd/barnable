@@ -51,7 +51,7 @@ fun LexicalConceptBuilder.expectActor(slotName: Fields = ActFields.Actor, variab
     val variable = root.createVariable(slotName, variableName)
     concept.with(variable.slot())
     val demon = ExpectActor(root.wordContext) {
-        variable.complete(it, root.wordContext, this.episodicConcept)
+        root.completeVariable(variable, it, this.episodicConcept)
     }
     root.addDemon(demon)
 }

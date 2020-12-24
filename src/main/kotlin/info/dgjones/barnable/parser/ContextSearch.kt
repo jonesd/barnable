@@ -61,10 +61,7 @@ fun searchContext(matcher: ConceptMatcher, abortSearch: ConceptMatcher = matchNe
             searchAborted = true
             return null
         }
-        if (matcher(value)) {
-            return defHolder
-        }
-        return null
+        return if (matcher(value)) defHolder else null
     }
 
     fun wordIterator(): IntProgression {

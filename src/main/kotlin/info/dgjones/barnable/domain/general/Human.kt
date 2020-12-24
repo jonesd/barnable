@@ -108,7 +108,8 @@ fun LexicalConceptBuilder.lastName(slotName: Fields, variableName: String? = nul
     concept.with(variable.slot())
     val demon = LastNameDemon(root.wordContext) {
         if (it != null) {
-            variable.complete(root.createDefHolder(it), root.wordContext, this.episodicConcept)
+            root.completeVariable(variable, it, this.episodicConcept)
+            //variable.complete(root.createDefHolder(it), root.wordContext, this.episodicConcept)
         }
     }
     root.addDemon(demon)

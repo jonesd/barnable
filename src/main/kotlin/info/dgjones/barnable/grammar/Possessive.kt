@@ -30,7 +30,7 @@ fun LexicalConceptBuilder.possessiveRef(slotName: Fields, variableName: String? 
     concept.with(variable.slot())
     val demon = PossessiveReference(gender, root.wordContext) {
         if (it != null) {
-            variable.complete(root.createDefHolder(it), root.wordContext, this.episodicConcept)
+            root.completeVariable(variable, it, this.episodicConcept)
         }
     }
     root.addDemon(demon)

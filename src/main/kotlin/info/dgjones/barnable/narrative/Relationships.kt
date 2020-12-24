@@ -76,7 +76,7 @@ fun LexicalConceptBuilder.checkRelationship(slotName: Fields, variableName: Stri
     concept.with(variable.slot())
     val demon = CheckRelationshipDemon(concept, waitForSlots, root.wordContext) {
         if (it != null) {
-            variable.complete(root.createDefHolder(it), root.wordContext, this.episodicConcept)
+            root.completeVariable(variable, it, this.episodicConcept)
         }
     }
     root.addDemon(demon)
