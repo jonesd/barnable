@@ -104,11 +104,11 @@ class WordPerson(val human: Concept, word: String = human.valueName(HumanFields.
 }
 
 fun LexicalConceptBuilder.lastName(slotName: Fields, variableName: String? = null) {
-    val variableSlot = root.createVariable(slotName, variableName)
-    concept.with(variableSlot)
+    val variable = root.createVariable(slotName, variableName)
+    concept.with(variable.slot())
     val demon = LastNameDemon(root.wordContext) {
         if (it != null) {
-            root.completeVariable(variableSlot, it, root.wordContext, this.episodicConcept)
+            variable.complete(root.createDefHolder(it), root.wordContext, this.episodicConcept)
         }
     }
     root.addDemon(demon)

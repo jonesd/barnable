@@ -48,20 +48,20 @@ enum class Acts {
 }
 
 fun LexicalConceptBuilder.expectActor(slotName: Fields = ActFields.Actor, variableName: String? = null) {
-    val variableSlot = root.createVariable(slotName, variableName)
-    concept.with(variableSlot)
+    val variable = root.createVariable(slotName, variableName)
+    concept.with(variable.slot())
     val demon = ExpectActor(root.wordContext) {
-        root.completeVariable(variableSlot, it, this.episodicConcept)
+        variable.complete(it, root.wordContext, this.episodicConcept)
     }
     root.addDemon(demon)
 }
 
 fun LexicalConceptBuilder.expectThing(slotName: Fields = ActFields.Thing, variableName: String? = null, matcher: ConceptMatcher = matchConceptByHeadOrGroup(
     GeneralConcepts.PhysicalObject.name)) {
-    val variableSlot = root.createVariable(slotName, variableName)
-    concept.with(variableSlot)
+    val variable = root.createVariable(slotName, variableName)
+    concept.with(variable.slot())
     val demon = ExpectThing(matcher, root.wordContext) {
-        root.completeVariable(variableSlot, it, this.episodicConcept)
+        root.completeVariable(variable, it, this.episodicConcept)
     }
     root.addDemon(demon)
 }

@@ -24,11 +24,11 @@ import info.dgjones.barnable.parser.conceptPathResolvedValue
 
 
 fun LexicalConceptBuilder.innerInstance(slotName: Fields, variableName: String? = null, observeSlot: String) {
-    val variableSlot = root.createVariable(slotName, variableName)
-    concept.with(variableSlot)
+    val variable = root.createVariable(slotName, variableName)
+    concept.with(variable.slot())
     val demon = InnerInstanceDemon(observeSlot, root.wordContext) {
         if (it != null) {
-            root.completeVariable(variableSlot, it, root.wordContext, this.episodicConcept)
+            variable.complete(root.createDefHolder(it), root.wordContext, this.episodicConcept)
         }
     }
     root.addDemon(demon)

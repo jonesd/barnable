@@ -26,11 +26,11 @@ import info.dgjones.barnable.parser.searchContext
 
 /* Populate a slot with a Human of matching gender marked as being of Possessive case */
 fun LexicalConceptBuilder.possessiveRef(slotName: Fields, variableName: String? = null, gender: Gender) {
-    val variableSlot = root.createVariable(slotName.fieldName, variableName)
-    concept.with(variableSlot)
+    val variable = root.createVariable(slotName.fieldName, variableName)
+    concept.with(variable.slot())
     val demon = PossessiveReference(gender, root.wordContext) {
         if (it != null) {
-            root.completeVariable(variableSlot, it, root.wordContext, this.episodicConcept)
+            variable.complete(root.createDefHolder(it), root.wordContext, this.episodicConcept)
         }
     }
     root.addDemon(demon)

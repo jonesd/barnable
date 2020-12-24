@@ -145,12 +145,12 @@ data class Concept(var name: String) {
         name.startsWith(VARIABLE_PREFIX)
 
     override fun toString(): String {
-        return printIndented(0)
+        return printIndented(0, mutableSetOf())
     }
 
-    fun printIndented(indent: Int = 1): String {
+    fun printIndented(indent: Int = 1, parents: MutableSet<Slot>): String {
         val indentString = " ".repeat(indent * 2)
-        return "($name ${slots.values.map{it.printIndented(indent + 1)}.joinToString(separator = "\n$indentString") { it }})"
+        return "($name ${slots.values.map{it.printIndented(indent + 1, parents)}.joinToString(separator = "\n$indentString") { it }})"
     }
 
     fun with(child: Concept?) {
@@ -162,7 +162,7 @@ data class Concept(var name: String) {
     }
 }
 
-class Slot(val name: String, var value: Concept? = null) {
+data class Slot(val name: String, var value: Concept? = null) {
     constructor(field: Fields, value: Concept? = null): this(field.fieldName, value)
 
     fun copyValue(destination: Concept) {
@@ -175,6 +175,7 @@ class Slot(val name: String, var value: Concept? = null) {
     }
 
     fun replaceSlotValues(matcher: ConceptMatcher, replace: String?) {
+        // FIXME review "recursive" references
         if (matcher(value)) {
             value = if (replace != null) Concept(replace) else null
         } else {
@@ -188,9 +189,13 @@ class Slot(val name: String, var value: Concept? = null) {
     override fun toString(): String {
         return "$name $value"
     }
-    fun printIndented(indent: Int = 1): String {
+    fun printIndented(indent: Int = 1, parents: MutableSet<Slot>): String {
         val indentString = " ".repeat(indent * 2)
-        return "$indentString$name ${value?.printIndented(indent)}"
+        if (parents.contains(this)) {
+            return "RECURSIVE $name ${value?.name}...."
+        }
+        parents.add(this)
+        return "$indentString$name ${value?.printIndented(indent, parents)}"
     }
 }
 

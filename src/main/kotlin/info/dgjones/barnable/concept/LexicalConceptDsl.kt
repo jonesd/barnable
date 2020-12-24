@@ -17,9 +17,8 @@
 
 package info.dgjones.barnable.concept
 
-import info.dgjones.barnable.domain.general.HumanFields
+import info.dgjones.barnable.domain.general.expectThing
 import info.dgjones.barnable.episodic.EpisodicConcept
-import info.dgjones.barnable.narrative.MopMealFields
 import info.dgjones.barnable.parser.*
 
 /* DSL to help build Concept as part of a word sense.
@@ -29,11 +28,9 @@ class LexicalRootBuilder(val wordContext: WordContext, private val headName: Str
     val root = LexicalConceptBuilder(this, headName)
 
     val demons = mutableListOf<Demon>()
-    private val variableSlots = mutableListOf<Slot>()
-    private val completedSlots = mutableListOf<Slot>()
-    val completedConceptHolders = mutableListOf<ConceptHolder>()
-    private val variableExpressions = mutableMapOf<Slot, ConceptTransformer>()
-    val overwriteHolderWithMatchedVariable = mutableMapOf<String, Concept>()
+
+    private val variableSpace = VariableSpace()
+
     private val disambiguations = mutableListOf<Demon>()
     private var totalSuccessfulDisambiguations = 0
 
@@ -43,57 +40,42 @@ class LexicalRootBuilder(val wordContext: WordContext, private val headName: Str
 
     // FIXME shouldn't associate this state that lives on beyond build() to builder
     // should create new holder instead
-    fun createVariable(slotName: Fields, variableName: String? = null, expression: ConceptTransformer? = null): Slot {
+    fun createVariable(slotName: Fields, variableName: String? = null, expression: ConceptTransformer? = null): CompletableVariable {
         return createVariable(slotName.fieldName, variableName, expression)
     }
-    fun createVariable(slotName: String, variableName: String? = null, expression: ConceptTransformer? = null): Slot {
-        val nameOrNextVariableNumber = variableName ?: wordContext.context.workingMemory.nextVariableIndex().toString()
-        val conceptVariable = createConceptVariable(nameOrNextVariableNumber)
-        val slot = Slot(slotName, conceptVariable)
-        variableSlots.add(slot)
-        expression?.let { variableExpressions[slot] = expression }
-        return slot
+    fun createVariable(slotName: String, variableName: String? = null, expression: ConceptTransformer? = null): CompletableVariable {
+        val variable = CompletableVariable(slotName, variableSpace, variableName, expression)
+        variableSpace.declareVariable(variable)
+        return variable
     }
-    fun completeVariable(variableSlot: Slot, value: Concept, wordContext: WordContext, episodicConcept: EpisodicConcept? = null) {
-        val conceptHolder = wordContext.context.workingMemory.createDefHolder(value)
-        completeVariable(variableSlot, conceptHolder, episodicConcept)
+
+    fun addVariableReference(slotName: Fields, variableName: String, expression: ConceptTransformer? = null): Slot {
+        return addVariableReference(slotName.fieldName, variableName, expression)
     }
-    fun completeVariable(variableSlot: Slot, valueHolder: ConceptHolder, episodicConcept: EpisodicConcept? = null, markAsInside: Boolean = true) {
-        if (!variableSlot.isVariable()) return
-        val variableName = variableSlot.value?.name ?: return
-        if (markAsInside) {
-            completedConceptHolders.add(valueHolder)
-        }
-        val completeVariableSlots = variableSlots.filter { it.value?.name == variableName }
-        //FIXME can multiple demons update the same value here?
-        completeVariableSlots.forEach {
-            it.value = evaluateExpression(it, valueHolder.value)
-            // FIXME better way to triggered updating - spawn demon instead
-            episodicConcept?.let { episodicConcept ->
-                // FIXME not sure about this qa hack?
-                if (!wordContext.context.qaMode) {
-                    wordContext.context.episodicMemory.episodicRoleCheck(episodicConcept, it)
-                }
-            }
-        }
-        completedSlots.addAll(completeVariableSlots)
-        variableSlots.removeAll(completeVariableSlots)
-        completedConceptHolders.forEach { it.addFlag(ParserFlags.Inside)  }
-        overwriteHolderWithMatchedVariable[variableName]?.let {
-            valueHolder.value?.shareStateFrom(it)
-            // FIXME assuming object...
-            valueHolder.value?.let { v ->
-                wordContext.context.mostRecentObject = v
-            }
-        }
+    fun addVariableReference(slotName: String, variableName: String, expression: ConceptTransformer? = null): Slot {
+        val sourceVariable = variableSpace.getVariable(variableName)
+        return sourceVariable.addVariableReference(slotName, expression)
     }
-    private fun evaluateExpression(slot: Slot, value: Concept?): Concept? {
-        if (value == null) {
-            return null
-        }
-        val conceptTransformer = variableExpressions[slot]
-        return if (conceptTransformer != null) conceptTransformer.transform(value) else value
+
+    fun completeVariable(variable: CompletableVariable, value: Concept, wordContext: WordContext, episodicConcept: EpisodicConcept? = null) {
+        val conceptHolder = createDefHolder(wordContext, value)
+        completeVariable(variable, conceptHolder, episodicConcept)
     }
+    fun createDefHolder(
+        wordContext: WordContext,
+        value: Concept
+    ) = wordContext.context.workingMemory.createDefHolder(value)
+
+    fun createDefHolder(value: Concept) = wordContext.context.workingMemory.createDefHolder(value)
+
+    fun overwriteHolderWithMatchedVariable(variableName: String, concept: Concept) {
+        val sourceVariable = variableSpace.getVariable(variableName)
+        sourceVariable.overwriteResolvedHolder = concept
+    }
+    fun completeVariable(variable: CompletableVariable, valueHolder: ConceptHolder, episodicConcept: EpisodicConcept? = null, markAsInside: Boolean = true) {
+        variable.complete(valueHolder, wordContext, episodicConcept)
+    }
+
     fun disambiguationResult(result: Boolean) {
         this.totalSuccessfulDisambiguations += 1
     }
@@ -123,6 +105,7 @@ class LexicalRootBuilder(val wordContext: WordContext, private val headName: Str
         root.addDisambiguationDemon(demon)
     }
 }*/
+
 
 class LexicalConceptBuilder(val root: LexicalRootBuilder, conceptName: String) {
     val concept = Concept(conceptName)
@@ -154,10 +137,10 @@ class LexicalConceptBuilder(val root: LexicalRootBuilder, conceptName: String) {
         expectHead(slotName, variableName, listOf(headValue), clearHolderOnCompletion, markAsInside, direction)
     }
     fun expectHead(slotName: String, variableName: String? = null, headValues: List<String>, clearHolderOnCompletion: Boolean = false, markAsInside: Boolean = true, direction: SearchDirection = SearchDirection.After) {
-        val variableSlot = root.createVariable(slotName, variableName)
-        concept.with(variableSlot)
+        val variable = root.createVariable(slotName, variableName)
+        concept.with(variable.slot())
         val demon = ExpectDemon(matchConceptByHead(headValues), direction, root.wordContext) {
-            root.completeVariable(variableSlot, it, this.episodicConcept, markAsInside = markAsInside)
+            variable.complete(it, root.wordContext, this.episodicConcept, markAsInside = markAsInside)
             if (clearHolderOnCompletion) {
                 it.value = null
             }
@@ -169,41 +152,40 @@ class LexicalConceptBuilder(val root: LexicalRootBuilder, conceptName: String) {
      * General find a concept from the concept sentence and extract out the specified concept value
      */
     fun expectConcept(slotName: String, variableName: String? = null, conceptField: String? = null, matcher: ConceptMatcher, direction: SearchDirection = SearchDirection.After) {
-        val variableSlot = root.createVariable(slotName, variableName)
-        concept.with(variableSlot)
+        val variable = root.createVariable(slotName, variableName)
+        concept.with(variable.slot())
         val demon = ExpectDemon(matcher, direction, root.wordContext) {
             if (conceptField != null) {
                 // FIXME support sub-concept matching
                 val value = it.value?.value(conceptField)
                 // FIXME will never complete if value initially empty...
                 if (value != null) {
-                    root.completeVariable(variableSlot, value, wordContext = root.wordContext, this.episodicConcept)
+                    variable.complete(it, wordContext = root.wordContext, this.episodicConcept)
                     it.addFlag(ParserFlags.Inside)
                 }
             } else {
-                root.completeVariable(variableSlot, it, this.episodicConcept)
+                variable.complete(it, root.wordContext, this.episodicConcept)
             }
         }
         root.addDemon(demon)
     }
 
     fun expectKind(slotName: String, variableName: String? = null, kinds: List<String>, direction: SearchDirection = SearchDirection.After) {
-        val variableSlot = root.createVariable(slotName, variableName)
-        concept.with(variableSlot)
+        val variable = root.createVariable(slotName, variableName)
+        concept.with(variable.slot())
         val demon = ExpectDemon(matchConceptByKind(kinds), direction, root.wordContext) {
-            root.completeVariable(variableSlot, it, this.episodicConcept)
+            variable.complete(it, root.wordContext, this.episodicConcept)
         }
         root.addDemon(demon)
     }
 
     fun varReference(slotName: String, variableName: String, expression: ConceptTransformer? = null) {
-        val variableSlot = root.createVariable(slotName, variableName, expression)
+        val variableSlot = root.addVariableReference(slotName, variableName, expression)
         concept.with(variableSlot)
     }
 
     fun replaceWordContextWithCurrent(variableName: String) {
-        val fullVariableName = createConceptVariable(variableName).name
-        root.overwriteHolderWithMatchedVariable[fullVariableName] = concept
+        root.overwriteHolderWithMatchedVariable(variableName, concept)
     }
 }
 

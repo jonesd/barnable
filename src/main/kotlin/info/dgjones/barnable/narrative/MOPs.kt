@@ -66,12 +66,12 @@ fun EpisodicMemory.checkOrCreateMop(concept: Concept): EpisodicConcept {
 // Lexical
 
 fun LexicalConceptBuilder.checkMop(slotName: String, variableName: String? = null) {
-    val variableSlot = root.createVariable(slotName, variableName)
-    concept.with(variableSlot)
+    val variable = root.createVariable(slotName, variableName)
+    concept.with(variable.slot())
     val checkMopDemon = CheckMopDemon(concept, root.wordContext) { episodicMop ->
         if (episodicMop != null) {
             val episodicInstance = episodicMop.value(CoreFields.Instance)
-            root.completeVariable(variableSlot, root.wordContext.context.workingMemory.createDefHolder(episodicInstance))
+            root.completeVariable(variable, root.wordContext.context.workingMemory.createDefHolder(episodicInstance))
             this.episodicConcept = episodicMop
             copyCompletedSlot(MopMealFields.EATER_A, episodicMop, concept)
             copyCompletedSlot(MopMealFields.EATER_B, episodicMop, concept)

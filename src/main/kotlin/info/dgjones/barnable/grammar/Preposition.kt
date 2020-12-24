@@ -55,13 +55,13 @@ fun matchPrepIn(preps: Collection<Preposition>): ConceptMatcher {
 }
 
 fun LexicalConceptBuilder.expectPrep(slotName: String, variableName: String? = null, preps: Collection<Preposition>, matcher: ConceptMatcher, direction: SearchDirection = SearchDirection.After) {
-    val variableSlot = root.createVariable(slotName, variableName)
-    concept.with(variableSlot)
+    val variable = root.createVariable(slotName, variableName)
+    concept.with(variable.slot())
     val matchers = matchAll(
         listOf(matchPrepIn(preps), matcher)
     )
     val demon = PrepDemon(matchers, direction, root.wordContext) {
-        root.completeVariable(variableSlot, it, this.episodicConcept)
+        root.completeVariable(variable, it, this.episodicConcept)
     }
     root.addDemon(demon)
 }

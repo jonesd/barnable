@@ -19,6 +19,7 @@ package info.dgjones.barnable.concept
 
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class ConceptResolutionTest {

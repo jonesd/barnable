@@ -302,8 +302,7 @@ open class EntryWord(val word: String, val expression: List<String> = listOf(wor
     }
 }
 
-data class ConceptHolder(val instanceNumber: Int) {
-    var value: Concept? = null
+data class ConceptHolder(val instanceNumber: Int, var value: Concept? = null) {
     private val flags = mutableSetOf<ParserFlags>()
 
     fun addFlag(flag: ParserFlags) {

@@ -72,11 +72,11 @@ class WordHusband: WordHandler(EntryWord("husband")) {
 
 // InDepth p185
 fun LexicalConceptBuilder.checkRelationship(slotName: Fields, variableName: String? = null, waitForSlots: List<String>) {
-    val variableSlot = root.createVariable(slotName.fieldName, variableName)
-    concept.with(variableSlot)
+    val variable = root.createVariable(slotName.fieldName, variableName)
+    concept.with(variable.slot())
     val demon = CheckRelationshipDemon(concept, waitForSlots, root.wordContext) {
         if (it != null) {
-            root.completeVariable(variableSlot, it, root.wordContext, this.episodicConcept)
+            variable.complete(root.createDefHolder(it), root.wordContext, this.episodicConcept)
         }
     }
     root.addDemon(demon)

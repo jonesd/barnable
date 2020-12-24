@@ -17,6 +17,8 @@
 
 package info.dgjones.barnable.concept
 
+import info.dgjones.barnable.domain.general.ActFields
+import info.dgjones.barnable.domain.general.GeneralConcepts
 import info.dgjones.barnable.episodic.EpisodicMemory
 import info.dgjones.barnable.nlp.TextSentence
 import info.dgjones.barnable.nlp.WordElement
@@ -27,14 +29,8 @@ import org.junit.jupiter.api.Test
 class LexicalConceptBuilderTest {
     @Test
     fun `create concept with simple concept hierarchy`() {
-        val defHolder = ConceptHolder(9)
-        val testElement = WordElement("one", "", "","")
-        val workingMemory = WorkingMemory()
-        val sentenceContext = SentenceContext(TextSentence("test", listOf(testElement)), workingMemory, EpisodicMemory())
-        val wordContext = WordContext(0, "test", defHolder, sentenceContext)
-
         // test
-        val lexicalConcept = lexicalConcept(wordContext, "MTRANS") {
+        val lexicalConcept = lexicalConcept(createWordContext(), "MTRANS") {
             slot("actor", "human") {
                 slot("name", "mary")
             }
@@ -47,40 +43,38 @@ class LexicalConceptBuilderTest {
 
     @Test
     fun `create concept with expectDemon`() {
-        val defHolder = ConceptHolder(9)
-        val testElement = WordElement("one", "", "","")
-        val workingMemory = WorkingMemory()
-        val sentenceContext = SentenceContext(TextSentence("test", listOf(testElement)), workingMemory, EpisodicMemory())
-        val wordContext = WordContext(0, "test", defHolder, sentenceContext)
-
-        val lexicalConcept = lexicalConcept(wordContext, "MTRANS") {
+        val lexicalConcept = lexicalConcept(createWordContext(), "MTRANS") {
             expectHead("actor", headValue = "Human", direction = SearchDirection.Before)
             expectHead("to", headValue = "Human")
             slot("kind", "Act")
         }
         assertEquals("MTRANS", lexicalConcept.head.name)
-        assertEquals("*VAR.0*", lexicalConcept.head.valueName("actor"))
-        assertEquals("*VAR.1*", lexicalConcept.head.valueName("to"))
+        assertEquals("*VAR.1*", lexicalConcept.head.valueName("actor"))
+        assertEquals("*VAR.2*", lexicalConcept.head.valueName("to"))
     }
 
     @Test
     fun `create concept with shared variables`() {
-        val defHolder = ConceptHolder(9)
-        val testElement = WordElement("one", "", "","")
-        val workingMemory = WorkingMemory()
-        val sentenceContext = SentenceContext(TextSentence("test", listOf(testElement)), workingMemory, EpisodicMemory())
-        val wordContext = WordContext(0,"test", defHolder, sentenceContext)
-
-        val lexicalConcept = lexicalConcept(wordContext, "MTRANS") {
-            expectHead("actor", "ACTOR", headValue = "Human", direction = SearchDirection.Before)
-            varReference("from", "ACTOR")
-            expectHead("to", headValue = "Human")
-            slot("kind", "Act")
+        val lexicalConcept = lexicalConcept(createWordContext(), "MTRANS") {
+            expectHead(ActFields.Actor.fieldName, "ACTOR", headValue = "Human", direction = SearchDirection.Before)
+            varReference(ActFields.From.fieldName, "ACTOR")
+            expectHead(ActFields.To.fieldName, headValue = "Human")
+            slot(CoreFields.Kind, GeneralConcepts.Act.name)
         }
 
         assertEquals("MTRANS", lexicalConcept.head.name)
         assertEquals("*VAR.ACTOR*", lexicalConcept.head.valueName("actor"))
         assertEquals("*VAR.ACTOR*", lexicalConcept.head.valueName("from"))
-        assertEquals("*VAR.0*", lexicalConcept.head.valueName("to"))
+        assertEquals("*VAR.2*", lexicalConcept.head.valueName("to"))
+    }
+
+    private fun createWordContext(): WordContext {
+        val defHolder = ConceptHolder(9)
+        val testElement = WordElement("one", "", "", "")
+        val workingMemory = WorkingMemory()
+        val sentenceContext =
+            SentenceContext(TextSentence("test", listOf(testElement)), workingMemory, EpisodicMemory())
+        val wordContext = WordContext(0, "test", defHolder, sentenceContext)
+        return wordContext
     }
 }

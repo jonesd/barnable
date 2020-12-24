@@ -25,12 +25,12 @@ import info.dgjones.barnable.domain.general.GeneralConcepts
 // Find matching human in episodic memory, and associate concept
 // InDepth p185
 fun LexicalConceptBuilder.checkCharacter(slotName: String, variableName: String? = null) {
-    val variableSlot = root.createVariable(slotName, variableName)
-    concept.with(variableSlot)
+    val variable = root.createVariable(slotName, variableName)
+    concept.with(variable.slot())
     val checkCharacterDemon = CheckCharacterDemon(concept, root.wordContext) { episodicCharacter ->
         if (episodicCharacter != null) {
             val episodicInstance = episodicCharacter.value(CoreFields.Instance)
-            root.completeVariable(variableSlot, root.wordContext.context.workingMemory.createDefHolder(episodicInstance))
+            root.completeVariable(variable, root.wordContext.context.workingMemory.createDefHolder(episodicInstance))
             this.episodicConcept = episodicCharacter
             copyCompletedSlot(HumanFields.FirstName, episodicCharacter, concept)
             copyCompletedSlot(HumanFields.LastName, episodicCharacter, concept)
@@ -48,22 +48,22 @@ fun LexicalConceptBuilder.checkCharacter(slotName: String, variableName: String?
 // May be replaced by better value using knowledge layer
 // InDepth p185
 fun LexicalConceptBuilder.findCharacter(slotName: String, variableName: String? = null) {
-    val variableSlot = root.createVariable(slotName, variableName)
-    concept.with(variableSlot)
+    val variable = root.createVariable(slotName, variableName)
+    concept.with(variable.slot())
     val demon = FindCharacterDemon(concept.valueName(HumanFields.Gender), root.wordContext) {
         if (it != null) {
-            root.completeVariable(variableSlot, it, root.wordContext, this.episodicConcept)
+            variable.complete(root.createDefHolder(it), root.wordContext, this.episodicConcept)
         }
     }
     root.addDemon(demon)
 }
 
 fun LexicalConceptBuilder.nextChar(slotName: String, variableName: String? = null, relRole: String? = null) {
-    val variableSlot = root.createVariable(slotName, variableName)
-    concept.with(variableSlot)
+    val variable = root.createVariable(slotName, variableName)
+    concept.with(variable.slot())
     val demon = NextCharacterDemon(root.wordContext) {
         if (it != null) {
-            root.completeVariable(variableSlot, it, this.episodicConcept)
+            variable.complete(it, root.wordContext, this.episodicConcept)
         }
     }
     root.addDemon(demon)
