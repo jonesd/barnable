@@ -59,6 +59,20 @@ class ConjunctionTest {
         }
 
         @Test
+        fun `List of three humans with oxford comma`() {
+            val textProcessor = runTextProcess("Jane, Fred, and George", lexicon)
+
+            assertEquals(1, textProcessor.workingMemory.concepts.size)
+            val group = textProcessor.workingMemory.concepts.first()
+            val actors = group.value(GroupFields.Elements)?.children()
+            assertEquals(3, actors?.size)
+            assertEquals("Jane", actors?.get(0)?.valueName(HumanFields.FirstName))
+            assertEquals("Fred", actors?.get(1)?.valueName(HumanFields.FirstName))
+            assertEquals("George", actors?.get(2)?.valueName(HumanFields.FirstName))
+            assertEquals(GeneralConcepts.Human.name, group.valueName(GroupFields.ElementsType))
+        }
+
+        @Test
         fun `List of two physical objects`() {
             val textProcessor = runTextProcess("ball and book", lexicon)
 
