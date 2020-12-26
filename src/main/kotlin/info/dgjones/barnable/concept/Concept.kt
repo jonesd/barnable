@@ -82,7 +82,8 @@ data class Concept(var name: String) {
         }
     }
 
-    /* Radical state change - alias name and slots with the supplied concept */
+    /* Replace state for this root concept with the concept argumunt, which must include this within it.
+    * An attempt is made to preserve the original hierachical nature */
     fun shareStateFrom(concept: Concept) {
         concept.duplicateChildMatch(this)
         name = concept.name
@@ -159,6 +160,10 @@ data class Concept(var name: String) {
 
     fun children(): List<Concept?> {
         return slots.map { (_, slot) -> slot.value }.toList()
+    }
+
+    fun slotNames(): List<String> {
+        return slots.map { (name, _) -> name }.toList()
     }
 }
 

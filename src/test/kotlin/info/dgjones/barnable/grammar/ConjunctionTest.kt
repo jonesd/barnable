@@ -36,12 +36,11 @@ class ConjunctionTest {
             val textProcessor = runTextProcess("Fred and George", lexicon)
 
             assertEquals(1, textProcessor.workingMemory.concepts.size)
-            val group = textProcessor.workingMemory.concepts.first()
-            val actors = group.value(GroupFields.Elements)?.children()
-            assertEquals(2, actors?.size)
-            assertEquals("Fred", actors?.get(0)?.valueName(HumanFields.FirstName))
-            assertEquals("George", actors?.get(1)?.valueName(HumanFields.FirstName))
-            assertEquals(GeneralConcepts.Human.name, group.valueName(GroupFields.ElementsType))
+            val actors = GroupAccessor(textProcessor.workingMemory.concepts.first())
+            assertEquals(2, actors.size)
+            assertEquals("Fred", actors[0]?.valueName(HumanFields.FirstName))
+            assertEquals("George", actors[1]?.valueName(HumanFields.FirstName))
+            assertEquals(GeneralConcepts.Human.name, actors.elementType())
         }
 
         @Test
@@ -49,13 +48,12 @@ class ConjunctionTest {
             val textProcessor = runTextProcess("Jane, Fred and George", lexicon)
 
             assertEquals(1, textProcessor.workingMemory.concepts.size)
-            val group = textProcessor.workingMemory.concepts.first()
-            val actors = group.value(GroupFields.Elements)?.children()
-            assertEquals(3, actors?.size)
-            assertEquals("Jane", actors?.get(0)?.valueName(HumanFields.FirstName))
-            assertEquals("Fred", actors?.get(1)?.valueName(HumanFields.FirstName))
-            assertEquals("George", actors?.get(2)?.valueName(HumanFields.FirstName))
-            assertEquals(GeneralConcepts.Human.name, group.valueName(GroupFields.ElementsType))
+            val actors = GroupAccessor(textProcessor.workingMemory.concepts.first())
+            assertEquals(3, actors.size)
+            assertEquals("Jane", actors[0]?.valueName(HumanFields.FirstName))
+            assertEquals("Fred", actors[1]?.valueName(HumanFields.FirstName))
+            assertEquals("George", actors[2]?.valueName(HumanFields.FirstName))
+            assertEquals(GeneralConcepts.Human.name, actors.elementType())
         }
 
         @Test
@@ -63,13 +61,12 @@ class ConjunctionTest {
             val textProcessor = runTextProcess("Jane, Fred, and George", lexicon)
 
             assertEquals(1, textProcessor.workingMemory.concepts.size)
-            val group = textProcessor.workingMemory.concepts.first()
-            val actors = group.value(GroupFields.Elements)?.children()
-            assertEquals(3, actors?.size)
-            assertEquals("Jane", actors?.get(0)?.valueName(HumanFields.FirstName))
-            assertEquals("Fred", actors?.get(1)?.valueName(HumanFields.FirstName))
-            assertEquals("George", actors?.get(2)?.valueName(HumanFields.FirstName))
-            assertEquals(GeneralConcepts.Human.name, group.valueName(GroupFields.ElementsType))
+            val actors = GroupAccessor(textProcessor.workingMemory.concepts.first())
+            assertEquals(3, actors.size)
+            assertEquals("Jane", actors[0]?.valueName(HumanFields.FirstName))
+            assertEquals("Fred", actors[1]?.valueName(HumanFields.FirstName))
+            assertEquals("George", actors[2]?.valueName(HumanFields.FirstName))
+            assertEquals(GeneralConcepts.Human.name, actors.elementType())
         }
 
         @Test
@@ -77,12 +74,25 @@ class ConjunctionTest {
             val textProcessor = runTextProcess("ball and book", lexicon)
 
             assertEquals(1, textProcessor.workingMemory.concepts.size)
-            val group = textProcessor.workingMemory.concepts.first()
-            val elements = group.value(GroupFields.Elements)?.children()
-            assertEquals(2, elements?.size)
-            assertEquals("ball", elements?.get(0)?.valueName(CoreFields.Name))
-            assertEquals("book", elements?.get(1)?.valueName(CoreFields.Name))
-            assertEquals(GeneralConcepts.PhysicalObject.name, group.valueName(GroupFields.ElementsType))
+            val group = GroupAccessor(textProcessor.workingMemory.concepts.first())
+            assertEquals(2, group.size)
+            assertEquals("ball", group[0]?.valueName(CoreFields.Name))
+            assertEquals("book", group[1]?.valueName(CoreFields.Name))
+            assertEquals(GeneralConcepts.PhysicalObject.name, group.elementType())
+        }
+
+        @Test
+        fun `List of four elements`() {
+            val textProcessor = runTextProcess("John, Jane, Fred, George", lexicon)
+
+            assertEquals(1, textProcessor.workingMemory.concepts.size)
+            val group = GroupAccessor(textProcessor.workingMemory.concepts.first())
+            assertEquals(4, group.size)
+            assertEquals("John", group[0]?.valueName(HumanFields.FirstName))
+            assertEquals("Jane", group[1]?.valueName(HumanFields.FirstName))
+            assertEquals("Fred", group[2]?.valueName(HumanFields.FirstName))
+            assertEquals("George", group[3]?.valueName(HumanFields.FirstName))
+            assertEquals(GeneralConcepts.Human.name, group.elementType())
         }
 
         @Test
@@ -109,21 +119,18 @@ class ConjunctionTest {
             // picked up the ball and book
             val pickedUp = textProcessor.workingMemory.concepts.first()
             assertEquals("Fred", pickedUp.value(ActFields.Actor)?.valueName(HumanFields.FirstName))
-            val pickedUpThings = pickedUp.value(ActFields.Thing)
-            assertEquals(GroupConcept.Group.name, pickedUpThings?.name)
-            val pickedUpElements = pickedUpThings?.value(GroupFields.Elements)?.children()
-            assertEquals(2, pickedUpElements?.size)
-            assertEquals("ball", pickedUpElements?.get(0)?.valueName(CoreFields.Name))
-            assertEquals("book", pickedUpElements?.get(1)?.valueName(CoreFields.Name))
+            val pickedUpThings = GroupAccessor(pickedUp.value(ActFields.Thing)!!)
+            assertEquals(2, pickedUpThings.size)
+            assertEquals("ball", pickedUpThings[0]?.valueName(CoreFields.Name))
+            assertEquals("book", pickedUpThings[1]?.valueName(CoreFields.Name))
+
             // dropped them in the box
             val dropped = textProcessor.workingMemory.concepts[1]
             assertEquals("Fred", dropped.value(ActFields.Actor)?.valueName(HumanFields.FirstName))
-            val droppedThings = dropped.value(ActFields.Thing)
-            assertEquals(GroupConcept.Group.name, droppedThings?.name)
-            val droppedElements = droppedThings?.value(GroupFields.Elements)?.children()
-            assertEquals(2, pickedUpElements?.size)
-            assertEquals("ball", droppedElements?.get(0)?.valueName(CoreFields.Name))
-            assertEquals("book", droppedElements?.get(1)?.valueName(CoreFields.Name))
+            val droppedThings = GroupAccessor(dropped.value(ActFields.Thing)!!)
+            assertEquals(2, droppedThings.size)
+            assertEquals("ball", droppedThings[0]?.valueName(CoreFields.Name))
+            assertEquals("book", droppedThings[1]?.valueName(CoreFields.Name))
             assertEquals("box", dropped.value(ActFields.To)?.valueName(CoreFields.Name))
         }
 
@@ -133,12 +140,11 @@ class ConjunctionTest {
 
             assertEquals(1, textProcessor.workingMemory.concepts.size)
             val ptrans = textProcessor.workingMemory.concepts.first()
-            assertEquals(GroupConcept.Group.name, ptrans.valueName(ActFields.Actor))
-            val actors = ptrans.value(ActFields.Actor)?.value(GroupFields.Elements)?.children()
-            assertEquals(3, actors?.size)
-            assertEquals("Jane", actors?.get(0)?.valueName(HumanFields.FirstName))
-            assertEquals("Fred", actors?.get(1)?.valueName(HumanFields.FirstName))
-            assertEquals("George", actors?.get(2)?.valueName(HumanFields.FirstName))
+            val actors = GroupAccessor(ptrans.value(ActFields.Actor)!!)
+            assertEquals(3, actors.size)
+            assertEquals("Jane", actors[0]?.valueName(HumanFields.FirstName))
+            assertEquals("Fred", actors[1]?.valueName(HumanFields.FirstName))
+            assertEquals("George", actors[2]?.valueName(HumanFields.FirstName))
 
             assertEquals(GeneralConcepts.Setting.name, ptrans.valueName(ActFields.To));
             assertEquals("restaurant", ptrans.value(ActFields.To)?.valueName(CoreFields.Name));

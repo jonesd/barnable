@@ -30,8 +30,29 @@ enum class GroupConcept {
 enum class GroupFields(override val fieldName: String): Fields {
     GroupInstances("groupInstances"),
     Elements("elements"),
-    ElementsType("elementsType"),
-    Next("next")
+    ElementsType("elementsType")
+}
+
+class GroupAccessor(private val group: Concept) {
+    val size: Int
+        get() {
+            val values = values()
+            val index = values?.slotNames()?.mapNotNull { it.toIntOrNull() }?.maxOfOrNull { it }
+            return if (index != null) index + 1 else 0
+        }
+    operator fun get(i: Int): Concept? {
+        return values()?.value(i.toString())
+    }
+
+    init {
+        check(group.name == GroupConcept.Group.name) { "should be group rather than ${group.name}"}
+    }
+    // The values slot is temporary
+    private fun values() = group.value(GroupFields.Elements)
+
+    fun elementType(): String? {
+        return group.valueName(GroupFields.ElementsType)
+    }
 }
 
 fun buildGroup(elements: List<Concept>): Concept {

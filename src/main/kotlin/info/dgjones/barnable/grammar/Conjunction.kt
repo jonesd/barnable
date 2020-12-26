@@ -46,6 +46,8 @@ fun buildGrammarConjunctionLexicon(lexicon: Lexicon) {
     lexicon.addMapping(WordAndBuildGroup())
     lexicon.addMapping(WordAndAddToGroup())
     lexicon.addMapping(WordCommaBuildGroup())
+    lexicon.addMapping(WordCommaAddToGroup())
+
     lexicon.addMapping(WordCommaBoundary())
 }
 
@@ -126,6 +128,9 @@ class WordAndAddToGroup: WordHandler(EntryWord("and")) {
     }
 }
 
+/*
+Comma will form a group for specific concept types.
+ */
 class WordCommaBuildGroup: WordHandler(EntryWord(",", noSuffix = true)) {
     private val matchingHeads = listOf(GeneralConcepts.Human.name, GeneralConcepts.PhysicalObject.name)
     override fun build(wordContext: WordContext): List<Demon> =
@@ -144,6 +149,34 @@ class WordCommaBuildGroup: WordHandler(EntryWord(",", noSuffix = true)) {
                 matchConceptByHead(matchingHeads),
                 SearchDirection.Before,
                 1,
+                wordContext,
+                disambiguationHandler
+            ),
+            DisambiguateUsingMatch(
+                matchConceptByHead(matchingHeads),
+                SearchDirection.After,
+                1,
+                wordContext,
+                disambiguationHandler
+            )
+        )
+    }
+}
+
+class WordCommaAddToGroup: WordHandler(EntryWord(",", noSuffix = true)) {
+    private val matchingHeads = listOf(GeneralConcepts.Human.name, GeneralConcepts.PhysicalObject.name)
+    override fun build(wordContext: WordContext): List<Demon> =
+        lexicalConcept(wordContext, "Ignore") {
+            addToGroup(matchConceptByHead(matchingHeads), SearchDirection.After)
+            ignoreHolder()
+        }.demons
+
+    override fun disambiguationDemons(wordContext: WordContext,disambiguationHandler: DisambiguationHandler): List<Demon> {
+        return listOf(
+            DisambiguateUsingMatch(
+                matchConceptByHead(GroupConcept.Group.name),
+                SearchDirection.Before,
+                distance = null,
                 wordContext,
                 disambiguationHandler
             ),
