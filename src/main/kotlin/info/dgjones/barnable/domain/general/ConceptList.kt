@@ -48,8 +48,8 @@ class ConceptListAccessor(private val list: Concept) {
     }
 }
 
-fun buildConceptList(elements: List<Concept>): Concept {
-    val list = Concept(ListConcept.List.name)
+fun buildConceptList(elements: List<Concept>, rootName: String = ListConcept.List.name): Concept {
+    val list = Concept(rootName)
     elements.forEachIndexed { index, element -> list.value(index.toString(), element)}
     return list
 }

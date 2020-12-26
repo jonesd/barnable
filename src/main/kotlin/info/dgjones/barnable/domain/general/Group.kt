@@ -36,16 +36,13 @@ enum class GroupFields(override val fieldName: String): Fields {
 
 class GroupAccessor(private val group: Concept) {
     val size: Int
-        get() {
-            val values = values()
-            val index = values?.slotNames()?.mapNotNull { it.toIntOrNull() }?.maxOfOrNull { it }
-            return if (index != null) index + 1 else 0
-        }
+        get() = list()?.size ?: 0
     operator fun get(i: Int): Concept? {
-        return values()?.value(i.toString())
+        val listAccessor = list()
+        return if (listAccessor != null) listAccessor[i] else null
     }
     fun concepts(): List<Concept> {
-        return values()?.children()?.filterNotNull() ?: listOf<Concept>()
+        return list()?.concepts() ?: listOf<Concept>()
     }
     fun valueNames(): List<String> {
         return concepts().map { it.name }
@@ -55,8 +52,7 @@ class GroupAccessor(private val group: Concept) {
     }
     fun add(concept: Concept):Boolean {
         if (elementType() == concept.name) {
-            group.value(GroupFields.Elements)?.let { elements ->
-                elements.value(elements.children().size.toString(), concept)
+            list()?.let { list -> list.add(concept)
                 return true
             }
         } else {
@@ -68,7 +64,10 @@ class GroupAccessor(private val group: Concept) {
     init {
         check(group.name == GroupConcept.Group.name) { "should be group rather than ${group.name}"}
     }
-    private fun values() = group.value(GroupFields.Elements)
+    private fun list(): ConceptListAccessor? {
+        val elements = group.value(GroupFields.Elements)
+        return if (elements != null) ConceptListAccessor(elements) else null
+    }
 }
 
 /**
@@ -78,9 +77,8 @@ class GroupAccessor(private val group: Concept) {
  */
 fun buildGroup(elements: List<Concept>, elementType: Concept? = null): Concept {
     val root = Concept(GroupConcept.Group.name)
-    val elementsField = Concept(GroupConcept.Values.name)
+    val elementsField = buildConceptList(elements, GroupConcept.Values.name)
     root.with(Slot(GroupFields.Elements, elementsField))
-    elements.forEachIndexed { index, element -> elementsField.with(Slot(index.toString(), element))}
     val t = elementType ?: (elements.firstOrNull()?.let { extractConceptHead.transform(it)})
     t?.let { root.value(GroupFields.ElementsType, t) }
     return root
