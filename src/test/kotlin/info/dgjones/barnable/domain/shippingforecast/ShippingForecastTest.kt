@@ -69,5 +69,16 @@ class ShippingForecastTest {
         }
     }
 
+    @Nested
+    inner class WeatherSegment {
+        @Test
+        fun `Basic weather`() {
+            val textProcessor = runTextProcess("Rain", lexicon)
 
+            assertEquals(1, textProcessor.workingMemory.concepts.size)
+            val weather = textProcessor.workingMemory.concepts.first()
+            assertEquals(GeneralConcepts.Weather.name, weather.name)
+            assertEquals(WeatherConcept.Rain.name, weather.valueName(MeteorologyFields.Weather))
+        }
+    }
 }

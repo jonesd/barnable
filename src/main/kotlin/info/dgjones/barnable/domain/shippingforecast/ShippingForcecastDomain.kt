@@ -21,6 +21,7 @@ import info.dgjones.barnable.concept.CoreFields
 import info.dgjones.barnable.concept.lexicalConcept
 import info.dgjones.barnable.domain.general.GeneralConcepts
 import info.dgjones.barnable.domain.general.PhysicalObjects
+import info.dgjones.barnable.grammar.ModifierWord
 import info.dgjones.barnable.narrative.MopFields
 import info.dgjones.barnable.narrative.MopRestaurant
 import info.dgjones.barnable.parser.*
@@ -34,6 +35,12 @@ enum class ShippingForecastConcepts {
     ShippingForecast_Region
 }
 
+/**
+ * Domain to support the MetOffice UK Shipping Forecasts
+ *
+ * See: https://www.metoffice.gov.uk/weather/specialist-forecasts/coast-and-sea/shipping-forecast
+ * See: https://web.archive.org/web/20190401161444/https://www.metoffice.gov.uk/binaries/content/assets/mohippo/pdf/3/3/fact_sheet_no._8.pdf
+ */
 class ShippingForecastDomain : Domain {
     override val name: String = "ShippingForecast"
     override fun buildGeneralDomainLexicon(lexicon: Lexicon) {

@@ -24,7 +24,8 @@ import info.dgjones.barnable.parser.*
 
 enum class GroupConcept {
     Group,
-    MultipleGroup
+    MultipleGroup,
+    Values
 }
 
 enum class GroupFields(override val fieldName: String): Fields {
@@ -43,37 +44,50 @@ class GroupAccessor(private val group: Concept) {
     operator fun get(i: Int): Concept? {
         return values()?.value(i.toString())
     }
+    fun concepts(): List<Concept> {
+        return values()?.children()?.filterNotNull() ?: listOf<Concept>()
+    }
+    fun valueNames(): List<String> {
+        return concepts().map { it.name }
+    }
+    fun elementType(): String? {
+        return group.valueName(GroupFields.ElementsType)
+    }
+    fun add(concept: Concept):Boolean {
+        if (elementType() == concept.name) {
+            group.value(GroupFields.Elements)?.let { elements ->
+                elements.value(elements.children().size.toString(), concept)
+                return true
+            }
+        } else {
+            print("ERROR element $concept does not match group type $group")
+        }
+        return false
+    }
 
     init {
         check(group.name == GroupConcept.Group.name) { "should be group rather than ${group.name}"}
     }
-    // The values slot is temporary
     private fun values() = group.value(GroupFields.Elements)
-
-    fun elementType(): String? {
-        return group.valueName(GroupFields.ElementsType)
-    }
 }
 
-fun buildGroup(elements: List<Concept>): Concept {
+/**
+ * Build a group concept structure from the provided elements.
+ * By default the element type of the group will be found from the first element,
+ * however, it can be set/overridden as an optional parameter.
+ */
+fun buildGroup(elements: List<Concept>, elementType: Concept? = null): Concept {
     val root = Concept(GroupConcept.Group.name)
-    val elementsField = Concept("values")
+    val elementsField = Concept(GroupConcept.Values.name)
     root.with(Slot(GroupFields.Elements, elementsField))
     elements.forEachIndexed { index, element -> elementsField.with(Slot(index.toString(), element))}
-    elements.firstOrNull()?.let { root.value(GroupFields.ElementsType, extractConceptHead.transform(it)) }
+    val t = elementType ?: (elements.firstOrNull()?.let { extractConceptHead.transform(it)})
+    t?.let { root.value(GroupFields.ElementsType, t) }
     return root
 }
 
 fun addConceptToHomogenousGroup(group: Concept, concept: Concept): Boolean {
-    if (group.valueName(GroupFields.ElementsType) == concept.name) {
-        group.value(GroupFields.Elements)?.let { elements ->
-            elements.value(elements.children().size.toString(), concept)
-            return true
-        }
-    } else {
-        print("ERROR element $concept does not match group type $group")
-    }
-    return false
+    return GroupAccessor(group).add(concept)
 }
 
 fun LexicalConceptBuilder.addToGroup(matcher: ConceptMatcher, direction: SearchDirection = SearchDirection.After,) {

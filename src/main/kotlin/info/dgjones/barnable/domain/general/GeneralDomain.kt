@@ -33,6 +33,7 @@ fun buildGeneralDomainLexicon(lexicon: Lexicon) {
     buildGeneralQuantityLexicon(lexicon)
     buildGeneralColourLexicon(lexicon)
     buildGeneralIndustryLexicon(lexicon)
+    buildGeneralMeteorolgyLexicon(lexicon)
 }
 
 enum class GeneralConcepts {
@@ -44,5 +45,6 @@ enum class GeneralConcepts {
     Goal,
     Plan,
     Ref,
-    UnknownWord
+    UnknownWord,
+    Weather
 }

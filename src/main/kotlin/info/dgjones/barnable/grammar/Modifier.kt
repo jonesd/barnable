@@ -18,7 +18,7 @@
 package info.dgjones.barnable.grammar
 
 import info.dgjones.barnable.concept.*
-import info.dgjones.barnable.domain.general.GeneralConcepts
+import info.dgjones.barnable.domain.general.*
 import info.dgjones.barnable.parser.*
 
 /**
@@ -53,7 +53,10 @@ fun buildGrammarModifierLexicon(lexicon: Lexicon) {
         } }
 }
 
-class ModifierWord(word: String, val field: Fields, val value: String = word): WordHandler(EntryWord(word)) {
+private fun defaultModifierTargetMatcher() =
+    matchConceptByHead(listOf(GeneralConcepts.Human.name, GeneralConcepts.PhysicalObject.name))
+
+class ModifierWord(word: String, val field: Fields, val value: String = word, val matcher: ConceptMatcher = defaultModifierTargetMatcher()): WordHandler(EntryWord(word)) {
     override fun build(wordContext: WordContext): List<Demon> {
         val demon = object : Demon(wordContext) {
             var thingHolder: ConceptHolder? = null
@@ -67,10 +70,41 @@ class ModifierWord(word: String, val field: Fields, val value: String = word): W
             }
 
             override fun description(): String {
-                return "ModifierWord $word"
+                return "Add a single ModifierWord $word to the matching concept"
             }
         }
-        val thingDemon = ExpectDemon(matchConceptByHead(listOf(GeneralConcepts.Human.name, GeneralConcepts.PhysicalObject.name)), SearchDirection.After, wordContext) {
+        val thingDemon = ExpectDemon(matcher, SearchDirection.After, wordContext) {
+            demon.thingHolder = it
+        }
+        return listOf(demon, thingDemon)
+    }
+}
+
+class MultipleModifierWord(word: String, val field: Fields, val value: String = word, val matcher: ConceptMatcher = defaultModifierTargetMatcher()): WordHandler(EntryWord(word)) {
+    override fun build(wordContext: WordContext): List<Demon> {
+        val demon = object : Demon(wordContext) {
+            var thingHolder: ConceptHolder? = null
+
+            override fun run() {
+                val thingConcept = thingHolder?.value
+                if (thingConcept != null) {
+                    val listConcept = thingConcept.value(field) ?: createEmptyList(thingConcept)
+                    ConceptListAccessor(listConcept).add(Concept(value))
+                    active = false
+                }
+            }
+
+            private fun createEmptyList(thingConcept: Concept): Concept {
+                val c = buildConceptList(listOf<Concept>())
+                thingConcept.value(field, c)
+                return c
+            }
+
+            override fun description(): String {
+                return "Add multiple modifier words to MultipleModifierWord $word to the matching concept"
+            }
+        }
+        val thingDemon = ExpectDemon(matcher, SearchDirection.After, wordContext) {
             demon.thingHolder = it
         }
         return listOf(demon, thingDemon)

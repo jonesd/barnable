@@ -24,13 +24,9 @@ import org.junit.jupiter.api.Test
 
 class GroupTest {
     @Test
-    fun `Create Group`() {
-        val ball = Concept(GeneralConcepts.PhysicalObject.name)
-        ball.value(CoreFields.Name, Concept("ball"))
-        ball.value(CoreFields.Kind, Concept(PhysicalObjectKind.GameObject.name))
-        val book = Concept(GeneralConcepts.PhysicalObject.name)
-        book.value(CoreFields.Name, Concept("book"))
-        book.value(CoreFields.Kind, Concept(PhysicalObjectKind.Book.name))
+    fun `Create Group with initial concepts`() {
+        val ball = createBall()
+        val book = createBook()
 
         // test
         val group = buildGroup(listOf(ball, book))
@@ -41,5 +37,31 @@ class GroupTest {
         assertEquals(2, groupAccessor.size)
         assertEquals("ball", groupAccessor[0]?.valueName(CoreFields.Name))
         assertEquals("book", groupAccessor[1]?.valueName(CoreFields.Name))
+    }
+
+    private fun createBook(): Concept {
+        val book = Concept(GeneralConcepts.PhysicalObject.name)
+        book.value(CoreFields.Name, Concept("book"))
+        book.value(CoreFields.Kind, Concept(PhysicalObjectKind.Book.name))
+        return book
+    }
+
+    private fun createBall(): Concept {
+        val ball = Concept(GeneralConcepts.PhysicalObject.name)
+        ball.value(CoreFields.Name, Concept("ball"))
+        ball.value(CoreFields.Kind, Concept(PhysicalObjectKind.GameObject.name))
+        return ball
+    }
+
+    @Test
+    fun `Create empty group with specific type then populate`() {
+        val root = Concept("root")
+
+        // test
+        var group = buildGroup(listOf(), Concept(GeneralConcepts.PhysicalObject.name))
+        root.value("group", group)
+        group
+
+
     }
 }
