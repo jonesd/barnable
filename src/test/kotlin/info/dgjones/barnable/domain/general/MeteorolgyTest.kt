@@ -17,45 +17,69 @@
 
 package info.dgjones.barnable.domain.general
 
+import info.dgjones.barnable.concept.Concept
+import info.dgjones.barnable.grammar.ConjunctionConcept
 import info.dgjones.barnable.narrative.buildInDepthUnderstandingLexicon
 import info.dgjones.barnable.parser.runTextProcess
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class MeteorolgyTest {
     val lexicon = buildInDepthUnderstandingLexicon()
 
-    @Test
-    fun `Weather basic`() {
-        val textProcessor = runTextProcess("Rain", lexicon)
+    @Nested
+    inner class WeatherTest {
+        @Test
+        fun `Weather basic`() {
+            val textProcessor = runTextProcess("Rain", lexicon)
 
-        assertEquals(1, textProcessor.workingMemory.concepts.size)
-        val weather = textProcessor.workingMemory.concepts[0]
-        assertEquals(MeteorologyConcept.Weather.name, weather.name)
-        assertEquals(WeatherConcept.Rain.name, weather.valueName(MeteorologyFields.Weather))
-    }
+            assertEquals(1, textProcessor.workingMemory.concepts.size)
+            val weather = textProcessor.workingMemory.concepts[0]
+            assertEquals(MeteorologyConcept.Weather.name, weather.name)
+            assertEquals(WeatherConcept.Rain.name, weather.valueName(MeteorologyFields.Weather))
+        }
 
-    @Test
-    fun `Weather with severity`() {
-        val textProcessor = runTextProcess("Thundery showers", lexicon)
+        @Test
+        fun `Weather with severity`() {
+            val textProcessor = runTextProcess("Thundery showers", lexicon)
 
-        assertEquals(1, textProcessor.workingMemory.concepts.size)
-        val weather = textProcessor.workingMemory.concepts[0]
-        assertEquals(MeteorologyConcept.Weather.name, weather.name)
-        assertEquals(WeatherConcept.Shower.name, weather.valueName(MeteorologyFields.Weather))
-        val characteristics = ConceptListAccessor(weather.value(MeteorologyFields.WeatherCharacteristics)!!)
-        assertEquals(setOf(WeatherCharacteristics.Thundery.name), characteristics.valueNames().toSet())
-    }
+            assertEquals(1, textProcessor.workingMemory.concepts.size)
+            val weather = textProcessor.workingMemory.concepts[0]
+            assertEquals(MeteorologyConcept.Weather.name, weather.name)
+            assertEquals(WeatherConcept.Shower.name, weather.valueName(MeteorologyFields.Weather))
+            val characteristics = ConceptListAccessor(weather.value(MeteorologyFields.WeatherCharacteristics)!!)
+            assertEquals(setOf(WeatherCharacteristics.Thundery.name), characteristics.valueNames().toSet())
+        }
 
-    @Test
-    fun `Weather with multiple severity`() {
-        val textProcessor = runTextProcess("squally wintry showers", lexicon)
+        @Test
+        fun `Weather with multiple severity`() {
+            val textProcessor = runTextProcess("squally wintry showers", lexicon)
 
-        assertEquals(1, textProcessor.workingMemory.concepts.size)
-        val weather = textProcessor.workingMemory.concepts[0]
-        assertEquals(MeteorologyConcept.Weather.name, weather.name)
-        assertEquals(WeatherConcept.Shower.name, weather.valueName(MeteorologyFields.Weather))
-        val characteristics = ConceptListAccessor(weather.value(MeteorologyFields.WeatherCharacteristics)!!)
-        assertEquals(setOf(WeatherCharacteristics.Wintry.name, WeatherCharacteristics.Squally.name), characteristics.valueNames().toSet())
+            assertEquals(1, textProcessor.workingMemory.concepts.size)
+            val weather = textProcessor.workingMemory.concepts[0]
+            assertEquals(MeteorologyConcept.Weather.name, weather.name)
+            assertEquals(WeatherConcept.Shower.name, weather.valueName(MeteorologyFields.Weather))
+            val characteristics = ConceptListAccessor(weather.value(MeteorologyFields.WeatherCharacteristics)!!)
+            assertEquals(
+                setOf(WeatherCharacteristics.Wintry.name, WeatherCharacteristics.Squally.name),
+                characteristics.valueNames().toSet()
+            )
+        }
+        @Test
+        fun `Alternative weather`() {
+            val textProcessor = runTextProcess("Rain or showers", lexicon)
+
+            assertEquals(1, textProcessor.workingMemory.concepts.size)
+            val groupWeather = GroupAccessor(textProcessor.workingMemory.concepts[0])
+            assertEquals(MeteorologyConcept.Weather.name, groupWeather.elementType())
+            assertEquals(listOf(withWeather(WeatherConcept.Rain), withWeather(WeatherConcept.Shower)), groupWeather.concepts())
+            assertEquals(ConjunctionConcept.Or.name, groupWeather.conjunctionType())
+        }
+        private fun withWeather(weather: WeatherConcept): Concept {
+            val root = Concept(MeteorologyConcept.Weather.name)
+            root.value(MeteorologyFields.Weather, Concept(weather.name))
+            return root
+        }
     }
 }

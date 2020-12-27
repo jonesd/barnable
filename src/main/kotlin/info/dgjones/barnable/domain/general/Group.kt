@@ -29,9 +29,10 @@ enum class GroupConcept {
 }
 
 enum class GroupFields(override val fieldName: String): Fields {
-    GroupInstances("groupInstances"),
+    Conjunction("conjunction"),
     Elements("elements"),
-    ElementsType("elementsType")
+    ElementsType("elementsType"),
+    GroupInstances("groupInstances")
 }
 
 class GroupAccessor(private val group: Concept) {
@@ -49,6 +50,9 @@ class GroupAccessor(private val group: Concept) {
     }
     fun elementType(): String? {
         return group.valueName(GroupFields.ElementsType)
+    }
+    fun conjunctionType(): String? {
+        return group.valueName(GroupFields.Conjunction)
     }
     fun add(concept: Concept):Boolean {
         if (elementType() == concept.name) {

@@ -23,8 +23,9 @@ import info.dgjones.barnable.domain.general.GeneralConcepts
 import info.dgjones.barnable.parser.*
 
 
-enum class Conjunction {
-    And
+enum class ConjunctionConcept {
+    And,
+    Or
 }
 
 fun withConjunctionObj(concept: Concept, conjunction: Concept) {
@@ -49,6 +50,8 @@ fun buildGrammarConjunctionLexicon(lexicon: Lexicon) {
     lexicon.addMapping(WordCommaAddToGroup())
 
     lexicon.addMapping(WordCommaBoundary())
+
+    lexicon.addMapping(WordOrBuildAlternatives())
 }
 
 class WordAnd: WordHandler(EntryWord("and")) {
@@ -67,10 +70,11 @@ class WordAndBuildGroup: WordHandler(EntryWord("and")) {
     private val matchingHeads = listOf(GeneralConcepts.Human.name, GeneralConcepts.PhysicalObject.name)
     override fun build(wordContext: WordContext): List<Demon> =
         lexicalConcept(wordContext, GroupConcept.Group.name) {
-            slot(GroupFields.Elements, "values") {
+            slot(GroupFields.Elements, GroupConcept.Values.name) {
                 expectHead("0", "exemplar", matchingHeads, clearHolderOnCompletion = false, markAsInside = false, direction = SearchDirection.Before)
                 expectHead("1", null, matchingHeads, clearHolderOnCompletion = true, direction = SearchDirection.After)
             }
+            slot(GroupFields.Conjunction.fieldName, ConjunctionConcept.And.name)
             varReference(GroupFields.ElementsType.fieldName, "exemplar", extractConceptHead)
             replaceWordContextWithCurrent("exemplar")
             // only want to save as resolution... saveAsObject()
@@ -135,10 +139,11 @@ class WordCommaBuildGroup: WordHandler(EntryWord(",", noSuffix = true)) {
     private val matchingHeads = listOf(GeneralConcepts.Human.name, GeneralConcepts.PhysicalObject.name)
     override fun build(wordContext: WordContext): List<Demon> =
         lexicalConcept(wordContext, GroupConcept.Group.name) {
-            slot(GroupFields.Elements, "values") {
+            slot(GroupFields.Elements,  GroupConcept.Values.name) {
                 expectHead("0", "exemplar", matchingHeads, clearHolderOnCompletion = true, direction = SearchDirection.Before)
                 expectHead("1", null, matchingHeads, clearHolderOnCompletion = true, direction = SearchDirection.After)
             }
+            slot(GroupFields.Conjunction.fieldName, ConjunctionConcept.And.name)
             varReference(GroupFields.ElementsType.fieldName, "exemplar", extractConceptHead)
             saveAsObject()
         }.demons
@@ -209,6 +214,44 @@ class WordCommaBoundary: WordHandler(EntryWord(",", noSuffix = true)) {
             ),
             DisambiguateUsingMatch(
                 matchNot(matchConceptByHead(matchingHeads)),
+                SearchDirection.After,
+                1,
+                wordContext,
+                disambiguationHandler
+            )
+        )
+    }
+}
+
+/*
+Handle the scenario of "george and harold" forming a group of two persons
+ */
+class WordOrBuildAlternatives: WordHandler(EntryWord("or")) {
+    private val matchingHeads = listOf(GeneralConcepts.Human.name, GeneralConcepts.PhysicalObject.name, GeneralConcepts.Weather.name)
+    override fun build(wordContext: WordContext): List<Demon> =
+        lexicalConcept(wordContext, GroupConcept.Group.name) {
+            slot(GroupFields.Elements,  GroupConcept.Values.name) {
+                expectHead("0", "exemplar", matchingHeads, clearHolderOnCompletion = false, markAsInside = false, direction = SearchDirection.Before)
+                expectHead("1", null, matchingHeads, clearHolderOnCompletion = true, direction = SearchDirection.After)
+            }
+            varReference(GroupFields.ElementsType.fieldName, "exemplar", extractConceptHead)
+            slot(GroupFields.Conjunction.fieldName, ConjunctionConcept.Or.name)
+            replaceWordContextWithCurrent("exemplar")
+            // only want to save as resolution... saveAsObject()
+            ignoreHolder()
+        }.demons
+
+    override fun disambiguationDemons(wordContext: WordContext,disambiguationHandler: DisambiguationHandler): List<Demon> {
+        return listOf(
+            DisambiguateUsingMatch(
+                matchConceptByHead(matchingHeads),
+                SearchDirection.Before,
+                1,
+                wordContext,
+                disambiguationHandler
+            ),
+            DisambiguateUsingMatch(
+                matchConceptByHead(matchingHeads),
                 SearchDirection.After,
                 1,
                 wordContext,
