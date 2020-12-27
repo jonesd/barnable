@@ -60,7 +60,7 @@ class GroupTest {
         // test
         var group = buildGroup(listOf(), Concept(GeneralConcepts.PhysicalObject.name))
         root.value("group", group)
-        group
+
 
 
     }
