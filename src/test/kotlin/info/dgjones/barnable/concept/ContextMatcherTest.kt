@@ -190,6 +190,30 @@ class MatchConceptByHeadOrGroup {
     }
 }
 
+class MatchConceptByHasField {
+    @Test
+    fun `Matches when root has field with value`() {
+        val c = Concept("root")
+        c.value(CoreFields.Name, Concept("hasValue"))
+
+        assertTrue(matchConceptHasSlotName(CoreFields.Name)(c))
+    }
+    @Test
+    fun `Does not match when root has field without value`() {
+        val c = Concept("root")
+        c.value(CoreFields.Name, null)
+
+        assertFalse(matchConceptHasSlotName(CoreFields.Name)(c))
+    }
+    @Test
+    fun `Matches when root has field with other name`() {
+        val c = Concept("root")
+        c.value(CoreFields.Event, Concept("hasValue"))
+
+        assertFalse(matchConceptHasSlotName(CoreFields.Name)(c))
+    }
+}
+
 class MatchConceptNot {
     @Test
     fun `Should negate matcher result`() {

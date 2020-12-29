@@ -60,6 +60,9 @@ fun matchUnresolvedVariables(): ConceptMatcher {
     return { c -> c?.isVariable() == true}
 }
 
+fun matchConceptHasSlotName(slot: Fields): ConceptMatcher {
+    return { c -> c?.value(slot) != null }
+}
 fun matchConceptValueName(slot: Fields, match: String): ConceptMatcher {
     return { c -> c?.valueName(slot) == match }
 }

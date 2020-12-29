@@ -31,8 +31,22 @@ enum class CoreFields(override val fieldName: String): Fields {
     Kind("kind"),
     Name("name"),
     Is("is"),
+    State("state"),
+    Scale("scale"),
     // FIXME not sure where these should be stored
     Age("age"),
     Weight("weight"),
     Location("location")
+}
+
+enum class ScaleConcepts {
+    GreaterThanNormal,
+    Normal,
+    LessThanNormal
+}
+
+enum class StateConcepts {
+    Positive,
+    Neutral,
+    Negative
 }

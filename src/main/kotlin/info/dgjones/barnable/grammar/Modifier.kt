@@ -24,42 +24,31 @@ import info.dgjones.barnable.parser.*
 /**
  * A word, phrase, or clause that limits or qualifies the sense of another word or phrase.
  * https://en.wiktionary.org/wiki/modifier
+ *
+ * Modifiers are implemented as word elements that search After for a matching word kind
+ * and then add a slot with the type of modifier and a value.
+ *
+ * The value of a modifier can be a specific value (for example the colour "yellow"), or
+ * often as an intensity relative to the normal, such as greater or lesser (for example old
+ * would map to age greater than normal).
  */
-
-enum class ModifierConcepts {
-    GreaterThanNormal,
-    Normal,
-    LessThanNormal
-}
-
-enum class Modifiers(val modifier: Fields, val value: ModifierConcepts, val words: List<String>) {
-    GreaterWeight(CoreFields.Weight, ModifierConcepts.GreaterThanNormal,
-        listOf("fat", "heavy", "obese", "overweight")),
-    LesserWeight(CoreFields.Weight, ModifierConcepts.LessThanNormal,
-        listOf("thin", "underweight")),
-
-    Old(CoreFields.Age, ModifierConcepts.GreaterThanNormal,
-        listOf("old")),
-    Young(CoreFields.Age, ModifierConcepts.LessThanNormal,
-        listOf("young"))
-
-
-}
 
 // Word Sense
 
-fun buildGrammarModifierLexicon(lexicon: Lexicon) {
-    Modifiers.values().forEach { modifier ->
-        modifier.words.forEach { word ->
-            lexicon.addMapping(ModifierWord(word, modifier.modifier, modifier.value.name))
-        } }
+fun addModifierMappings(field: Fields, value: String, words: List<String>, matcher: ConceptMatcher = defaultModifierTargetMatcher(), lexicon: Lexicon) {
+    words.forEach { word ->
+        lexicon.addMapping(ModifierWord(word, field, value, matcher))
+    }
 }
 
-private fun defaultModifierTargetMatcher() =
+fun defaultModifierTargetMatcher() =
     matchConceptByHead(listOf(GeneralConcepts.Human.name, GeneralConcepts.PhysicalObject.name))
 
-private fun stateActMatcher() =
-    matchConceptByHead(listOf(GeneralConcepts.State.name, GeneralConcepts.Act.name))
+fun stateActMatcher() =
+    matchAny(listOf(
+        matchConceptByHead(listOf(GeneralConcepts.State.name, GeneralConcepts.Act.name)),
+        matchConceptHasSlotName(CoreFields.State)
+    ))
 
 class ModifierWord(word: String, val field: Fields, val value: String = word, val matcher: ConceptMatcher = defaultModifierTargetMatcher()): WordHandler(EntryWord(word)) {
     override fun build(wordContext: WordContext): List<Demon> {

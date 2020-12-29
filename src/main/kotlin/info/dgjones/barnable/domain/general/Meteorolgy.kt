@@ -39,7 +39,6 @@ enum class MeteorologyFields(override val fieldName: String): Fields {
 fun buildGeneralMeteorologyLexicon(lexicon: Lexicon) {
     buildWeatherConcepts(lexicon)
     buildWeatherCharacteristics(lexicon)
-    buildWeatherInLocation(lexicon)
 }
 
 enum class WeatherCharacteristics {
@@ -65,13 +64,9 @@ private fun buildWeatherConcepts(lexicon: Lexicon) {
     }
 }
 
-// FIXME defined in a more general
-private fun buildWeatherInLocation(lexicon: Lexicon) {
-    val weatherMatcher = matchConceptByHead(MeteorologyConcept.Weather.name)
-
-}
-
 enum class WeatherConcept {
+    Drizzle,
+    Fair,
     Rain,
     Shower;
 
@@ -82,6 +77,7 @@ class WeatherHandler(private val weather: WeatherConcept): WordHandler(EntryWord
     override fun build(wordContext: WordContext): List<Demon> =
         lexicalConcept(wordContext, MeteorologyConcept.Weather.name) {
             slot(CoreFields.Name, weather.name)
+            slot(CoreFields.State, StateConcepts.Neutral.name)
             slot(CoreFields.Location, GeneralConcepts.Location.name) {
                 expectPrep(CardinalFields.Direction.fieldName, variableName = "cardinalDirection", preps = setOf(Preposition.In), matcher = matchConceptByHead(setOf(
                     CardinalDirectionConcept.CardinalDirection.name))

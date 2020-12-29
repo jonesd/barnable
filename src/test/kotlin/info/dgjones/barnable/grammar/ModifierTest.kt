@@ -18,6 +18,7 @@
 package info.dgjones.barnable.grammar
 
 import info.dgjones.barnable.concept.CoreFields
+import info.dgjones.barnable.concept.ScaleConcepts
 import info.dgjones.barnable.domain.general.*
 import info.dgjones.barnable.narrative.buildInDepthUnderstandingLexicon
 import info.dgjones.barnable.parser.runTextProcess
@@ -44,8 +45,8 @@ class ModifierTest {
 
         assertEquals(1, textProcessor.workingMemory.concepts.size)
         val concept = textProcessor.workingMemory.concepts.first()
-        assertEquals(ModifierConcepts.GreaterThanNormal.name, concept.valueName(CoreFields.Age))
-        assertEquals(ModifierConcepts.LessThanNormal.name, concept.valueName(CoreFields.Weight))
+        assertEquals(ScaleConcepts.GreaterThanNormal.name, concept.valueName(AgeFields.Age))
+        assertEquals(ScaleConcepts.LessThanNormal.name, concept.valueName(CoreFields.Weight))
     }
 
     @Test
@@ -54,6 +55,6 @@ class ModifierTest {
 
         assertEquals(1, textProcessor.workingMemory.concepts.size)
         val concept = textProcessor.workingMemory.concepts.first()
-        assertEquals(ModifierConcepts.GreaterThanNormal.name, concept.valueName(CoreFields.Weight))
+        assertEquals(ScaleConcepts.GreaterThanNormal.name, concept.valueName(CoreFields.Weight))
     }
 }
