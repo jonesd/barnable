@@ -54,6 +54,9 @@ fun matchPrepIn(preps: Collection<Preposition>): ConceptMatcher {
     return { c -> prepNames.contains(c?.valueName(CoreFields.Is)) }
 }
 
+/**
+ * Find a concept marked with a matching Preposition and populate the slot with the matched concept.
+ */
 fun LexicalConceptBuilder.expectPrep(slotName: String, variableName: String? = null, preps: Collection<Preposition>, matcher: ConceptMatcher, direction: SearchDirection = SearchDirection.After) {
     val variable = root.createVariable(slotName, variableName)
     concept.with(variable.slot())
@@ -72,15 +75,15 @@ fun buildGrammarPropositionLexicon(lexicon: Lexicon) {
     // FIXME InDepth p304 "with" also needs to "determine social activity"
     lexicon.addMapping(PrepositionWord(Preposition.With, setOf(GeneralConcepts.Human.name)))
     lexicon.addMapping(PrepositionWord(Preposition.In, setOf(GeneralConcepts.PhysicalObject.name, GeneralConcepts.Setting.name)))
-    lexicon.addMapping(PrepositionWord(Preposition.By, setOf(GeneralConcepts.Setting.name)))
+    lexicon.addMapping(PrepositionWord(Preposition.By, setOf(GeneralConcepts.Human.name, GeneralConcepts.Setting.name)))
 }
 
 /*
-A preposition word will mark a matched target word as being connected to the preposition. This can then be matched
-This target can then be matched by another word searching for a preposition.
+A preposition word will mark a matched target word as being connected to the preposition.
+This target can then be matched by another WordHandler searching for a preposition.
 For example: John had lunch with George
- - With word will mark George as being related to the With preposition
- - Lunch looks for a following Human related to a With preposition
+ - "With" word handler will mark George as being related to the "With" preposition
+ - "Lunch" word handler looks for a following Human marked by a "With" preposition
  */
 class PrepositionWord(private val preposition: Preposition, private val matchConcepts: Set<String>): WordHandler(EntryWord(preposition.name.toLowerCase())) {
     override fun build(wordContext: WordContext): List<Demon> {
@@ -101,6 +104,17 @@ class PrepositionWord(private val preposition: Preposition, private val matchCon
         }
         return listOf(addPrepObj)
     }
+    override fun disambiguationDemons(wordContext: WordContext, disambiguationHandler: DisambiguationHandler): List<Demon> {
+        return listOf(
+            DisambiguateUsingMatch(
+                matchConceptByHead(matchConcepts),
+                SearchDirection.After,
+                null,
+                wordContext,
+                disambiguationHandler
+            )
+        )
+    }
 }
 
 // Demons
@@ -116,6 +130,6 @@ class PrepDemon(val matcher: ConceptMatcher, val direction: SearchDirection = Se
     }
 
     override fun description(): String {
-        return "PrepDemon $matcher"
+        return "Mark $matcher word with preposition"
     }
 }

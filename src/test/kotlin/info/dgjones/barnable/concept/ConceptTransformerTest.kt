@@ -35,4 +35,20 @@ class ConceptTransformerTest {
         assertEquals("Test", head?.name)
         assertTrue(head?.children()?.isEmpty() ?: false)
     }
+    @Test
+    fun `Can match by Name value`() {
+        val source = Concept("Test")
+        source.value(CoreFields.Name, Concept("ChildValue"))
+
+        // test
+        assertEquals(Concept("ChildValue"), extractConceptName.transform(source))
+    }
+    @Test
+    fun `Can match by Name value returns null when not present`() {
+        val source = Concept("Test")
+        source.value("other", Concept("ChildValue"))
+
+        // test
+        assertNull(extractConceptName.transform(source))
+    }
 }

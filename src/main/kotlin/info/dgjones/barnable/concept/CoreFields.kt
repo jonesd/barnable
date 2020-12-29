@@ -33,5 +33,6 @@ enum class CoreFields(override val fieldName: String): Fields {
     Is("is"),
     // FIXME not sure where these should be stored
     Age("age"),
-    Weight("weight")
+    Weight("weight"),
+    Location("location")
 }

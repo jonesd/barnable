@@ -17,14 +17,17 @@
 
 package info.dgjones.barnable.domain.general
 
-import info.dgjones.barnable.concept.CoreFields
-import info.dgjones.barnable.concept.Fields
-import info.dgjones.barnable.concept.lexicalConcept
+import info.dgjones.barnable.concept.*
+import info.dgjones.barnable.grammar.Preposition
+import info.dgjones.barnable.grammar.PrepositionWord
 import info.dgjones.barnable.parser.*
 import info.dgjones.barnable.util.transformCamelCaseToHyphenSeparatedWords
 
 /**
- * Cardinal Direction
+ * Cardinal Direction model with cardinal directions of  North/East/South/West, and intercardinal, and secondary
+ * intercardinal directions.
+ *
+ * https://en.wikipedia.org/wiki/Cardinal_direction
  */
 
 enum class CardinalDirectionConcept {
@@ -32,6 +35,16 @@ enum class CardinalDirectionConcept {
 }
 
 fun buildGeneralCardinalDirectionLexicon(lexicon: Lexicon) {
+    buildCardinalDirectionWords(lexicon)
+    buildInCardinalDirection(lexicon)
+}
+
+// Support Rain in Northeast
+fun buildInCardinalDirection(lexicon: Lexicon) {
+    lexicon.addMapping(PrepositionWord(Preposition.In, setOf(CardinalDirectionConcept.CardinalDirection.name)))
+}
+
+private fun buildCardinalDirectionWords(lexicon: Lexicon) {
     CardinalDirection.values().forEach { cardinalDirection ->
         cardinalDirection.lexiconNames().forEach { lexiconName ->
             lexicon.addMapping(CardinalDirectionHandler(cardinalDirection, lexiconName))
@@ -41,7 +54,8 @@ fun buildGeneralCardinalDirectionLexicon(lexicon: Lexicon) {
 }
 
 enum class CardinalFields(override val fieldName: String): Fields {
-    Degrees("degrees")
+    Degrees("degrees"),
+    Direction("direction"),
 }
 
 private enum class CardinalCategory {
@@ -83,4 +97,27 @@ class CardinalDirectionHandler(private val cardinalDirection: CardinalDirection,
             slot(CoreFields.Name, cardinalDirection.name)
             slot(CardinalFields.Degrees, cardinalDirection.degrees.toString())
         }.demons
+}
+
+// Lexical "in north-east"
+class InDirectionHandler(): WordHandler(EntryWord("in")) {
+    val matchingHead = CardinalDirectionConcept.CardinalDirection.name
+    override fun build(wordContext: WordContext): List<Demon> =
+        lexicalConcept(wordContext, GeneralConcepts.Location.name) {
+            expectHead(CardinalFields.Direction.name, "direction", matchingHead)
+            varReference(CoreFields.Name.name, "direction", extractConceptName)
+            slot(CoreFields.Kind, CardinalDirectionConcept.CardinalDirection.name)
+        }.demons
+
+    override fun disambiguationDemons(wordContext: WordContext, disambiguationHandler: DisambiguationHandler): List<Demon> {
+        return listOf(
+            DisambiguateUsingMatch(
+                matchConceptByHead(matchingHead),
+                SearchDirection.After,
+                null,
+                wordContext,
+                disambiguationHandler
+            )
+        )
+    }
 }

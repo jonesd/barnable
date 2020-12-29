@@ -42,6 +42,8 @@ enum class Modifiers(val modifier: Fields, val value: ModifierConcepts, val word
         listOf("old")),
     Young(CoreFields.Age, ModifierConcepts.LessThanNormal,
         listOf("young"))
+
+
 }
 
 // Word Sense
@@ -55,6 +57,9 @@ fun buildGrammarModifierLexicon(lexicon: Lexicon) {
 
 private fun defaultModifierTargetMatcher() =
     matchConceptByHead(listOf(GeneralConcepts.Human.name, GeneralConcepts.PhysicalObject.name))
+
+private fun stateActMatcher() =
+    matchConceptByHead(listOf(GeneralConcepts.State.name, GeneralConcepts.Act.name))
 
 class ModifierWord(word: String, val field: Fields, val value: String = word, val matcher: ConceptMatcher = defaultModifierTargetMatcher()): WordHandler(EntryWord(word)) {
     override fun build(wordContext: WordContext): List<Demon> {

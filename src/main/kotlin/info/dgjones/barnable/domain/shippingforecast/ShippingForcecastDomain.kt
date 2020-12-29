@@ -25,6 +25,7 @@ import info.dgjones.barnable.grammar.ModifierWord
 import info.dgjones.barnable.narrative.MopFields
 import info.dgjones.barnable.narrative.MopRestaurant
 import info.dgjones.barnable.parser.*
+import info.dgjones.barnable.util.transformCamelCaseToSpaceSeparatedWords
 
 interface Domain {
     val name: String
@@ -87,10 +88,18 @@ enum class ShippingForecastEnum() {
     Faeroes,
     SoutheastIceland;
 
-    fun title(): String {
-        return "(?<=[a-zA-Z])[A-Z]".toRegex().replace(this.name) {" ${it.value}"}
-        //return this.name.split("""[\p{Lu}\p{Lt}]""".toRegex(), ).joinToString(" ").trim()
-    }
+    fun title(): String = transformCamelCaseToSpaceSeparatedWords(this.name)
+}
+
+enum class SeaState(val minHeight: Double, val maxHeight: Double) {
+    Smooth(0.0, 0.5),
+    Slight(0.5, 1.25),
+    Moderate(1.25, 2.5),
+    Rough(2.5, 4.0),
+    VeryRough(4.0, 6.0),
+    High(6.0, 9.0),
+    VeryHigh(9.0, 14.0),
+    Phenomenal(14.0, Double.MAX_VALUE)
 }
 
 private class ShippingForecastRegionWord(val region: ShippingForecastEnum): WordHandler(EntryWord(region.title().split(" ").first(), region.title().split(" "))) {

@@ -17,19 +17,42 @@
 
 package info.dgjones.barnable.domain.general
 
-import info.dgjones.barnable.concept.Concept
-import info.dgjones.barnable.concept.Fields
-import info.dgjones.barnable.concept.lexicalConcept
-import info.dgjones.barnable.concept.matchConceptByHead
+import info.dgjones.barnable.concept.*
 import info.dgjones.barnable.grammar.MultipleModifierWord
+import info.dgjones.barnable.grammar.Preposition
+import info.dgjones.barnable.grammar.expectPrep
 import info.dgjones.barnable.parser.*
 
-fun buildGeneralMeteorolgyLexicon(lexicon: Lexicon) {
-    buildWeatherConcepts(lexicon)
-    buildWeatherModifiers(lexicon)
+/**
+ * Model basic Meteorological domain.
+ */
+enum class MeteorologyConcept {
+    Weather,
+    WeatherCharacteristic
 }
 
-fun buildWeatherModifiers(lexicon: Lexicon) {
+enum class MeteorologyFields(override val fieldName: String): Fields {
+    Weather("weather"),
+    WeatherCharacteristics("characteristics")
+}
+
+fun buildGeneralMeteorologyLexicon(lexicon: Lexicon) {
+    buildWeatherConcepts(lexicon)
+    buildWeatherCharacteristics(lexicon)
+    buildWeatherInLocation(lexicon)
+}
+
+enum class WeatherCharacteristics {
+    Snow,
+    Squally,
+    Thundery,
+    Wintry;
+
+    fun word() = this.name.toLowerCase()
+}
+
+/* Implement characteristic word elements as modifiers for the Weather */
+fun buildWeatherCharacteristics(lexicon: Lexicon) {
     val weatherMatcher = matchConceptByHead(MeteorologyConcept.Weather.name)
     WeatherCharacteristics.values().forEach {
         lexicon.addMapping(MultipleModifierWord(it.word(), MeteorologyFields.WeatherCharacteristics, it.name, weatherMatcher ))
@@ -42,14 +65,10 @@ private fun buildWeatherConcepts(lexicon: Lexicon) {
     }
 }
 
-enum class MeteorologyConcept {
-    Weather,
-    WeatherCharacteristic
-}
+// FIXME defined in a more general
+private fun buildWeatherInLocation(lexicon: Lexicon) {
+    val weatherMatcher = matchConceptByHead(MeteorologyConcept.Weather.name)
 
-enum class MeteorologyFields(override val fieldName: String): Fields {
-    Weather("weather"),
-    WeatherCharacteristics("characteristics")
 }
 
 enum class WeatherConcept {
@@ -59,18 +78,17 @@ enum class WeatherConcept {
     fun word() = this.name.toLowerCase()
 }
 
-enum class WeatherCharacteristics {
-    Snow,
-    Squally,
-    Thundery,
-    Wintry;
-
-    fun word() = this.name.toLowerCase()
-}
-
-class WeatherHandler(val weather: WeatherConcept): WordHandler(EntryWord(weather.word())) {
+class WeatherHandler(private val weather: WeatherConcept): WordHandler(EntryWord(weather.word())) {
     override fun build(wordContext: WordContext): List<Demon> =
         lexicalConcept(wordContext, MeteorologyConcept.Weather.name) {
-            slot(MeteorologyFields.Weather, weather.name)
+            slot(CoreFields.Name, weather.name)
+            slot(CoreFields.Location, GeneralConcepts.Location.name) {
+                expectPrep(CardinalFields.Direction.fieldName, variableName = "cardinalDirection", preps = setOf(Preposition.In), matcher = matchConceptByHead(setOf(
+                    CardinalDirectionConcept.CardinalDirection.name))
+                )
+                varReference(CoreFields.Name.fieldName, "cardinalDirection", extractConceptName)
+                varReference(CoreFields.Kind.fieldName, "cardinalDirection", extractConceptHead)
+            }
+
         }.demons
 }

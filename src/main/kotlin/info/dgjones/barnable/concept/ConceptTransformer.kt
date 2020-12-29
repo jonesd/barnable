@@ -22,3 +22,7 @@ fun interface ConceptTransformer {
 }
 
 val extractConceptHead = ConceptTransformer { if (it != null) Concept(it.name) else null }
+val extractConceptName = ConceptTransformer {
+    val name = it?.valueName(CoreFields.Name)
+    if (name != null) Concept(name) else null
+}

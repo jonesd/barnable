@@ -21,6 +21,8 @@ import info.dgjones.barnable.domain.general.HumanFields
 import info.dgjones.barnable.domain.general.Acts
 import info.dgjones.barnable.narrative.buildInDepthUnderstandingLexicon
 import info.dgjones.barnable.concept.Concept
+import info.dgjones.barnable.concept.CoreFields
+import info.dgjones.barnable.domain.general.ActFields
 import info.dgjones.barnable.parser.runTextProcess
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -48,7 +50,7 @@ class ShouldMapPassiveAndActiveToSameConceptsTest {
 
     private fun verifyFredKickedBall(propel: Concept) {
         assertEquals(Acts.PROPEL.name, propel.name)
-        assertEquals("Fred", propel.value("actor")?.valueName(HumanFields.FirstName))
-        assertEquals("ball", propel.value("thing")?.valueName("name"))
+        assertEquals("Fred", propel.value(ActFields.Actor)?.valueName(HumanFields.FirstName))
+        assertEquals("ball", propel.value(ActFields.Thing)?.valueName(CoreFields.Name))
     }
 }
