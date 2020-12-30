@@ -97,6 +97,18 @@ class MeteorolgyTest {
             assertEquals(CardinalDirectionConcept.CardinalDirection.name, weather.value(CoreFields.Location)?.valueName(CoreFields.Kind))
         }
         @Test
+        fun `Weather specific to direction passive`() {
+            val textProcessor = runTextProcess("In northwest, rain", lexicon)
+
+            assertEquals(1, textProcessor.workingMemory.concepts.size)
+            val weather = textProcessor.workingMemory.concepts[0]
+            assertEquals(MeteorologyConcept.Weather.name, weather.name)
+            assertEquals(WeatherConcept.Rain.name, weather.valueName(CoreFields.Name))
+            assertEquals(GeneralConcepts.Location.name, weather.valueName(CoreFields.Location))
+            assertEquals(CardinalDirection.NorthWest.name, weather.value(CoreFields.Location)?.valueName(CoreFields.Name))
+            assertEquals(CardinalDirectionConcept.CardinalDirection.name, weather.value(CoreFields.Location)?.valueName(CoreFields.Kind))
+        }
+        @Test
         fun `Weather with frequency before`() {
             val textProcessor = runTextProcess("Occasional rain", lexicon)
 

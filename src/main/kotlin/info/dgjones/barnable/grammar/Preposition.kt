@@ -119,12 +119,22 @@ class PrepositionWord(private val preposition: Preposition, private val matchCon
 
 // Demons
 
-class PrepDemon(val matcher: ConceptMatcher, val direction: SearchDirection = SearchDirection.Before, wordContext: WordContext, val action: (ConceptHolder) -> Unit): Demon(wordContext) {
+class PrepDemon(val matcher: ConceptMatcher, val direction: SearchDirection = SearchDirection.After, wordContext: WordContext, val action: (ConceptHolder) -> Unit): Demon(wordContext) {
     override fun run() {
         searchContext(matcher, matchNever(), direction = direction, wordContext = wordContext) {
             action(it)
             if (it != null) {
                 active = false
+            }
+        }
+        // fIXME should also switch when bounday reched?
+        // Handle the test of teh preposition being at the beginning of the sentenc
+        if (wordContext.context.sentenceComplete) {
+            searchContext(matcher, matchNever(), direction = SearchDirection.Before, wordContext = wordContext) {
+                action(it)
+                if (it != null) {
+                    active = false
+                }
             }
         }
     }

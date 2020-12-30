@@ -30,52 +30,52 @@ class NaiveTokenizerTest {
     }
 
     @Test
-    fun `handle sequence of words`() {
+    fun `handle sequence of words and ensures period at end`() {
         val words = NaiveTokenizer().splitTextIntoWords("one two three")
 
-        assertEquals(listOf("one", "two", "three"), words)
+        assertEquals(listOf("one", "two", "three", "."), words)
     }
 
     @Test
     fun `detect period for new sentence`() {
         val words = NaiveTokenizer().splitTextIntoWords("one two. three four")
 
-        assertEquals(listOf("one", "two", ".", "three", "four"), words)
+        assertEquals(listOf("one", "two", ".", "three", "four", "."), words)
     }
 
     @Test
     fun `ignore period for word in abbreviation list`() {
         val words = NaiveTokenizer().splitTextIntoWords("one Dr. three four")
 
-        assertEquals(listOf("one", "Dr.", "three", "four"), words)
+        assertEquals(listOf("one", "Dr.", "three", "four", "."), words)
     }
 
     @Test
     fun `ignore period for money word`() {
         val words = NaiveTokenizer().splitTextIntoWords("one 1.78 three four")
 
-        assertEquals(listOf("one", "1.78", "three", "four"), words)
+        assertEquals(listOf("one", "1.78", "three", "four", "."), words)
     }
 
     @Test
     fun `detect multiple sentences`() {
         val words = NaiveTokenizer().splitTextIntoWords("one two. three four. five")
 
-        assertEquals(listOf("one", "two", ".", "three", "four", ".", "five"), words)
+        assertEquals(listOf("one", "two", ".", "three", "four", ".", "five", "."), words)
     }
 
     @Test
     fun `considers question mark as sentence end`() {
         val words = NaiveTokenizer().splitTextIntoWords("one two? three")
 
-        assertEquals(listOf("one", "two", "?", "three"), words)
+        assertEquals(listOf("one", "two", "?", "three", "."), words)
     }
 
     @Test
     fun `considers exclamation as sentence end`() {
         val words = NaiveTokenizer().splitTextIntoWords("one two! three")
 
-        assertEquals(listOf("one", "two", "!", "three"), words)
+        assertEquals(listOf("one", "two", "!", "three", "."), words)
     }
 
     @Test
@@ -89,21 +89,21 @@ class NaiveTokenizerTest {
     fun `split clause on comma`() {
         val words = NaiveTokenizer().splitTextIntoWords("one two, three four")
 
-        assertEquals(listOf("one", "two", ",", "three", "four"), words)
+        assertEquals(listOf("one", "two", ",", "three", "four", "."), words)
     }
 
     @Test
     fun `split clause on semicolon`() {
         val words = NaiveTokenizer().splitTextIntoWords("one two; three four")
 
-        assertEquals(listOf("one", "two", ";", "three", "four"), words)
+        assertEquals(listOf("one", "two", ";", "three", "four", "."), words)
     }
 
     @Test
     fun `split clause on colon`() {
         val words = NaiveTokenizer().splitTextIntoWords("one two: three four")
 
-        assertEquals(listOf("one", "two", ":", "three", "four"), words)
+        assertEquals(listOf("one", "two", ":", "three", "four", "."), words)
     }
 
     @Test

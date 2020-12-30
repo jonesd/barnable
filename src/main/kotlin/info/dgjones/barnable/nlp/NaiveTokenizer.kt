@@ -80,7 +80,11 @@ class NaiveTokenizer {
                 words2.add(it)
             }
         }
-        return words2.map { it.trim() }.filter { it.isNotEmpty() }
+        val words3 = words2.map { it.trim() }.filter { it.isNotEmpty() }.toMutableList()
+        if (words3.size > 0 && (words3.last().length != 1 || !endOfLineMarkers.contains(words3.last()[0]))) {
+            words3.add(".")
+        }
+        return words3
     }
 
     private fun isAbbreviation(unit: String): Boolean {

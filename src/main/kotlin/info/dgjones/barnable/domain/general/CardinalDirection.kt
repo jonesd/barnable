@@ -98,26 +98,3 @@ class CardinalDirectionHandler(private val cardinalDirection: CardinalDirection,
             slot(CardinalFields.Degrees, cardinalDirection.degrees.toString())
         }.demons
 }
-
-// Lexical "in north-east"
-class InDirectionHandler(): WordHandler(EntryWord("in")) {
-    val matchingHead = CardinalDirectionConcept.CardinalDirection.name
-    override fun build(wordContext: WordContext): List<Demon> =
-        lexicalConcept(wordContext, GeneralConcepts.Location.name) {
-            expectHead(CardinalFields.Direction.name, "direction", matchingHead)
-            varReference(CoreFields.Name.name, "direction", extractConceptName)
-            slot(CoreFields.Kind, CardinalDirectionConcept.CardinalDirection.name)
-        }.demons
-
-    override fun disambiguationDemons(wordContext: WordContext, disambiguationHandler: DisambiguationHandler): List<Demon> {
-        return listOf(
-            DisambiguateUsingMatch(
-                matchConceptByHead(matchingHead),
-                SearchDirection.After,
-                null,
-                wordContext,
-                disambiguationHandler
-            )
-        )
-    }
-}

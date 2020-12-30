@@ -66,10 +66,12 @@ class TextProcessor(private val textModel: TextModel, val lexicon: Lexicon) {
         println(sentence.text.toUpperCase())
         val splitter = TextSplitter(lexicon)
         val wordUnits = splitter.split(sentence).units
+
         wordUnits.forEachIndexed { index, wordUnit ->
             val unitText = wordUnit[0].textFragment()
             val wordContext = WordContext(index, unitText, workingMemory.createDefHolder(), context)
             context.pushWord(wordContext)
+            context.sentenceComplete = (index == wordUnits.lastIndex)
             runWord(wordUnit, wordContext)
             agenda.runDemons()
         }
@@ -221,6 +223,7 @@ class SentenceContext(val sentence: TextSentence, val workingMemory: WorkingMemo
     var mostRecentObject: Concept? = null
     var mostRecentCharacter: Concept? = null
     var localCharacter: Concept? = null
+    var sentenceComplete = false
     val wordContexts = mutableListOf<WordContext>()
 
     fun pushWord(wordContext: WordContext) {

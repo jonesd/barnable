@@ -30,9 +30,9 @@ class TextSplitterTest {
         val textSplitter = TextSplitter(lexicon)
 
         // test zero
-        val splits = textSplitter.split(buildTextModel("zero one two").initialSentence())
+        val splits = textSplitter.split(buildTextModel("zero one two.").initialSentence())
 
-        assertEquals(3, splits.units.size)
+        assertEquals(4, splits.units.size)
 
         val unit0 = splits.units[0]
         assertEquals("zero", unit0.first().morphologies.first().full)
@@ -57,9 +57,9 @@ class TextSplitterTest {
         val textSplitter = TextSplitter(lexicon)
 
         // test zero
-        val splits = textSplitter.split(buildTextModel("zero one two").initialSentence())
+        val splits = textSplitter.split(buildTextModel("zero one two .").initialSentence())
 
-        assertEquals(2, splits.units.size)
+        assertEquals(3, splits.units.size)
 
         val unit0 = splits.units[0]
         assertEquals("zero", unit0.first().morphologies.first().full)

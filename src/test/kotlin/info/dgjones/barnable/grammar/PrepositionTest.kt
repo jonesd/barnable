@@ -64,4 +64,14 @@ class PrepositionTest {
         val book = textProcessor.workingMemory.concepts[1]
         assertEquals(PhysicalObjects.Book.title, book.valueName(CoreFields.Name))
     }
+    @Test
+    fun `Preposition at start of sentence`() {
+        val textProcessor = runTextProcess("In northwest, rain", lexicon)
+
+        assertEquals(1, textProcessor.workingMemory.concepts.size)
+        val weather = textProcessor.workingMemory.concepts[0]
+        assertEquals(MeteorologyConcept.Weather.name, weather.name)
+        assertEquals(WeatherConcept.Rain.name, weather.valueName(CoreFields.Name))
+        assertEquals(CardinalDirection.NorthWest.name, weather.value(CoreFields.Location)?.valueName(CoreFields.Name))
+    }
 }
