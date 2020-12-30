@@ -119,4 +119,37 @@ class MeteorolgyTest {
             assertEquals(ScaleConcepts.LessThanNormal.name, weather.valueName(FrequencyFields.Frequency))
         }
     }
+
+    @Nested
+    inner class WindTest {
+        @Test
+        fun `Wind basic`() {
+            val textProcessor = runTextProcess("Gale", lexicon)
+
+            assertEquals(1, textProcessor.workingMemory.concepts.size)
+            val wind = textProcessor.workingMemory.concepts[0]
+            assertEquals(MeteorologyConcept.Wind.name, wind.name)
+            assertEquals(WindConcepts.Gale.name, wind.valueName(CoreFields.Name))
+        }
+        @Test
+        fun `Wind scale modifier`() {
+            val textProcessor = runTextProcess("Severe gale", lexicon)
+
+            assertEquals(1, textProcessor.workingMemory.concepts.size)
+            val wind = textProcessor.workingMemory.concepts[0]
+            assertEquals(MeteorologyConcept.Wind.name, wind.name)
+            assertEquals(WindConcepts.Gale.name, wind.valueName(CoreFields.Name))
+            assertEquals(ScaleConcepts.GreaterThanNormal.name, wind.valueName(CoreFields.Scale))
+        }
+        @Test
+        fun `Direction of wind`() {
+            val textProcessor = runTextProcess("Northerly gale", lexicon)
+
+            assertEquals(1, textProcessor.workingMemory.concepts.size)
+            val wind = textProcessor.workingMemory.concepts[0]
+            assertEquals(MeteorologyConcept.Wind.name, wind.name)
+            assertEquals(WindConcepts.Gale.name, wind.valueName(CoreFields.Name))
+            assertEquals("North", wind.valueName(CardinalFields.Direction))
+        }
+    }
 }

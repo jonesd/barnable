@@ -17,11 +17,14 @@
 
 package info.dgjones.barnable.domain.general
 
+import info.dgjones.barnable.grammar.buildEnglishGrammarLexicon
 import info.dgjones.barnable.parser.Lexicon
 
 
 
 fun buildGeneralDomainLexicon(lexicon: Lexicon) {
+    buildEnglishGrammarLexicon(lexicon)
+
     buildGeneralPhysicalObjectsLexicon(lexicon)
     buildGeneralFoodLexicon(lexicon)
     buildGeneralLiquidLexicon(lexicon)

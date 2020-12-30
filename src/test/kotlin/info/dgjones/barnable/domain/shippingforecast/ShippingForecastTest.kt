@@ -33,9 +33,7 @@ class ShippingForecastTest {
 
     private fun buildLexicon(): Lexicon {
         val lexicon = Lexicon()
-        buildEnglishGrammarLexicon(lexicon)
-        buildGeneralDomainLexicon(lexicon)
-        ShippingForecastDomain().buildGeneralDomainLexicon(lexicon)
+        ShippingForecastDomain().buildDomainLexicon(lexicon)
         return lexicon
     }
 

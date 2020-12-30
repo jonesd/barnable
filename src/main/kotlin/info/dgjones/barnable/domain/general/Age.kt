@@ -25,7 +25,7 @@ import info.dgjones.barnable.grammar.stateActMatcher
 import info.dgjones.barnable.parser.Lexicon
 
 /**
- * Age or the entity
+ * Relative age of the entity
  */
 enum class AgeFields(override val fieldName: String): Fields {
     Age("age")

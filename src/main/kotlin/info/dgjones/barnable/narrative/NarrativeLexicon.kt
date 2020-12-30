@@ -24,7 +24,6 @@ import info.dgjones.barnable.parser.*
 
 fun buildInDepthUnderstandingLexicon(): Lexicon {
     val lexicon = Lexicon()
-    buildEnglishGrammarLexicon(lexicon)
     buildGeneralDomainLexicon(lexicon)
 
     buildNarrativeRelationshipLexicon(lexicon)
@@ -40,9 +39,6 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
     lexicon.addMapping(WordTell())
     lexicon.addMapping(WordIgnore(EntryWord("that")))
     lexicon.addMapping(WordEats())
-
-    lexicon.addMapping(WordPerson(buildHuman("", "", Gender.Female.name), "woman"))
-    lexicon.addMapping(WordPerson(buildHuman("", "", Gender.Male.name), "man"))
 
     // Locations
     lexicon.addMapping(WordHome())

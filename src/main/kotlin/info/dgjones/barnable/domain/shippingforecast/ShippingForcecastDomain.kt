@@ -21,6 +21,7 @@ import info.dgjones.barnable.concept.CoreFields
 import info.dgjones.barnable.concept.lexicalConcept
 import info.dgjones.barnable.domain.general.GeneralConcepts
 import info.dgjones.barnable.domain.general.PhysicalObjects
+import info.dgjones.barnable.domain.general.buildGeneralDomainLexicon
 import info.dgjones.barnable.grammar.ModifierWord
 import info.dgjones.barnable.narrative.MopFields
 import info.dgjones.barnable.narrative.MopRestaurant
@@ -29,7 +30,8 @@ import info.dgjones.barnable.util.transformCamelCaseToSpaceSeparatedWords
 
 interface Domain {
     val name: String
-    fun buildGeneralDomainLexicon(lexicon: Lexicon)
+    fun buildDomainLexicon(lexicon: Lexicon)
+    fun addToLexicon(lexicon: Lexicon)
 }
 
 enum class ShippingForecastConcepts {
@@ -44,7 +46,11 @@ enum class ShippingForecastConcepts {
  */
 class ShippingForecastDomain : Domain {
     override val name: String = "ShippingForecast"
-    override fun buildGeneralDomainLexicon(lexicon: Lexicon) {
+    override fun buildDomainLexicon(lexicon: Lexicon) {
+        buildGeneralDomainLexicon(lexicon)
+        addToLexicon(lexicon)
+    }
+    override fun addToLexicon(lexicon: Lexicon) {
         buildRegions(lexicon)
     }
 

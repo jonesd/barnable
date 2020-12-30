@@ -46,7 +46,7 @@ class ModifierTest {
         assertEquals(1, textProcessor.workingMemory.concepts.size)
         val concept = textProcessor.workingMemory.concepts.first()
         assertEquals(ScaleConcepts.GreaterThanNormal.name, concept.valueName(AgeFields.Age))
-        assertEquals(ScaleConcepts.LessThanNormal.name, concept.valueName(CoreFields.Weight))
+        assertEquals(ScaleConcepts.LessThanNormal.name, concept.valueName(WeightFields.Weight))
     }
 
     @Test
@@ -55,6 +55,6 @@ class ModifierTest {
 
         assertEquals(1, textProcessor.workingMemory.concepts.size)
         val concept = textProcessor.workingMemory.concepts.first()
-        assertEquals(ScaleConcepts.GreaterThanNormal.name, concept.valueName(CoreFields.Weight))
+        assertEquals(ScaleConcepts.GreaterThanNormal.name, concept.valueName(WeightFields.Weight))
     }
 }

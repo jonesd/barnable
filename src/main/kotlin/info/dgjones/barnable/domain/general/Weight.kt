@@ -25,7 +25,7 @@ import info.dgjones.barnable.grammar.stateActMatcher
 import info.dgjones.barnable.parser.Lexicon
 
 /**
- * Weight of an entity
+ * Relative weight of an entity
  */
 enum class WeightFields(override val fieldName: String): Fields {
     Weight("weight")

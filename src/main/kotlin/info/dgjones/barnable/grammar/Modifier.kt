@@ -22,7 +22,7 @@ import info.dgjones.barnable.domain.general.*
 import info.dgjones.barnable.parser.*
 
 /**
- * A word, phrase, or clause that limits or qualifies the sense of another word or phrase.
+ * "A word, phrase, or clause that limits or qualifies the sense of another word or phrase."
  * https://en.wiktionary.org/wiki/modifier
  *
  * Modifiers are implemented as word elements that search After for a matching word kind
@@ -50,6 +50,10 @@ fun stateActMatcher() =
         matchConceptHasSlotName(CoreFields.State)
     ))
 
+/**
+ * Add a modifier to a matched concept. Only supports a single value to be associated with the field..
+ * For example set Age=GreaterThanNorm to the following Human concept
+ */
 class ModifierWord(word: String, val field: Fields, val value: String = word, val matcher: ConceptMatcher = defaultModifierTargetMatcher()): WordHandler(EntryWord(word)) {
     override fun build(wordContext: WordContext): List<Demon> {
         val demon = object : Demon(wordContext) {
@@ -74,6 +78,10 @@ class ModifierWord(word: String, val field: Fields, val value: String = word, va
     }
 }
 
+/**
+ * Add a modifier to a matched concept. Supports multiple values being associated with a slot.
+ * For example add Squally to the list of characterstics for a Weather concept.
+ */
 class MultipleModifierWord(word: String, val field: Fields, val value: String = word, val matcher: ConceptMatcher = defaultModifierTargetMatcher()): WordHandler(EntryWord(word)) {
     override fun build(wordContext: WordContext): List<Demon> {
         val demon = object : Demon(wordContext) {

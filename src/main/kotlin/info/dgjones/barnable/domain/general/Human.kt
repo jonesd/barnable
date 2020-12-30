@@ -83,6 +83,9 @@ fun humanKeyValue(human: Concept) =
 // Word Senses
 
 fun buildGeneralHumanLexicon(lexicon: Lexicon) {
+    lexicon.addMapping(WordPerson(buildHuman("", "", Gender.Female.name), "woman"))
+    lexicon.addMapping(WordPerson(buildHuman("", "", Gender.Male.name), "man"))
+
     lexicon.addMapping(WordPerson(buildHuman("Ann", "", Gender.Female.name)))
     lexicon.addMapping(WordPerson(buildHuman("Anne", "", Gender.Female.name)))
     lexicon.addMapping(WordPerson(buildHuman("Bill", "", Gender.Male.name)))
