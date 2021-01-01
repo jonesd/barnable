@@ -36,6 +36,40 @@ class ExpectDemon(val matcher: ConceptMatcher, val direction: SearchDirection, w
     }
 }
 
+/**
+ * Find the earliest match in the sentence from a contiguous match from the current wordContext.
+ * Ignore skipMatcher elements.
+ */
+class ExpectEarliestDemon(val matcher: ConceptMatcher, val skipMatcher: ConceptMatcher = matchNever(), wordContext: WordContext, val action: (ConceptHolder) -> Unit): Demon(wordContext) {
+    override fun run() {
+        val anyMatcher = matchAny(listOf(matcher, skipMatcher))
+        var currentMatch = wordContext.defHolder
+        do {
+            var newMatch: ConceptHolder? = null
+            val startWordContext = wordContext.context.wordContexts.first { it.defHolder == currentMatch }
+            searchContext(
+                anyMatcher,
+                abortSearch = matchConjunction(),
+                direction = SearchDirection.Before,
+                wordContext = startWordContext
+            ) {
+                if (it.value != null) {
+                    newMatch = it
+                }
+            }
+            if (newMatch != null) {
+                currentMatch = newMatch as ConceptHolder
+            }
+        } while (newMatch != null)
+        action(currentMatch)
+        active = false
+    }
+
+    override fun description(): String {
+        return "ExpectEarliestDemon $action"
+    }
+}
+
 class InsertAfterDemon(val matcher: ConceptMatcher, wordContext: WordContext, val action: (ConceptHolder) -> Unit): Demon(wordContext) {
     override fun run() {
         searchContext(matcher, matchNever(), direction = SearchDirection.After, wordContext = wordContext) {
