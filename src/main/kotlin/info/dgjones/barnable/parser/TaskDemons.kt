@@ -40,7 +40,7 @@ class ExpectDemon(val matcher: ConceptMatcher, val direction: SearchDirection, w
  * Find the earliest match in the sentence from a contiguous match from the current wordContext.
  * Ignore skipMatcher elements.
  */
-class ExpectEarliestDemon(val matcher: ConceptMatcher, val skipMatcher: ConceptMatcher = matchNever(), wordContext: WordContext, val action: (ConceptHolder) -> Unit): Demon(wordContext) {
+class ExpectEarliestDemon(val matcher: ConceptMatcher, val skipMatcher: ConceptMatcher = matchNever(), val abortSearch: ConceptMatcher = matchConjunction(), wordContext: WordContext, val action: (ConceptHolder) -> Unit): Demon(wordContext) {
     override fun run() {
         val anyMatcher = matchAny(listOf(matcher, skipMatcher))
         var currentMatch = wordContext.defHolder
@@ -49,7 +49,7 @@ class ExpectEarliestDemon(val matcher: ConceptMatcher, val skipMatcher: ConceptM
             val startWordContext = wordContext.context.wordContexts.first { it.defHolder == currentMatch }
             searchContext(
                 anyMatcher,
-                abortSearch = matchConjunction(),
+                abortSearch = abortSearch,
                 direction = SearchDirection.Before,
                 wordContext = startWordContext
             ) {
@@ -82,6 +82,30 @@ class InsertAfterDemon(val matcher: ConceptMatcher, wordContext: WordContext, va
 
     override fun description(): String {
         return "InsertAfter $matcher"
+    }
+}
+
+class CopySlotValueToConceptDemon(val sourceField: Fields, val matcher: ConceptMatcher = defaultModifierTargetMatcher(), val updateField: Fields, val keepRunning: Boolean = false, wordContext: WordContext): Demon(wordContext) {
+    override fun run() {
+        val sourceValue = wordContext.defHolder.value?.valueName(sourceField)
+        searchContext(matcher, direction = SearchDirection.After, wordContext = wordContext) { updateHolder ->
+            updateHolder.value?.let { root ->
+                root.slotOrCreate(updateField.fieldName).let { slot ->
+                    if (sourceValue != slot.value?.name) {
+                        // FIXME should we alias concept or create new?
+                        slot.value =  if (sourceValue != null) Concept(sourceValue) else null
+                        wordContext.defHolder.addFlag(ParserFlags.Inside)
+                    }
+                }
+                if (!keepRunning) {
+                    active = false
+                }
+            }
+        }
+    }
+
+    override fun description(): String {
+        return "copy slot value ${sourceField.fieldName} to ${updateField.fieldName} on found concept"
     }
 }
 

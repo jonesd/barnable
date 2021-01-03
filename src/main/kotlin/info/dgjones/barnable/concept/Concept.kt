@@ -59,6 +59,15 @@ data class Concept(var name: String) {
         return slots[name]
     }
 
+    fun slotOrCreate(name:String): Slot {
+        var slot = slots[name]
+        if (slot == null) {
+            slot = Slot(name, null)
+            with(slot)
+        }
+        return slot
+    }
+
     fun with(slot: Slot): Concept {
         slots[slot.name] = slot
         return this

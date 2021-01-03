@@ -20,6 +20,7 @@ package info.dgjones.barnable.parser
 open class Demon(val wordContext: WordContext) {
     private val demonIndex = wordContext.nextDemonIndex()
     var active = true
+    var highPriority = false
 
     open fun run() {
         // Without an implementation - just deactivate
@@ -61,7 +62,9 @@ class Agenda {
     // Active demons in a prioritized order for execution:
     // - Most recently added first - ie current word
     fun prioritizedActiveDemons(): List<Demon> {
-        return demons.filter { it.active }.reversed()
+        val prioritized = demons.filter { it.highPriority && it.active }.reversed()
+        var normal = demons.filter { !it.highPriority && it.active }.reversed()
+        return listOf(prioritized, normal).flatten()
     }
 
     // Run each active demon is a prioritized order.

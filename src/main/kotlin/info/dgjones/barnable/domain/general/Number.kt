@@ -18,10 +18,13 @@
 package info.dgjones.barnable.domain.general
 
 import info.dgjones.barnable.concept.*
+import info.dgjones.barnable.grammar.ConjunctionConcept
+import info.dgjones.barnable.grammar.defaultModifierTargetMatcher
 import info.dgjones.barnable.parser.*
 
 enum class NumberConcept {
-    Number
+    Number,
+    NumberAnd
 }
 
 enum class NumberFields(override val fieldName: String): Fields {
@@ -72,22 +75,74 @@ enum class NumberValues(val value: Int, val accumulateAsMultiple: Boolean = fals
 }
 
 fun buildGeneralNumberLexicon(lexicon: Lexicon) {
+    buildNumberValueAnd(lexicon)
+    buildNumberValueWords(lexicon)
+}
+
+private fun buildNumberValueAnd(lexicon: Lexicon) {
+    lexicon.addMapping(AndNumberElement())
+}
+
+private fun buildNumberValueWords(lexicon: Lexicon) {
     NumberValues.values().forEach {
         lexicon.addMapping(NumberHandler(it.value, it.name))
     }
 }
 
+/*
+Handle the scenario of "hundred and one" where number elements will be collected together for the total number value
+ */
+class AndNumberElement: WordHandler(EntryWord("and")) {
+    private val matchingNumberElement = matchConceptByHead(NumberConcept.Number.name)
+    override fun build(wordContext: WordContext): List<Demon> =
+        lexicalConcept(wordContext, NumberConcept.NumberAnd.name) {
+            ignoreHolder()
+        }.demons
 
+    override fun disambiguationDemons(wordContext: WordContext, disambiguationHandler: DisambiguationHandler): List<Demon> {
+        return listOf(
+            DisambiguateUsingMatch(
+                matchingNumberElement,
+                SearchDirection.Before,
+                1,
+                wordContext,
+                disambiguationHandler
+            ),
+            DisambiguateUsingMatch(
+                matchingNumberElement,
+                SearchDirection.After,
+                1,
+                wordContext,
+                disambiguationHandler
+            )
+        )
+    }
+}
+
+/**
+ * Handle individual number element that will be collated together into the calculating the full number value.
+ */
 class NumberHandler(var value: Int, val name: String): WordHandler(EntryWord(name.toLowerCase())) {
     override fun build(wordContext: WordContext): List<Demon> =
         lexicalConcept(wordContext, NumberConcept.Number.name) {
             slot(NumberFields.Value, value.toString())
-            pushValueToInitialNumberElement(value, name)
+            pushValueToInitialNumberElement(name)
+            copySlotValueToConcept(NumberFields.Value, defaultModifierTargetMatcher(), QuantityFields.Amount, wordContext)
         }.demons
 }
 
-private fun LexicalConceptBuilder.pushValueToInitialNumberElement(value: Int, name: String) {
-    val demon = ExpectEarliestDemon(matchConceptByHead(NumberConcept.Number.name), matchNever(), root.wordContext) {
+private fun LexicalConceptBuilder.pushValueToInitialNumberElement(name: String) {
+    val matchNumberOrAndNumber = matchConceptByHead(setOf(NumberConcept.Number.name, NumberConcept.NumberAnd.name))
+    val demon = ExpectEarliestDemon(matchConceptByHead(NumberConcept.Number.name), abortSearch = matchNot(matchNumberOrAndNumber), wordContext = root.wordContext) {
+        fun markSubsequentNumbersAsIgnored(firstNumberElement: Concept) {
+            if (firstNumberElement !== root.wordContext.defHolder.value) {
+                ignoreHolder()
+            }
+        }
+        fun calculateFromCollectedValues(words: List<String>): Int {
+            return words.map { NumberValues.valueOf(it) }.fold( 0, {acc, next ->  next.accumulate(acc)})
+        }
+
         it.value?.let { firstNumberElement ->
             val values = firstNumberElement.value(NumberFields.CollectedValues)?: run {
                 val list: Concept = buildConceptList(listOf())
@@ -97,15 +152,10 @@ private fun LexicalConceptBuilder.pushValueToInitialNumberElement(value: Int, na
             val list = ConceptListAccessor(values)
             list.add(Concept(name))
             val total = calculateFromCollectedValues(list.valueNames())
+            println("Updated ${root.wordContext.word} number = $total")
             firstNumberElement.value(NumberFields.Value, Concept(total.toString()))
-            if (firstNumberElement !== root.wordContext.defHolder?.value) {
-                ignoreHolder()
-            }
+            markSubsequentNumbersAsIgnored(firstNumberElement)
         }
     }
     root.addDemon(demon)
-}
-
-private fun calculateFromCollectedValues(words: List<String>): Int {
-    return words.map { NumberValues.valueOf(it) }.fold( 0, {acc, next ->  next.accumulate(acc)})
 }

@@ -18,6 +18,8 @@
 package info.dgjones.barnable.concept
 
 import info.dgjones.barnable.episodic.EpisodicConcept
+import info.dgjones.barnable.grammar.MultipleModifierDemon
+import info.dgjones.barnable.grammar.SingleModifierDemon
 import info.dgjones.barnable.parser.*
 
 /* DSL to help build Concept as part of a word sense.
@@ -182,6 +184,17 @@ class LexicalConceptBuilder(val root: LexicalRootBuilder, conceptName: String) {
 
     fun replaceWordContextWithCurrent(variableName: String) {
         root.overwriteHolderWithMatchedVariable(variableName, concept)
+    }
+
+    // fIXME split this up to find concept, and then use initializer to set values
+    fun copySlotValueToConcept(sourceField: Fields, updateMatcher: ConceptMatcher, updateField: Fields, wordContext: WordContext) {
+        val demon = CopySlotValueToConceptDemon(sourceField, updateMatcher, updateField, keepRunning = true, wordContext)
+        root.addDemon(demon)
+    }
+    // fIXME split this up to find concept, and then use initializer to set values
+    fun addValueToListInFoundConcept(slotName: Fields, value: String, matcher: ConceptMatcher, wordContext: WordContext) {
+        val demon = MultipleModifierDemon(slotName, value, matcher, keepRunning = true, wordContext)
+        root.addDemon(demon)
     }
 }
 

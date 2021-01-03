@@ -253,6 +253,10 @@ class WordEats: WordHandler(EntryWord("eat")) {
         }.demons
 }
 
+/**
+ * The act of measuring an object.
+ * For example: George measures the tree
+ */
 class WordMeasureObject: WordHandler(EntryWord("measure")) {
     override fun build(wordContext: WordContext): List<Demon> =
         lexicalConcept(wordContext, Acts.ATRANS.name) {

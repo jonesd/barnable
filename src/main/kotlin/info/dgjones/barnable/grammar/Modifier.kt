@@ -56,25 +56,28 @@ fun stateActMatcher() =
  */
 class ModifierWord(word: String, val field: Fields, val value: String = word, val matcher: ConceptMatcher = defaultModifierTargetMatcher()): WordHandler(EntryWord(word)) {
     override fun build(wordContext: WordContext): List<Demon> {
-        val demon = object : Demon(wordContext) {
-            var thingHolder: ConceptHolder? = null
+        val demon = SingleModifierDemon(field, value, matcher, keepRunning = false, wordContext)
+        return listOf(demon)
+    }
+}
 
-            override fun run() {
-                val thingConcept = thingHolder?.value
-                if (thingConcept != null) {
-                    thingConcept.with(Slot(field, Concept(value)))
+class SingleModifierDemon(val field: Fields, val value: String, val matcher: ConceptMatcher = defaultModifierTargetMatcher(), val keepRunning: Boolean = false, wordContext: WordContext): Demon(wordContext) {
+    var thingHolder: ConceptHolder? = null
+
+    override fun run() {
+        searchContext(matcher, direction = SearchDirection.After, wordContext = wordContext) {
+            it.value?.let { root ->
+                // FIXME assumes immediate child slot
+                root.with(Slot(field, Concept(value)))
+                if (!keepRunning) {
                     active = false
                 }
             }
+        }
+    }
 
-            override fun description(): String {
-                return "Add a single ModifierWord $word to the matching concept"
-            }
-        }
-        val thingDemon = ExpectDemon(matcher, SearchDirection.After, wordContext) {
-            demon.thingHolder = it
-        }
-        return listOf(demon, thingDemon)
+    override fun description(): String {
+        return "Add a single ModifierWord ${field.fieldName} = $value to the matching concept"
     }
 }
 
@@ -84,31 +87,32 @@ class ModifierWord(word: String, val field: Fields, val value: String = word, va
  */
 class MultipleModifierWord(word: String, val field: Fields, val value: String = word, val matcher: ConceptMatcher = defaultModifierTargetMatcher()): WordHandler(EntryWord(word)) {
     override fun build(wordContext: WordContext): List<Demon> {
-        val demon = object : Demon(wordContext) {
-            var thingHolder: ConceptHolder? = null
+        val demon = MultipleModifierDemon(field, value, matcher, keepRunning = false, wordContext)
+        return listOf(demon)
+    }
+}
 
-            override fun run() {
-                val thingConcept = thingHolder?.value
-                if (thingConcept != null) {
-                    val listConcept = thingConcept.value(field) ?: createEmptyList(thingConcept)
-                    ConceptListAccessor(listConcept).add(Concept(value))
+class MultipleModifierDemon(val field: Fields, val value: String, val matcher: ConceptMatcher = defaultModifierTargetMatcher(), val keepRunning: Boolean = false, wordContext: WordContext): Demon(wordContext) {
+    override fun run() {
+        fun createEmptyList(thingConcept: Concept): Concept {
+            val c = buildConceptList(listOf<Concept>())
+            thingConcept.value(field, c)
+            return c
+        }
+
+        searchContext(matcher, direction = SearchDirection.After, wordContext = wordContext) {
+            it.value?.let { root ->
+                // FIXME assumes immediate child slot
+                val listConcept = root.value(field) ?: createEmptyList(root)
+                ConceptListAccessor(listConcept).add(Concept(value))
+                if (!keepRunning) {
                     active = false
                 }
             }
-
-            private fun createEmptyList(thingConcept: Concept): Concept {
-                val c = buildConceptList(listOf<Concept>())
-                thingConcept.value(field, c)
-                return c
-            }
-
-            override fun description(): String {
-                return "Add multiple modifier words to MultipleModifierWord $word to the matching concept"
-            }
         }
-        val thingDemon = ExpectDemon(matcher, SearchDirection.After, wordContext) {
-            demon.thingHolder = it
-        }
-        return listOf(demon, thingDemon)
+    }
+
+    override fun description(): String {
+        return "Add a additional ModifierWord ${field.fieldName} = $value to the matching list concept"
     }
 }

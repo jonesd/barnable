@@ -27,7 +27,7 @@ import info.dgjones.barnable.parser.*
 fun buildSuffixDemon(suffix: String, wordContext: WordContext): Demon? {
     return when (suffix) {
         "ed" -> SuffixEdDemon(wordContext)
-        "s" -> SuffixSDemon(wordContext)
+        "s" -> PluralDemon(wordContext)
         "ing" -> SuffixIngDemon(wordContext)
         else -> null
     }
@@ -44,19 +44,6 @@ class SuffixEdDemon(wordContext: WordContext): Demon(wordContext) {
 
     override fun description(): String {
         return "Suffix ED marks word sense as in the past"
-    }
-}
-
-class SuffixSDemon(wordContext: WordContext): Demon(wordContext) {
-    override fun run() {
-        val def = wordContext.def()
-        if (def != null && def.value(GroupFields.GroupInstances) == null) {
-            def.value(GroupFields.GroupInstances, Concept(GroupConcept.MultipleGroup.name))
-            active = false
-        }
-    }
-    override fun description(): String {
-        return "Suffix S marks word sense as being multiple"
     }
 }
 

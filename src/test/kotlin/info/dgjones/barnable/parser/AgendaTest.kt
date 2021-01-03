@@ -53,10 +53,13 @@ class AgendaTest {
 
             val demonOldest = mockk<Demon>(relaxUnitFun = true)
             every { demonOldest.active } returns true
+            every { demonOldest.highPriority } returns false
             val demonOlder = mockk<Demon>(relaxUnitFun = true)
             every { demonOlder.active } returns true
+            every { demonOlder.highPriority } returns false
             val demonNewer = mockk<Demon>(relaxUnitFun = true)
             every { demonNewer.active } returns true
+            every { demonNewer.highPriority } returns false
 
             agenda.withDemon(0, demonOldest)
             agenda.withDemon(0, demonOlder)
@@ -78,10 +81,13 @@ class AgendaTest {
 
             val demonOldest = mockk<Demon>(relaxUnitFun = true)
             every { demonOldest.active } returns true
+            every { demonOldest.highPriority } returns false
             val demonOlder = mockk<Demon>(relaxUnitFun = true)
             every { demonOlder.active } returns true
+            every { demonOlder.highPriority } returns false
             val demonNewerCompletesAfterRun = mockk<Demon>(relaxUnitFun = true)
             every { demonNewerCompletesAfterRun.active } returnsMany listOf(true, false)
+            every { demonNewerCompletesAfterRun.highPriority } returns false
 
             agenda.withDemon(0, demonOldest)
             agenda.withDemon(0, demonOlder)
