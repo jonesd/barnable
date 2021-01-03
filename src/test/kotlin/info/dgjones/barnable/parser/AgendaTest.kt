@@ -44,6 +44,23 @@ class AgendaTest {
 
         assertEquals(listOf(demonNewer, demonOlder, demonOldest), demons)
     }
+    fun `demons marked as high priority are prioritized before more recent demons`() {
+        val agenda = Agenda()
+
+        val wordContext = withWordContext()
+        val demonOldestAndHighPriority = Demon(wordContext, highPriority = true)
+        val demonOlder = Demon(wordContext)
+        val demonNewer = Demon(wordContext)
+
+        agenda.withDemon(0, demonOldestAndHighPriority)
+        agenda.withDemon(0, demonOlder)
+        agenda.withDemon(0, demonNewer)
+
+        // test
+        val demons = agenda.prioritizedActiveDemons()
+
+        assertEquals(listOf(demonOldestAndHighPriority, demonNewer, demonOlder), demons)
+    }
 
     @Nested
     inner class RunningDemons {
