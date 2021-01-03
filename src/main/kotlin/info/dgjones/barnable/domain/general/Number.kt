@@ -105,6 +105,7 @@ class AndNumberElement: WordHandler(EntryWord("and")) {
                 matchingNumberElement,
                 SearchDirection.Before,
                 1,
+                true,
                 wordContext,
                 disambiguationHandler
             ),
@@ -112,6 +113,7 @@ class AndNumberElement: WordHandler(EntryWord("and")) {
                 matchingNumberElement,
                 SearchDirection.After,
                 1,
+                true,
                 wordContext,
                 disambiguationHandler
             )

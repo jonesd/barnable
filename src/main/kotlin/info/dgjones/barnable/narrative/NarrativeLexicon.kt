@@ -268,8 +268,8 @@ class WordMeasureObject: WordHandler(EntryWord("measure")) {
 
     override fun disambiguationDemons(wordContext: WordContext, disambiguationHandler: DisambiguationHandler): List<Demon> {
         return listOf(
-            DisambiguateUsingMatch(matchConceptByHead(GeneralConcepts.Human.name), SearchDirection.Before, null, wordContext, disambiguationHandler),
-            DisambiguateUsingMatch(matchConceptByHead(GeneralConcepts.PhysicalObject.name), SearchDirection.After, null, wordContext, disambiguationHandler)
+            DisambiguateUsingMatch(matchConceptByHead(GeneralConcepts.Human.name), SearchDirection.Before, null, false, wordContext, disambiguationHandler),
+            DisambiguateUsingMatch(matchConceptByHead(GeneralConcepts.PhysicalObject.name), SearchDirection.After, null, false, wordContext, disambiguationHandler)
         )
     }
 }

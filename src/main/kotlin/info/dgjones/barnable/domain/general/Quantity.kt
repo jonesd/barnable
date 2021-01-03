@@ -51,7 +51,7 @@ class WordMeasureQuantity : WordHandler(EntryWord("measure")) {
 
     override fun disambiguationDemons(wordContext: WordContext, disambiguationHandler: DisambiguationHandler): List<Demon> {
         return listOf(
-            DisambiguateUsingWord("of", matchConceptByKind(listOf(PhysicalObjectKind.Food.name, PhysicalObjectKind.Liquid.name)), SearchDirection.After, wordContext, disambiguationHandler)
+            DisambiguateUsingWord("of", matchConceptByKind(listOf(PhysicalObjectKind.Food.name, PhysicalObjectKind.Liquid.name)), SearchDirection.After, false, wordContext, disambiguationHandler)
         )
     }
 }

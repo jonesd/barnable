@@ -29,7 +29,7 @@ class DemonTest {
         val demon = TestDemon(withWordContext())
 
         assertEquals("test description", demon.description())
-        assertEquals("{demon0/0=test description, active=true}", demon.toString())
+        assertEquals("{demon0/0=test description, active=true, priority=false}", demon.toString())
     }
 
     @Test
@@ -43,9 +43,17 @@ class DemonTest {
 
         assertFalse(demon.active)
     }
+
+    @Test
+    fun `demon can be high priority`() {
+        val demon = TestDemon(withWordContext(), true)
+
+        assertEquals("test description", demon.description())
+        assertEquals("{demon0/0=test description, active=true, priority=true}", demon.toString())
+    }
 }
 
-class TestDemon(wordContext: WordContext): Demon(wordContext) {
+class TestDemon(wordContext: WordContext, highPriority: Boolean = false): Demon(wordContext, highPriority) {
     override fun description(): String {
         return "test description"
     }

@@ -85,7 +85,7 @@ class NumberTest {
     inner class ComposeNumbersWithAnd {
         @Test
         fun `Compose two number words as addition`() {
-            val textProcessor = runTextProcess("hundred and twenty", lexicon)
+            val textProcessor = runTextProcess("one hundred and twenty", lexicon)
 
             assertEquals(1, textProcessor.workingMemory.concepts.size)
             val number = textProcessor.workingMemory.concepts[0]

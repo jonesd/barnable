@@ -110,6 +110,7 @@ class PrepositionWord(private val preposition: Preposition, private val matchCon
                 matchConceptByHead(matchConcepts),
                 SearchDirection.After,
                 null,
+                false,
                 wordContext,
                 disambiguationHandler
             )

@@ -30,14 +30,14 @@ sense is appropriate.
 
 See: InDepth p180
  */
-open class DisambiguationDemon(private val disambiguationHandler: DisambiguationHandler, wordContext: WordContext): Demon(wordContext) {
+open class DisambiguationDemon(private val disambiguationHandler: DisambiguationHandler, highPriority: Boolean = false, wordContext: WordContext): Demon(wordContext, highPriority) {
     fun disambiguationCompleted() {
         disambiguationHandler.disambiguationMatchCompleted(this)
         active = false
     }
 }
 
-class DisambiguateUsingWord(val word: String, val matcher: ConceptMatcher, val direction: SearchDirection = SearchDirection.After, wordContext: WordContext, disambiguationHandler: DisambiguationHandler): DisambiguationDemon(disambiguationHandler, wordContext) {
+class DisambiguateUsingWord(val word: String, val matcher: ConceptMatcher, val direction: SearchDirection = SearchDirection.After, highPriority: Boolean = false, wordContext: WordContext, disambiguationHandler: DisambiguationHandler): DisambiguationDemon(disambiguationHandler, highPriority, wordContext) {
     override fun run() {
         searchContext(matcher, matchPreviousWord = word, direction = direction, wordContext = wordContext) {
             disambiguationCompleted()
@@ -48,10 +48,7 @@ class DisambiguateUsingWord(val word: String, val matcher: ConceptMatcher, val d
     }
 }
 
-class DisambiguateUsingMatch(val matcher: ConceptMatcher, val direction: SearchDirection = SearchDirection.After, private val distance: Int? = null, wordContext: WordContext, disambiguationHandler: DisambiguationHandler): DisambiguationDemon(disambiguationHandler, wordContext) {
-    init {
-        highPriority = true
-    }
+class DisambiguateUsingMatch(val matcher: ConceptMatcher, val direction: SearchDirection = SearchDirection.After, private val distance: Int? = null, highPriority: Boolean = false, wordContext: WordContext, disambiguationHandler: DisambiguationHandler): DisambiguationDemon(disambiguationHandler, highPriority, wordContext) {
     override fun run() {
         searchContext(matcher, direction = direction, distance = distance, wordContext = wordContext) {
             disambiguationCompleted()

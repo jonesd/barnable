@@ -87,6 +87,7 @@ class WordAndBuildGroup: WordHandler(EntryWord("and")) {
                 matchConceptByHead(matchingHeads),
                 SearchDirection.Before,
                 1,
+                false,
                 wordContext,
                 disambiguationHandler
             ),
@@ -94,6 +95,7 @@ class WordAndBuildGroup: WordHandler(EntryWord("and")) {
                 matchConceptByHead(matchingHeads),
                 SearchDirection.After,
                 1,
+                false,
                 wordContext,
                 disambiguationHandler
             )
@@ -118,6 +120,7 @@ class WordAndAddToGroup: WordHandler(EntryWord("and")) {
                 matchConceptByHead(GroupConcept.Group.name),
                 SearchDirection.Before,
                 distance = null,
+                false,
                 wordContext,
                 disambiguationHandler
             ),
@@ -125,6 +128,7 @@ class WordAndAddToGroup: WordHandler(EntryWord("and")) {
                 matchConceptByHead(matchingHeads),
                 SearchDirection.After,
                 1,
+                false,
                 wordContext,
                 disambiguationHandler
             )
@@ -154,6 +158,7 @@ class WordCommaBuildGroup: WordHandler(EntryWord(",", noSuffix = true)) {
                 matchConceptByHead(matchingHeads),
                 SearchDirection.Before,
                 1,
+                false,
                 wordContext,
                 disambiguationHandler
             ),
@@ -161,6 +166,7 @@ class WordCommaBuildGroup: WordHandler(EntryWord(",", noSuffix = true)) {
                 matchConceptByHead(matchingHeads),
                 SearchDirection.After,
                 1,
+                false,
                 wordContext,
                 disambiguationHandler
             )
@@ -182,6 +188,7 @@ class WordCommaAddToGroup: WordHandler(EntryWord(",", noSuffix = true)) {
                 matchConceptByHead(GroupConcept.Group.name),
                 SearchDirection.Before,
                 distance = null,
+                false,
                 wordContext,
                 disambiguationHandler
             ),
@@ -189,6 +196,7 @@ class WordCommaAddToGroup: WordHandler(EntryWord(",", noSuffix = true)) {
                 matchConceptByHead(matchingHeads),
                 SearchDirection.After,
                 1,
+                false,
                 wordContext,
                 disambiguationHandler
             )
@@ -209,6 +217,7 @@ class WordCommaBoundary: WordHandler(EntryWord(",", noSuffix = true)) {
                 matchNot(matchConceptByHead(matchingHeads)),
                 SearchDirection.Before,
                 1,
+                false,
                 wordContext,
                 disambiguationHandler
             ),
@@ -216,6 +225,7 @@ class WordCommaBoundary: WordHandler(EntryWord(",", noSuffix = true)) {
                 matchNot(matchConceptByHead(matchingHeads)),
                 SearchDirection.After,
                 1,
+                false,
                 wordContext,
                 disambiguationHandler
             )
@@ -247,6 +257,7 @@ class WordOrBuildAlternatives: WordHandler(EntryWord("or")) {
                 matchConceptByHead(matchingHeads),
                 SearchDirection.Before,
                 1,
+                false,
                 wordContext,
                 disambiguationHandler
             ),
@@ -254,6 +265,7 @@ class WordOrBuildAlternatives: WordHandler(EntryWord("or")) {
                 matchConceptByHead(matchingHeads),
                 SearchDirection.After,
                 1,
+                false,
                 wordContext,
                 disambiguationHandler
             )

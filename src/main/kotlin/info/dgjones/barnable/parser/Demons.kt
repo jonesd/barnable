@@ -17,10 +17,9 @@
 
 package info.dgjones.barnable.parser
 
-open class Demon(val wordContext: WordContext) {
+open class Demon(val wordContext: WordContext, val highPriority: Boolean = false) {
     private val demonIndex = wordContext.nextDemonIndex()
     var active = true
-    var highPriority = false
 
     open fun run() {
         // Without an implementation - just deactivate
@@ -39,7 +38,7 @@ open class Demon(val wordContext: WordContext) {
     }
 
     override fun toString(): String {
-        return "{demon${wordContext.defHolder.instanceNumber}/${demonIndex}=${description()}, active=$active}"
+        return "{demon${wordContext.defHolder.instanceNumber}/${demonIndex}=${description()}, active=$active, priority=$highPriority}"
     }
 
     open fun description(): String {

@@ -51,7 +51,7 @@ class TitleWord(word: String, val gender: Gender): WordHandler(EntryWord(word, n
 
     override fun disambiguationDemons(wordContext: WordContext, disambiguationHandler: DisambiguationHandler): List<Demon> {
         return listOf(
-            DisambiguateUsingMatch(matchConceptByHead(listOf(GeneralConcepts.UnknownWord.name)), SearchDirection.After, 1, wordContext, disambiguationHandler)
+            DisambiguateUsingMatch(matchConceptByHead(listOf(GeneralConcepts.UnknownWord.name)), SearchDirection.After, 1, false, wordContext, disambiguationHandler)
         )
     }
 }
