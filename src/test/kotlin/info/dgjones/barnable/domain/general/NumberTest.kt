@@ -43,6 +43,28 @@ class NumberTest {
         }
     }
     @Nested
+    inner class NumberDigits {
+        @Test
+        fun `Number of single digit`() {
+            val textProcessor = runTextProcess("1", lexicon)
+
+            assertEquals(1, textProcessor.workingMemory.concepts.size)
+            val number = textProcessor.workingMemory.concepts[0]
+            assertEquals(NumberConcept.Number.name, number.name)
+            assertEquals("1", number.valueName(NumberFields.Value))
+        }
+        @Test
+        fun `Number with multiple digits`() {
+            val textProcessor = runTextProcess("1234", lexicon)
+
+            assertEquals(1, textProcessor.workingMemory.concepts.size)
+            val number = textProcessor.workingMemory.concepts[0]
+            assertEquals(NumberConcept.Number.name, number.name)
+            assertEquals("1234", number.valueName(NumberFields.Value))
+        }
+        //FIXME support 1,234
+    }
+    @Nested
     inner class ComposeNumberWords {
         @Test
         fun `Compose two number words as addition`() {

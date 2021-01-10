@@ -20,20 +20,30 @@ package info.dgjones.barnable.parser
 import info.dgjones.barnable.nlp.WordMorphology
 import info.dgjones.barnable.nlp.WordMorphologyBuilder
 
-/* Lexicon holds all the mappings from defined words to handlers for processing them.
-* Word mappings need to be registered with the lexicon as part of initializations.
-* During parsing of a text, the lexicon will provide matching word handlers for the words
-* at the current head of the text. Handlers primary word and versions with suffixes will be
-* found.
-* */
+/**
+ * Lexicon holds all the mappings from defined words to handlers for processing them.
+ * Word mappings need to be registered with the lexicon as part of initializations.
+ * During parsing of a text, the lexicon will provide matching word handlers for the words
+ * at the current head of the text. Handlers primary word and versions with suffixes will be
+ * found.
+ *
+ * Exceptional handlers can be registered for "unregistered" words. Typically this is used to handle
+ * multitude of cases with one handler, for example all numbers expressed with digits, or
+ * telephone numbers, or when a separate datastore of words is to be looked up such as cities in the world.
+ * The standard word disambiguation mechanism should be used to support many handlers of unregistered words.
+ **/
 class Lexicon {
     private val wordMappings: MutableMap<String, MutableList<WordHandler>> = mutableMapOf()
-
     private val morphologicalMappings: MutableMap<String, MutableList<Pair<WordMorphology, WordHandler>>> = mutableMapOf()
+    private val unknownHandlers: MutableList<WordHandler> = mutableListOf()
 
     fun addMapping(handler: WordHandler) {
         addDirectMappingsForInitialWord(handler)
         addMorphologyMappingsForInitialWord(handler)
+    }
+
+    fun addUnknownHandler(handler: WordHandler) {
+        unknownHandlers.add(handler)
     }
 
     // Return all matches from the lexicon for the word, either exact or with suffixes.
@@ -48,13 +58,17 @@ class Lexicon {
         return lookupInitialWord(word).filter { it.handler.word.expression.size == 1}
     }
 
-    fun lookupNextEntry(list: List<String>): List<LexicalItem> {
-        if (list.isEmpty()) {
+    fun lookupNextEntry(wordStream: List<String>): List<LexicalItem> {
+        if (wordStream.isEmpty()) {
             return listOf()
         }
-        val word = list.first()
+        val word = wordStream.first()
         val firstWordMatches = lookupInitialWord(word)
-        return firstWordMatches.mapNotNull { populateAndMatchExpression(it, list) }
+        return if (firstWordMatches.isNotEmpty()) {
+            firstWordMatches.mapNotNull { populateAndMatchExpression(it, wordStream) }
+        } else {
+            unregisteredHandlersForEntry(word)
+        }
     }
 
     private fun populateAndMatchExpression(lexicalItem: LexicalItem, list: List<String>): LexicalItem? {
@@ -80,6 +94,12 @@ class Lexicon {
             morphologicalMappings.putIfAbsent(key, mutableListOf())
             morphologicalMappings[key]?.add(Pair(it, handler))
         }
+    }
+
+    private fun unregisteredHandlersForEntry(word: String): List<LexicalItem> {
+        val lexicalItems = unknownHandlers.map { LexicalItem(listOf(WordMorphology(word)), it) }.toMutableList()
+        lexicalItems += LexicalItem(listOf(WordMorphology(word)), WordUnknown(word))
+        return lexicalItems
     }
 
     private fun wordMorphologies(word: String): List<WordMorphology> =

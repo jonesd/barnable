@@ -18,7 +18,6 @@
 package info.dgjones.barnable.domain.general
 
 import info.dgjones.barnable.concept.*
-import info.dgjones.barnable.grammar.ConjunctionConcept
 import info.dgjones.barnable.grammar.defaultModifierTargetMatcher
 import info.dgjones.barnable.parser.*
 
@@ -77,10 +76,15 @@ enum class NumberValues(val value: Int, val accumulateAsMultiple: Boolean = fals
 fun buildGeneralNumberLexicon(lexicon: Lexicon) {
     buildNumberValueAnd(lexicon)
     buildNumberValueWords(lexicon)
+    buildNumberValueFromDigitsWord(lexicon)
 }
 
 private fun buildNumberValueAnd(lexicon: Lexicon) {
     lexicon.addMapping(AndNumberElement())
+}
+
+private fun buildNumberValueFromDigitsWord(lexicon: Lexicon) {
+    lexicon.addUnknownHandler(NumberDigitsUnregistered())
 }
 
 private fun buildNumberValueWords(lexicon: Lexicon) {
@@ -160,4 +164,25 @@ private fun LexicalConceptBuilder.pushValueToInitialNumberElement(name: String) 
         }
     }
     root.addDemon(demon)
+}
+
+/*
+Handle the scenario of "hundred and one" where number elements will be collected together for the total number value
+ */
+class NumberDigitsUnregistered: WordHandler(EntryWord("")) {
+    override fun build(wordContext: WordContext): List<Demon> =
+        lexicalConcept(wordContext, NumberConcept.Number.name) {
+            slot(NumberFields.Value, wordContext.word)
+        }.demons
+
+    override fun disambiguationDemons(wordContext: WordContext, disambiguationHandler: DisambiguationHandler): List<Demon> {
+        return listOf(
+            DisambiguateUsingSentenceWordRegex(
+                """\d+""".toRegex(),
+                false,
+                wordContext,
+                disambiguationHandler
+            )
+        )
+    }
 }

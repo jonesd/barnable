@@ -31,10 +31,10 @@ fun buildTextModel(text: String): TextModel {
 }
 
 fun runTextProcess(text: String, lexicon: Lexicon = buildInDepthUnderstandingLexicon()): TextProcessor {
-        val textModel = buildTextModel(text)
-        val textProcessor = TextProcessor(textModel, lexicon)
-        textProcessor.runProcessor()
-        return textProcessor
+    val textModel = buildTextModel(text)
+    val textProcessor = TextProcessor(textModel, lexicon)
+    textProcessor.runProcessor()
+    return textProcessor
 }
 
 class TextProcessor(private val textModel: TextModel, val lexicon: Lexicon) {
@@ -101,7 +101,7 @@ class TextProcessor(private val textModel: TextModel, val lexicon: Lexicon) {
         val defs = context.wordContexts
             .filter { !it.defHolder.hasFlag(ParserFlags.Inside) }
             .filter { !it.defHolder.hasFlag(ParserFlags.Ignore) }
-            .mapNotNull { it.def()}
+            .mapNotNull { it.def() }
 
         println("Sentence Result:")
         defs.forEach { println(it) }
@@ -130,81 +130,12 @@ class TextProcessor(private val textModel: TextModel, val lexicon: Lexicon) {
     }
 }
 
-/* Decide which one of the wordHandlers is going to be run. Use disambiguation demons associated with each wordHandler
- to resolve which one. The first wordHandler to resolve all of their disambiguation demons wins.
- */
-class DisambiguationHandler(val wordContext: WordContext, private val lexicalOptions: List<LexicalItem>, private val agenda: Agenda) {
-    private var disambiguationsByWordHandler = mutableMapOf<LexicalItem, MutableList<Demon>>()
-    private var resolvedTo: LexicalItem? = null
-
-    fun startDisambiguations() {
-        lexicalOptions.forEach { lexicalItem ->
-            val wordHandler = lexicalItem.handler
-            val disambiguationDemons = wordHandler.disambiguationDemons(wordContext, this)
-            disambiguationsByWordHandler[lexicalItem] = disambiguationDemons.toMutableList()
-        }
-        val noDisambiguationNeeded = disambiguationsByWordHandler.keys.filter { disambiguationsByWordHandler[it]?.isEmpty() ?: true }
-        when {
-            noDisambiguationNeeded.size == 1 -> {
-                resolveTo(noDisambiguationNeeded.first())
-            }
-            noDisambiguationNeeded.size > 1 -> {
-                println("ERROR Disambiguation failed - multiple wordHandlers do not need disambiguation $noDisambiguationNeeded for ${wordContext.word}")
-            }
-            else -> {
-                disambiguationsByWordHandler.forEach { (wordHandler, disambiguationDemons) ->
-                    spawnDemons(disambiguationDemons)
-                }
-            }
-        }
-    }
-
-    private fun resolveTo(lexicalItem: LexicalItem) {
-        stopExtantDisambiguationDemons()
-        if (disambiguationsByWordHandler.size > 1) {
-            println("Disambiguated ${lexicalItem.textFragment()} to ${lexicalItem.handler} - building Demons...")
-        }
-        resolvedTo = lexicalItem
-        buildWordDemons(lexicalItem)
-    }
-
-    private fun stopExtantDisambiguationDemons() {
-        disambiguationsByWordHandler.values.flatten().forEach { it.deactivate() }
-    }
-
-    private fun buildWordDemons(lexicalItem: LexicalItem){
-        val suffixDemons = buildSuffixDemons(lexicalItem)
-        val wordDemons = lexicalItem.handler.build(wordContext)
-        val allDemons = wordDemons + suffixDemons
-        spawnDemons(allDemons)
-    }
-
-    // Currently build a suffix demon for each suffix of the expression
-    private fun buildSuffixDemons(lexicalItem: LexicalItem) =
-        lexicalItem.morphologies.map { it.suffix }.mapNotNull { buildSuffixDemon(it, wordContext) }
-
-    private fun spawnDemons(demons: List<Demon>) {
-        demons.forEach { spawnDemon(wordContext.wordIndex, it) }
-    }
-
-    private fun spawnDemon(index: Int, demon: Demon) {
-        agenda.withDemon(index, demon)
-        println("Spawning demon: $demon")
-    }
-
-    fun disambiguationMatchCompleted(demon: Demon) {
-        disambiguationsByWordHandler.forEach { (wordHandler, disambiguationDemons) ->
-            if (disambiguationDemons.contains(demon)) {
-                disambiguationDemons.remove(demon)
-                if (disambiguationDemons.isEmpty()) {
-                    resolveTo(wordHandler)
-                }
-            }
-        }
-    }
-}
-
-data class WordContext(val wordIndex: Int, val word: String, val defHolder: ConceptHolder, val context: SentenceContext) {
+data class WordContext(
+    val wordIndex: Int,
+    val word: String,
+    val defHolder: ConceptHolder,
+    val context: SentenceContext
+) {
     private var totalDemons = 0
 
     fun previousWord() =
@@ -219,7 +150,12 @@ data class WordContext(val wordIndex: Int, val word: String, val defHolder: Conc
     }
 }
 
-class SentenceContext(val sentence: TextSentence, val workingMemory: WorkingMemory, val episodicMemory: EpisodicMemory, val qaMode: Boolean = false) {
+class SentenceContext(
+    val sentence: TextSentence,
+    val workingMemory: WorkingMemory,
+    val episodicMemory: EpisodicMemory,
+    val qaMode: Boolean = false
+) {
     var mostRecentObject: Concept? = null
     var mostRecentCharacter: Concept? = null
     var localCharacter: Concept? = null
@@ -233,6 +169,7 @@ class SentenceContext(val sentence: TextSentence, val workingMemory: WorkingMemo
     fun sentenceWordAtWordIndex(wordIndex: Int): String {
         return wordContexts[wordIndex].word
     }
+
     fun defHolderAtWordIndex(wordIndex: Int): ConceptHolder {
         return wordContexts[wordIndex].defHolder
     }
@@ -284,9 +221,13 @@ open class WordHandler(val word: EntryWord) {
     open fun build(wordContext: WordContext): List<Demon> {
         return listOf()
     }
+
     open fun disambiguationDemons(wordContext: WordContext, disambiguationHandler: DisambiguationHandler): List<Demon> {
         return listOf()
     }
+
+    /* Mark when handler should be used if all disambiguation demons fail */
+    open fun isFallbackHandler(): Boolean = false
 }
 
 open class EntryWord(val word: String, val expression: List<String> = listOf(word), val noSuffix: Boolean = false) {
@@ -299,6 +240,7 @@ open class EntryWord(val word: String, val expression: List<String> = listOf(wor
         pastWords.add(word)
         return this
     }
+
     fun and(word: String): EntryWord {
         extras.add(word)
         return this
@@ -322,13 +264,13 @@ enum class ParserFlags {
     Ignore // Concept has been processed and can be ignored
 }
 
-class WordIgnore(word: EntryWord): WordHandler(word) {
+class WordIgnore(word: EntryWord) : WordHandler(word) {
     override fun build(wordContext: WordContext): List<Demon> {
         return listOf(IgnoreDemon(wordContext))
     }
 }
 
-class IgnoreDemon(wordContext: WordContext): Demon(wordContext) {
+class IgnoreDemon(wordContext: WordContext) : Demon(wordContext) {
     override fun run() {
         wordContext.defHolder.addFlag(ParserFlags.Ignore)
         active = false
@@ -339,7 +281,7 @@ class IgnoreDemon(wordContext: WordContext): Demon(wordContext) {
     }
 }
 
-class WordUnknown(word: String): WordHandler(EntryWord(word)) {
+class WordUnknown(word: String) : WordHandler(EntryWord(word)) {
     override fun build(wordContext: WordContext): List<Demon> {
         val lexicalConcept = lexicalConcept(wordContext, GeneralConcepts.UnknownWord.name) {
             ignoreHolder()
@@ -347,4 +289,6 @@ class WordUnknown(word: String): WordHandler(EntryWord(word)) {
         }
         return lexicalConcept.demons
     }
+
+    override fun isFallbackHandler(): Boolean = true
 }

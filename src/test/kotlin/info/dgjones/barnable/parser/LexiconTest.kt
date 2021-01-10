@@ -17,8 +17,10 @@
 
 package info.dgjones.barnable.parser
 
+import info.dgjones.barnable.concept.Concept
 import info.dgjones.barnable.nlp.WordMorphology
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class LexiconTest {
@@ -202,6 +204,79 @@ class LexiconTest {
     }
     */
 
+    @Nested
+    inner class UnregisteredWords {
+        inner class UnregisteredTestHandler(): WordHandler(EntryWord("")) {
+            override fun build(wordContext: WordContext): List<Demon> {
+                wordContext.defHolder.value = Concept("**"+wordContext.word+"**")
+                return listOf()
+            }
+
+            override fun disambiguationDemons(
+                wordContext: WordContext,
+                disambiguationHandler: DisambiguationHandler
+            ): List<Demon> {
+                return listOf(object : DisambiguationDemon(disambiguationHandler, false, wordContext) {
+                    override fun run() {
+                        disambiguationCompleted()
+                    }
+                })
+            }
+        }
+        @Test
+        fun `unregistered word in lexicon will return unknown word handler as fallback`() {
+            val lexicon = Lexicon()
+            val handler0 = withWordMapping(lexicon, "test")
+
+            // test
+            val sentence = listOf("unknown-word")
+
+            val lexicalItemsForWord0 = lexicon.lookupNextEntry(sentence)
+            assertEquals(1, lexicalItemsForWord0.size)
+            assertTrue(lexicalItemsForWord0[0].handler.isFallbackHandler())
+            assertEquals("unknown-word", lexicalItemsForWord0[0].morphologies[0].full)
+        }
+        @Test
+        fun `can associate handler for unregistered words`() {
+            val lexicon = Lexicon()
+            val handler0 = withWordMapping(lexicon, "test")
+
+            val handlerUnregistered = UnregisteredTestHandler()
+            lexicon.addUnknownHandler(handlerUnregistered)
+
+            // test
+            val sentence = listOf("unknown-word")
+
+            val lexicalItemsForWord0 = lexicon.lookupNextEntry(sentence)
+            assertEquals(2, lexicalItemsForWord0.size)
+            assertEquals(handlerUnregistered, lexicalItemsForWord0[0].handler)
+            assertEquals("unknown-word", lexicalItemsForWord0[0].morphologies[0].full)
+            // always contains unknown word fallback handler
+            assertTrue(lexicalItemsForWord0[1].handler.isFallbackHandler())
+        }
+        @Test
+        fun `can associate multiple handlers for unregistered words`() {
+            val lexicon = Lexicon()
+            val handler0 = withWordMapping(lexicon, "test")
+
+            val handlerUnregistered0 = UnregisteredTestHandler()
+            lexicon.addUnknownHandler(handlerUnregistered0)
+            val handlerUnregistered1 = UnregisteredTestHandler()
+            lexicon.addUnknownHandler(handlerUnregistered1)
+
+            // test
+            val sentence = listOf("unknown-word")
+
+            val lexicalItemsForWord0 = lexicon.lookupNextEntry(sentence)
+            assertEquals(3, lexicalItemsForWord0.size)
+            assertEquals(handlerUnregistered0, lexicalItemsForWord0[0].handler)
+            assertEquals("unknown-word", lexicalItemsForWord0[0].morphologies[0].full)
+            assertEquals(handlerUnregistered1, lexicalItemsForWord0[1].handler)
+            assertEquals("unknown-word", lexicalItemsForWord0[1].morphologies[0].full)
+            // always contains unknown word fallback handler
+            assertTrue(lexicalItemsForWord0[2].handler.isFallbackHandler())
+        }
+    }
     private fun withWordMapping(lexicon: Lexicon, word: String, expression: List<String> = listOf(word), noSuffix:Boolean = false): WordHandler {
         val handler = WordHandler(EntryWord(word, expression, noSuffix = noSuffix))
         lexicon.addMapping(handler)

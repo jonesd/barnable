@@ -18,6 +18,7 @@
 package info.dgjones.barnable.parser
 
 import info.dgjones.barnable.concept.ConceptMatcher
+import info.dgjones.barnable.grammar.buildSuffixDemon
 
 /*
 Disambiguation is the process of deciding which word sense is selected when a word/expression has two or more meanings in
@@ -33,6 +34,10 @@ See: InDepth p180
 open class DisambiguationDemon(private val disambiguationHandler: DisambiguationHandler, highPriority: Boolean = false, wordContext: WordContext): Demon(wordContext, highPriority) {
     fun disambiguationCompleted() {
         disambiguationHandler.disambiguationMatchCompleted(this)
+        active = false
+    }
+    fun disambiguationFailed() {
+        disambiguationHandler.disambiguationMatchFailed(this)
         active = false
     }
 }
@@ -56,5 +61,126 @@ class DisambiguateUsingMatch(val matcher: ConceptMatcher, val direction: SearchD
     }
     override fun description(): String {
         return "DisambiguateUsingMatch"
+    }
+}
+
+class DisambiguateUsingSentenceWordRegex(private val regex: Regex, highPriority: Boolean = false, wordContext: WordContext, disambiguationHandler: DisambiguationHandler): DisambiguationDemon(disambiguationHandler, highPriority, wordContext) {
+    override fun run() {
+        if (wordContext.word.matches(regex)) {
+            disambiguationCompleted()
+        } else {
+            disambiguationFailed()
+        }
+    }
+    override fun description(): String {
+        return "DisambiguateUsingWordRegex word=$wordContext.word regex=$regex"
+    }
+}
+
+
+/* Decide which one of the wordHandlers is going to be run. Use disambiguation demons associated with each wordHandler
+ to resolve which one. The first wordHandler to resolve all of their disambiguation demons wins.
+ If all lexical options fail, then apply the fallbackOption when present.
+ */
+class DisambiguationHandler(val wordContext: WordContext, private val lexicalOptions: List<LexicalItem>, private val agenda: Agenda) {
+    private var disambiguationsByWordHandler = mutableMapOf<LexicalItem, MutableList<Demon>>()
+    private var resolvedTo: LexicalItem? = null
+    private val fallbackLexicalOption: LexicalItem? = lexicalOptions.firstOrNull { it.handler.isFallbackHandler() }
+
+    fun startDisambiguations() {
+        lexicalOptions.forEach { lexicalItem ->
+            val wordHandler = lexicalItem.handler
+            val disambiguationDemons = wordHandler.disambiguationDemons(wordContext, this)
+            disambiguationsByWordHandler[lexicalItem] = disambiguationDemons.toMutableList()
+        }
+        val noDisambiguationNeeded = disambiguationsByWordHandler.keys.filter { disambiguationsByWordHandler[it]?.isEmpty() ?: true }
+        when {
+            noDisambiguationNeeded.size == 1  && fallbackLexicalOption == null -> {
+                resolveTo(noDisambiguationNeeded.first())
+            }
+            noDisambiguationNeeded.size > 1 -> {
+                println("ERROR Disambiguation failed - multiple wordHandlers do not need disambiguation $noDisambiguationNeeded for ${wordContext.word}")
+            }
+            else -> {
+                spawnDisambiguationDemons()
+            }
+        }
+    }
+
+    private fun spawnDisambiguationDemons() {
+        disambiguationsByWordHandler.forEach { (wordHandler, disambiguationDemons) ->
+            spawnDemons(disambiguationDemons)
+        }
+    }
+
+    private fun resolveTo(lexicalItem: LexicalItem) {
+        stopExtantDisambiguationDemons()
+        if (disambiguationsByWordHandler.size > 1) {
+            println("Disambiguated ${lexicalItem.textFragment()} to ${lexicalItem.handler} - building Demons...")
+        }
+        resolvedTo = lexicalItem
+        buildWordDemons(lexicalItem)
+    }
+
+    private fun stopExtantDisambiguationDemons() {
+        disambiguationsByWordHandler.values.flatten().forEach { it.deactivate() }
+    }
+
+    private fun buildWordDemons(lexicalItem: LexicalItem){
+        val suffixDemons = buildSuffixDemons(lexicalItem)
+        val wordDemons = lexicalItem.handler.build(wordContext)
+        val allDemons = wordDemons + suffixDemons
+        spawnDemons(allDemons)
+    }
+
+    // Currently build a suffix demon for each suffix of the expression
+    private fun buildSuffixDemons(lexicalItem: LexicalItem) =
+        lexicalItem.morphologies.map { it.suffix }.mapNotNull { buildSuffixDemon(it, wordContext) }
+
+    private fun spawnDemons(demons: List<Demon>) {
+        demons.forEach { spawnDemon(wordContext.wordIndex, it) }
+    }
+
+    private fun spawnDemon(index: Int, demon: Demon) {
+        agenda.withDemon(index, demon)
+        println("Spawning demon: $demon")
+    }
+
+    /**
+     * Once all demons associated with a word handler are completed/met then resolve disambigation for this word handler
+     */
+    fun disambiguationMatchCompleted(demon: Demon) {
+        if (resolvedTo != null) {
+            println("Ignored disambiguation complete for ${demon} as already complete")
+            return
+        }
+        disambiguationsByWordHandler.keys.firstOrNull() { disambiguationsByWordHandler[it]?.contains(demon)?:false}?.let { lexicalItem ->
+            disambiguationsByWordHandler[lexicalItem]?.let { itemDemons ->
+                demon.deactivate()
+                itemDemons.remove(demon)
+                if (itemDemons.isEmpty()) {
+                    resolveTo(lexicalItem)
+                }
+            }
+        }
+    }
+    fun disambiguationMatchFailed(demon: Demon) {
+        if (resolvedTo != null) {
+            println("Ignored disambiguation complete for ${demon} as already complete")
+            return
+        }
+        disambiguationsByWordHandler.keys.firstOrNull() { disambiguationsByWordHandler[it]?.contains(demon)?:false}?.let { lexicalItem ->
+            disambiguationsByWordHandler[lexicalItem]?.let { itemDemons ->
+                itemDemons.forEach { it.deactivate()}
+                itemDemons.remove(demon)
+                if (itemDemons.isEmpty()) {
+                    if (fallbackLexicalOption != null) {
+                        resolveTo(fallbackLexicalOption)
+                    } else {
+                        println("No fallbackLexicalOption as last disambiguation failed")
+                    }
+                }
+            }
+        }
     }
 }
