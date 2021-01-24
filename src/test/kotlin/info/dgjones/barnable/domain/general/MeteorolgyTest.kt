@@ -17,15 +17,15 @@
 
 package info.dgjones.barnable.domain.general
 
-import info.dgjones.barnable.concept.Concept
-import info.dgjones.barnable.concept.CoreFields
-import info.dgjones.barnable.concept.ScaleConcepts
+import info.dgjones.barnable.concept.*
 import info.dgjones.barnable.grammar.ConjunctionConcept
 import info.dgjones.barnable.narrative.buildInDepthUnderstandingLexicon
 import info.dgjones.barnable.parser.runTextProcess
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.opentest4j.AssertionFailedError
 
 class MeteorolgyTest {
     val lexicon = buildInDepthUnderstandingLexicon()
@@ -75,13 +75,34 @@ class MeteorolgyTest {
             assertEquals(1, textProcessor.workingMemory.concepts.size)
             val groupWeather = GroupAccessor(textProcessor.workingMemory.concepts[0])
             assertEquals(MeteorologyConcept.Weather.name, groupWeather.elementType())
-            assertEquals(listOf(withWeather(WeatherConcept.Rain), withWeather(WeatherConcept.Shower)), groupWeather.concepts())
+            assertContainsRootedList(groupWeather.concepts(), listOf(withWeather(WeatherConcept.Rain), withWeather(WeatherConcept.Shower)))
             assertEquals(ConjunctionConcept.Or.name, groupWeather.conjunctionType())
+        }
+        @Test
+        fun `Progression using later`() {
+            val textProcessor = runTextProcess("Mainly fair, occasional drizzle later", lexicon)
+
+            assertEquals(2, textProcessor.workingMemory.concepts.size)
+            val fair = textProcessor.workingMemory.concepts[0]
+            assertContainsRooted(fair, withWeather(WeatherConcept.Fair))
+            val drizzle = textProcessor.workingMemory.concepts[1]
+            assertContainsRooted(drizzle, withTiming(withWeather(WeatherConcept.Drizzle), "Later"))
+//            assertEquals(MeteorologyConcept.Weather.name, groupWeather.elementType())
+//            assertContainsRootedList(groupWeather.concepts(),
+//                listOf(
+//                    withWeather(WeatherConcept.Fair),
+//                    withTiming(withWeather(WeatherConcept.Drizzle), "Later")
+//            ))
+//            assertEquals(ConjunctionConcept.And.name, groupWeather.conjunctionType())
         }
         private fun withWeather(weather: WeatherConcept): Concept {
             val root = Concept(MeteorologyConcept.Weather.name)
-            root.value(MeteorologyFields.Weather, Concept(weather.name))
+            root.value(CoreFields.Name, Concept(weather.name))
             return root
+        }
+        private fun withTiming(weather: Concept, timing: String): Concept {
+            weather.value(TimeFields.TIME, Concept(timing))
+            return weather
         }
 
         @Test

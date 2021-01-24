@@ -161,8 +161,11 @@ class CompletableVariableTest {
 
         variable.complete(conceptHolder, wordContext)
 
-        assertEquals(Slot(TestFields.Source, Concept("replacementRoot")), variable.sourceReference.variableSlot)
-        assertEquals(Concept("replacementRoot"), conceptHolder.value)
+        val expectedSlot = Slot(TestFields.Source, Concept("replacementRoot"))
+        expectedSlot.value?.value("replacementChild", Concept("replacementChildValue"))
+        expectedSlot.value?.value("testChild", Concept("testResult"))
+        expectedSlot.value?.value("testChild")?.value("testChild", Concept("testChildValue"))
+        assertEquals(expectedSlot, variable.sourceReference.variableSlot)
     }
 }
 

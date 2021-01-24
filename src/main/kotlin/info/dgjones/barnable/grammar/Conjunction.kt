@@ -63,11 +63,14 @@ class WordAnd: WordHandler(EntryWord("and")) {
     }
 }
 
+private val groupMatchingHeads: List<String> = listOf(GeneralConcepts.Human.name, GeneralConcepts.PhysicalObject.name/*, MeteorologyConcept.Weather.name*/)
+private val groupMatchingHeadsForOr: List<String> = listOf(GeneralConcepts.Human.name, GeneralConcepts.PhysicalObject.name, MeteorologyConcept.Weather.name)
+
 /*
 Handle the scenario of "george and harold" forming a group of two persons
  */
 class WordAndBuildGroup: WordHandler(EntryWord("and")) {
-    private val matchingHeads = listOf(GeneralConcepts.Human.name, GeneralConcepts.PhysicalObject.name)
+    private val matchingHeads = groupMatchingHeads
     override fun build(wordContext: WordContext): List<Demon> =
         lexicalConcept(wordContext, GroupConcept.Group.name) {
             slot(GroupFields.Elements, GroupConcept.Values.name) {
@@ -107,7 +110,7 @@ class WordAndBuildGroup: WordHandler(EntryWord("and")) {
 Handle the scenario of "fred, george and mary" where the "and" will add mary to a Group formed from "fred, george"
  */
 class WordAndAddToGroup: WordHandler(EntryWord("and")) {
-    private val matchingHeads = listOf(GeneralConcepts.Human.name, GeneralConcepts.PhysicalObject.name)
+    private val matchingHeads = groupMatchingHeads
     override fun build(wordContext: WordContext): List<Demon> =
         lexicalConcept(wordContext, "Ignore") {
             addToGroup(matchConceptByHead(matchingHeads), SearchDirection.After)
@@ -140,7 +143,7 @@ class WordAndAddToGroup: WordHandler(EntryWord("and")) {
 Comma will form a group for specific concept types.
  */
 class WordCommaBuildGroup: WordHandler(EntryWord(",", noSuffix = true)) {
-    private val matchingHeads = listOf(GeneralConcepts.Human.name, GeneralConcepts.PhysicalObject.name)
+    private val matchingHeads = groupMatchingHeads
     override fun build(wordContext: WordContext): List<Demon> =
         lexicalConcept(wordContext, GroupConcept.Group.name) {
             slot(GroupFields.Elements,  GroupConcept.Values.name) {
@@ -165,7 +168,7 @@ class WordCommaBuildGroup: WordHandler(EntryWord(",", noSuffix = true)) {
             DisambiguateUsingMatch(
                 matchConceptByHead(matchingHeads),
                 SearchDirection.After,
-                1,
+                null /*1*/,
                 false,
                 wordContext,
                 disambiguationHandler
@@ -175,7 +178,7 @@ class WordCommaBuildGroup: WordHandler(EntryWord(",", noSuffix = true)) {
 }
 
 class WordCommaAddToGroup: WordHandler(EntryWord(",", noSuffix = true)) {
-    private val matchingHeads = listOf(GeneralConcepts.Human.name, GeneralConcepts.PhysicalObject.name)
+    private val matchingHeads = groupMatchingHeads
     override fun build(wordContext: WordContext): List<Demon> =
         lexicalConcept(wordContext, "Ignore") {
             addToGroup(matchConceptByHead(matchingHeads), SearchDirection.After)
@@ -195,7 +198,7 @@ class WordCommaAddToGroup: WordHandler(EntryWord(",", noSuffix = true)) {
             DisambiguateUsingMatch(
                 matchConceptByHead(matchingHeads),
                 SearchDirection.After,
-                1,
+                null /*1*/,
                 false,
                 wordContext,
                 disambiguationHandler
@@ -205,7 +208,7 @@ class WordCommaAddToGroup: WordHandler(EntryWord(",", noSuffix = true)) {
 }
 
 class WordCommaBoundary: WordHandler(EntryWord(",", noSuffix = true)) {
-    private val matchingHeads = listOf(GeneralConcepts.Human.name, GeneralConcepts.PhysicalObject.name)
+    private val matchingHeads = groupMatchingHeads
     override fun build(wordContext: WordContext): List<Demon> =
         lexicalConcept(wordContext, Clause.Boundary.name) {
             ignoreHolder()
@@ -234,10 +237,10 @@ class WordCommaBoundary: WordHandler(EntryWord(",", noSuffix = true)) {
 }
 
 /*
-Handle the scenario of "george and harold" forming a group of two persons
+Handle the scenario of "rain or showers" forming a group of two persons
  */
 class WordOrBuildAlternatives: WordHandler(EntryWord("or")) {
-    private val matchingHeads = listOf(GeneralConcepts.Human.name, GeneralConcepts.PhysicalObject.name, GeneralConcepts.Weather.name)
+    private val matchingHeads = groupMatchingHeadsForOr
     override fun build(wordContext: WordContext): List<Demon> =
         lexicalConcept(wordContext, GroupConcept.Group.name) {
             slot(GroupFields.Elements,  GroupConcept.Values.name) {

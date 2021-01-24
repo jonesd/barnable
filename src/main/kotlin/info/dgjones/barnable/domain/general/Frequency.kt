@@ -30,7 +30,7 @@ enum class FrequencyFields(override val fieldName: String): Fields {
     Frequency("frequency")
 }
 
-private val greaterFrequency = listOf("frequent")
+private val greaterFrequency = listOf("frequent", "mainly")
 private val lesserFrequency = listOf("irregularly", "occasional", "sometimes", )
 
 fun buildGeneralFrequencyLexicon(lexicon: Lexicon) {

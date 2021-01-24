@@ -33,7 +33,7 @@ enum class MeteorologyConcept {
     Wind
 }
 
-enum class MeteorologyFields(override val fieldName: String): Fields {
+enum class MeteorologyFields(override val fieldName: String) : Fields {
     Weather("weather"),
     WeatherCharacteristics("characteristics")
 }
@@ -59,7 +59,14 @@ enum class WeatherCharacteristics {
 fun buildWeatherCharacteristics(lexicon: Lexicon) {
     val weatherMatcher = matchConceptByHead(MeteorologyConcept.Weather.name)
     WeatherCharacteristics.values().forEach {
-        lexicon.addMapping(MultipleModifierWord(it.word(), MeteorologyFields.WeatherCharacteristics, it.name, weatherMatcher ))
+        lexicon.addMapping(
+            MultipleModifierWord(
+                it.word(),
+                MeteorologyFields.WeatherCharacteristics,
+                it.name,
+                weatherMatcher
+            )
+        )
     }
 }
 
@@ -78,14 +85,21 @@ enum class WeatherConcept {
     fun word() = this.name.toLowerCase()
 }
 
-class WeatherHandler(private val weather: WeatherConcept): WordHandler(EntryWord(weather.word())) {
+class WeatherHandler(private val weather: WeatherConcept) : WordHandler(EntryWord(weather.word())) {
     override fun build(wordContext: WordContext): List<Demon> =
         lexicalConcept(wordContext, MeteorologyConcept.Weather.name) {
             slot(CoreFields.Name, weather.name)
             slot(CoreFields.State, StateConcepts.Neutral.name)
             slot(CoreFields.Location, GeneralConcepts.Location.name) {
-                expectPrep(CardinalFields.Direction.fieldName, variableName = "cardinalDirection", preps = setOf(Preposition.In), matcher = matchConceptByHead(setOf(
-                    CardinalDirectionConcept.CardinalDirection.name))
+                expectPrep(
+                    CardinalFields.Direction.fieldName,
+                    variableName = "cardinalDirection",
+                    preps = setOf(Preposition.In),
+                    matcher = matchConceptByHead(
+                        setOf(
+                            CardinalDirectionConcept.CardinalDirection.name
+                        )
+                    )
                 )
                 varReference(CoreFields.Name.fieldName, "cardinalDirection", extractConceptName)
                 varReference(CoreFields.Kind.fieldName, "cardinalDirection", extractConceptHead)
@@ -129,12 +143,12 @@ private fun buildWindModifiers(lexicon: Lexicon) {
 private fun buildWindDirections(lexicon: Lexicon) {
     val windMatcher = matchConceptByHead(MeteorologyConcept.Wind.name)
     CardinalDirection.values().forEach {
-        val word = it.name.toLowerCase()+"erly"
+        val word = it.name.toLowerCase() + "erly"
         lexicon.addMapping(ModifierWord(word, CardinalFields.Direction, it.name, windMatcher))
     }
 }
 
-class WindHandler(private val wind: WindConcepts): WordHandler(EntryWord(wind.word())) {
+class WindHandler(private val wind: WindConcepts) : WordHandler(EntryWord(wind.word())) {
     override fun build(wordContext: WordContext): List<Demon> =
         lexicalConcept(wordContext, MeteorologyConcept.Wind.name) {
             slot(CoreFields.Name, wind.name)

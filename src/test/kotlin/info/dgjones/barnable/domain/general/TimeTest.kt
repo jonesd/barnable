@@ -37,4 +37,15 @@ class TimeTest {
         Assertions.assertEquals("Home", walk.value(ActFields.To)?.valueName(CoreFields.Name))
         Assertions.assertEquals("Yesterday", walk.valueName(TimeFields.TIME))
     }
+    @Test
+    fun `Time modification - Later`() {
+        val textProcessor = runTextProcess("John walked home later", lexicon)
+
+        Assertions.assertEquals(1, textProcessor.workingMemory.concepts.size)
+        val walk = textProcessor.workingMemory.concepts[0]
+        Assertions.assertEquals(Acts.PTRANS.name, walk.name)
+        Assertions.assertEquals("John", walk.value(ActFields.Actor)?.valueName(HumanFields.FirstName))
+        Assertions.assertEquals("Home", walk.value(ActFields.To)?.valueName(CoreFields.Name))
+        Assertions.assertEquals("Later", walk.valueName(TimeFields.TIME))
+    }
 }

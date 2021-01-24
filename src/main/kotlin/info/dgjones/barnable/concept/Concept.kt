@@ -91,6 +91,30 @@ data class Concept(var name: String) {
         }
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other?.javaClass != javaClass) return false
+
+        other as Concept
+
+        return name == other.name &&
+                slots.equals(other.slots)
+    }
+
+    fun containsRooted(other: Concept): Boolean {
+        if (this === other) return true
+
+        return other.isRootedSubtreeOf(this)
+    }
+
+    fun isRootedSubtreeOf(supertree: Concept): Boolean {
+        if (this === supertree) return true
+        return name == supertree.name &&
+            slots.all { subtreeEntry ->
+                val superTreeSlot = supertree.slot(subtreeEntry.key)
+                subtreeEntry.value.isRootedSubtreeOf(superTreeSlot)}
+    }
+
     /* Replace state for this root concept with the concept argumunt, which must include this within it.
     * An attempt is made to preserve the original hierachical nature */
     fun shareStateFrom(concept: Concept) {
@@ -210,6 +234,24 @@ data class Slot(val name: String, var value: Concept? = null) {
         }
         parents.add(this)
         return "$indentString$name ${value?.printIndented(indent, parents)}"
+    }
+
+    fun isRootedSubtreeOf(supertree: Slot?): Boolean {
+        if (this === supertree) return true
+        if (supertree == null) return false
+        if (name != supertree.name) return false
+
+        val subtreeValue = value
+        val supertreeValue = supertree?.value
+        return if (subtreeValue != null && supertreeValue != null) {
+            return subtreeValue.isRootedSubtreeOf(supertreeValue)
+        } else if (subtreeValue == null && supertreeValue == null) {
+            true
+        } else if (subtreeValue != null && supertreeValue == null) {
+            false
+        } else {
+            true
+        }
     }
 }
 

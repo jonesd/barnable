@@ -23,7 +23,7 @@ import info.dgjones.barnable.episodic.EpisodicMemory
 import info.dgjones.barnable.grammar.*
 import info.dgjones.barnable.narrative.*
 
-class ExpectDemon(val matcher: ConceptMatcher, val direction: SearchDirection, wordContext: WordContext, val action: (ConceptHolder) -> Unit): Demon(wordContext) {
+class ExpectDemon(val matcher: ConceptMatcher, val direction: SearchDirection, wordContext: WordContext, highPriority: Boolean = false, val action: (ConceptHolder) -> Unit): Demon(wordContext) {
     override fun run() {
         searchContext(matcher, abortSearch = matchConjunction(), direction = direction, wordContext = wordContext) {
             action(it)

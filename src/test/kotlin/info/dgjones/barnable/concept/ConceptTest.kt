@@ -20,6 +20,27 @@ package info.dgjones.barnable.concept
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.opentest4j.AssertionFailedError
+
+fun assertContainsRooted(actual: Concept, expected: Concept) {
+    if (!actual.containsRooted(expected)) {
+        throw AssertionFailedError("Concept $actual does not contain $expected")
+    }
+}
+fun assertNotContainsRooted(actual: Concept, expected: Concept) {
+    if (actual.containsRooted(expected)) {
+        throw AssertionFailedError("Concept $actual should not contain $expected")
+    }
+}
+fun assertContainsRootedList(actual: List<Concept>, expected: List<Concept>) {
+    assertEquals(actual.size, expected.size)
+    actual.zip(expected).forEach {
+        if (!it.first.containsRooted(it.second)) {
+            throw AssertionFailedError("Concept ${it.first} does not contain ${it.second}")
+        }
+    }
+
+}
 
 class ConceptTest {
     @Test
@@ -35,7 +56,7 @@ class ConceptTest {
 
         assertEquals("value0", c.value("slot0")?.name)
     }
-
+ 
     @Test
     fun `can change slot value`() {
         val c = Concept("test")
@@ -262,6 +283,99 @@ class ConceptTest {
             assertNotSame(root, childRoot)
         }
     }
+    @Nested
+    inner class Equality {
+        @Test
+        fun `same root name matches`() {
+            val root = Concept("root")
+            assertEquals(root, root)
+        }
+        @Test
+        fun `equivalent root name matches`() {
+            assertEquals(Concept("root"), Concept("root"))
+        }
+        @Test
+        fun `different root name fails`() {
+            assertNotEquals(Concept("other"), Concept("root"))
+        }
+        @Test
+        fun `child names and values match`() {
+            val a = Concept("root")
+            a.value("child", Concept("childValue"))
+            val b = Concept("root")
+            b.value("child", Concept("childValue"))
+            assertEquals(a, b)
+        }
+        @Test
+        fun `child names differ`() {
+            val a = Concept("root")
+            a.value("child", Concept("childValue"))
+            val b = Concept("root")
+            b.value("childOther", Concept("childValue"))
+            assertNotEquals(a, b)
+        }
+        @Test
+        fun `child value differ`() {
+            val a = Concept("root")
+            a.value("child", Concept("childValue"))
+            val b = Concept("root")
+            b.value("child", Concept("childValueOther"))
+            assertNotEquals(a, b)
+        }
+        @Test
+        fun `children order shouldn't matter`() {
+            val a = Concept("root")
+            a.value("one", Concept("oneValue"))
+            a.value("two", Concept("twoValue"))
+            val b = Concept("root")
+            b.value("two", Concept("twoValue"))
+            b.value("one", Concept("oneValue"))
+            assertEquals(a, b)
+        }
+        @Test
+        fun `missing children should fail`() {
+            val a = Concept("root")
+            a.value("one", Concept("oneValue"))
+            a.value("two", Concept("twoValue"))
+            val b = Concept("root")
+            b.value("one", Concept("oneValue"))
+            assertNotEquals(a, b)
+        }
+        @Test
+        fun `different children should fail`() {
+            val a = Concept("root")
+            a.value("one", Concept("oneValue"))
+            a.value("two", Concept("twoValue"))
+            val b = Concept("root")
+            b.value("one", Concept("oneValue"))
+            b.value("three", Concept("threeValue"))
+            assertNotEquals(a, b)
+        }
+    }
+    @Nested
+    inner class Contains {
+        @Test
+        fun `equals implies contains`() {
+            val a = Concept("root")
+            a.value("child", Concept("childValue"))
+            val b = Concept("root")
+            b.value("child", Concept("childValue"))
+
+            assertContainsRooted(a, b)
+            assertContainsRooted(b, a)
+        }
+        @Test
+        fun `can contain more entries`() {
+            val a = Concept("root")
+            a.value("child", Concept("childValue"))
+            a.value("child1", Concept("childValue1"))
+            val b = Concept("root")
+            b.value("child", Concept("childValue"))
+
+            assertContainsRooted(a, b)
+            assertNotContainsRooted(b, a)
+        }
+    }
 }
 
 class SlotTest {
@@ -326,6 +440,25 @@ class SlotTest {
 
             assertEquals("someName", duplicated.name)
             assertNull(duplicated.value)
+        }
+    }
+    @Nested
+    inner class SlotEquality {
+        @Test
+        fun `equal`() {
+            assertEquals(Slot("name", Concept("value")), Slot("name", Concept("value")))
+        }
+        @Test
+        fun `different name`() {
+            assertNotEquals(Slot("name", Concept("value")), Slot("other", Concept("value")))
+        }
+        @Test
+        fun `different value`() {
+            assertNotEquals(Slot("name", Concept("value")), Slot("name", Concept("other")))
+        }
+        @Test
+        fun `different null value`() {
+            assertNotEquals(Slot("name", Concept("value")), Slot("name", null))
         }
     }
 }

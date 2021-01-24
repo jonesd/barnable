@@ -75,7 +75,7 @@ class ShippingForecastTest {
 
             assertEquals(1, textProcessor.workingMemory.concepts.size)
             val weather = textProcessor.workingMemory.concepts.first()
-            assertEquals(GeneralConcepts.Weather.name, weather.name)
+            assertEquals(MeteorologyConcept.Weather.name, weather.name)
             assertEquals(WeatherConcept.Rain.name, weather.valueName(CoreFields.Name))
         }
     }
