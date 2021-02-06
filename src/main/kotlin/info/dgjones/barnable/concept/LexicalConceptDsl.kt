@@ -39,6 +39,10 @@ class LexicalRootBuilder(val wordContext: WordContext, private val headName: Str
         return LexicalConcept(wordContext, root.build(), demons, disambiguations)
     }
 
+    fun buildConcept(): Concept {
+        return root.build()
+    }
+
     // FIXME shouldn't associate this state that lives on beyond build() to builder
     // should create new holder instead
     fun createVariable(slotName: Fields, variableName: String? = null, expression: ConceptTransformer? = null): CompletableVariable {
@@ -104,6 +108,28 @@ class LexicalRootBuilder(val wordContext: WordContext, private val headName: Str
     }
 }*/
 
+class ConceptBuilder(conceptName: String) {
+    val concept = Concept(conceptName)
+
+    fun slot(slotName: Fields, slotValue: String) {
+        slot(slotName.fieldName, slotValue)
+    }
+    fun slot(slotName: String, slotValue: String) {
+        concept.with(Slot(slotName, Concept(slotValue)))
+    }
+    fun slot(slotName: Fields, slotValue: String, initializer: ConceptBuilder.() -> Unit) {
+        slot(slotName.fieldName, slotValue, initializer)
+    }
+    fun slot(slotName: String, slotValue: String, initializer: ConceptBuilder.() -> Unit) {
+        val child = ConceptBuilder(slotValue)
+        child.apply(initializer)
+        val c = child.build()
+        concept.with(Slot(slotName, c))
+    }
+    fun build(): Concept {
+        return concept
+    }
+}
 
 class LexicalConceptBuilder(val root: LexicalRootBuilder, conceptName: String) {
     val concept = Concept(conceptName)
@@ -208,4 +234,14 @@ class LexicalConcept(val wordContext: WordContext, val head: Concept, val demons
     init {
         wordContext.defHolder.value = head
     }
+}
+
+fun concept(headName: String): Concept {
+    return ConceptBuilder(headName).concept
+}
+
+fun concept(headName: String, initializer: ConceptBuilder.() -> Unit): Concept {
+    val builder = ConceptBuilder(headName)
+    builder.apply(initializer)
+    return builder.concept
 }
