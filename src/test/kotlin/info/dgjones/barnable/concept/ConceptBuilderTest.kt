@@ -17,6 +17,7 @@
 
 package info.dgjones.barnable.concept
 
+import info.dgjones.barnable.domain.general.ListConcept
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -52,6 +53,23 @@ class ConceptBuilderTest {
         val child = Concept("Zero")
         expected.value("zero", child)
         child.value("one", Concept("One"))
+
+        assertEquals(actual, expected)
+    }
+
+    @Test
+    fun `create concept with list`() {
+        val actual = concept("root") {
+            slot("zero", listOf("a", "b"))
+        }
+
+        val expected = Concept("root")
+        val a = Concept("a")
+        val b = Concept("b")
+        val list = Concept(ListConcept.List.name)
+        list.value("0", a)
+        list.value("1", b)
+        expected.value("zero", list)
 
         assertEquals(actual, expected)
     }

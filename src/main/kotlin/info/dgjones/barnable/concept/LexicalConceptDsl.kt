@@ -17,6 +17,7 @@
 
 package info.dgjones.barnable.concept
 
+import info.dgjones.barnable.domain.general.buildConceptList
 import info.dgjones.barnable.episodic.EpisodicConcept
 import info.dgjones.barnable.grammar.MultipleModifierDemon
 import info.dgjones.barnable.grammar.SingleModifierDemon
@@ -125,6 +126,13 @@ class ConceptBuilder(conceptName: String) {
         child.apply(initializer)
         val c = child.build()
         concept.with(Slot(slotName, c))
+    }
+    fun slot(slotName: Fields, listValue: List<String>) {
+        slot(slotName.fieldName, listValue)
+    }
+    fun slot(slotName: String, listValue: List<String>) {
+        val list = buildConceptList(listValue.map { concept(it) })
+        concept.with(Slot(slotName, list))
     }
     fun build(): Concept {
         return concept
@@ -236,10 +244,16 @@ class LexicalConcept(val wordContext: WordContext, val head: Concept, val demons
     }
 }
 
+/**
+ * Build a concept from the headName
+ */
 fun concept(headName: String): Concept {
     return ConceptBuilder(headName).concept
 }
 
+/**
+ * Build a concept from the headName and nested state
+ */
 fun concept(headName: String, initializer: ConceptBuilder.() -> Unit): Concept {
     val builder = ConceptBuilder(headName)
     builder.apply(initializer)

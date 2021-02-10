@@ -17,11 +17,15 @@
 
 package info.dgjones.barnable.concept
 
+/**
+ * Transform the concept parameter into another Concept
+ */
 fun interface ConceptTransformer {
     fun transform(concept: Concept?): Concept?
 }
 
 val extractConceptHead = ConceptTransformer { if (it != null) Concept(it.name) else null }
+
 val extractConceptName = ConceptTransformer {
     val name = it?.valueName(CoreFields.Name)
     if (name != null) Concept(name) else null

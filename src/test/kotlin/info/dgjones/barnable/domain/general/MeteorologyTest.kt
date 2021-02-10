@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.opentest4j.AssertionFailedError
 
-class MeteorolgyTest {
+class MeteorologyTest {
     val lexicon = buildInDepthUnderstandingLexicon()
 
     @Nested
@@ -38,8 +38,9 @@ class MeteorolgyTest {
 
             assertEquals(1, textProcessor.workingMemory.concepts.size)
             val weather = textProcessor.workingMemory.concepts[0]
-            assertEquals(MeteorologyConcept.Weather.name, weather.name)
-            assertEquals(WeatherConcept.Rain.name, weather.valueName(CoreFields.Name))
+            assertContainsRooted(weather, concept(MeteorologyConcept.Weather.name) {
+                slot(CoreFields.Name, WeatherConcept.Rain.name)
+            })
         }
 
         @Test
@@ -48,10 +49,10 @@ class MeteorolgyTest {
 
             assertEquals(1, textProcessor.workingMemory.concepts.size)
             val weather = textProcessor.workingMemory.concepts[0]
-            assertEquals(MeteorologyConcept.Weather.name, weather.name)
-            assertEquals(WeatherConcept.Shower.name, weather.valueName(CoreFields.Name))
-            val characteristics = ConceptListAccessor(weather.value(MeteorologyFields.WeatherCharacteristics)!!)
-            assertEquals(setOf(WeatherCharacteristics.Thundery.name), characteristics.valueNames().toSet())
+            assertContainsRooted(weather, concept(MeteorologyConcept.Weather.name) {
+                slot(CoreFields.Name, WeatherConcept.Shower.name)
+                slot(MeteorologyFields.WeatherCharacteristics, listOf(WeatherCharacteristics.Thundery.name))
+            })
         }
 
         @Test
@@ -60,13 +61,10 @@ class MeteorolgyTest {
 
             assertEquals(1, textProcessor.workingMemory.concepts.size)
             val weather = textProcessor.workingMemory.concepts[0]
-            assertEquals(MeteorologyConcept.Weather.name, weather.name)
-            assertEquals(WeatherConcept.Shower.name, weather.valueName(CoreFields.Name))
-            val characteristics = ConceptListAccessor(weather.value(MeteorologyFields.WeatherCharacteristics)!!)
-            assertEquals(
-                setOf(WeatherCharacteristics.Wintry.name, WeatherCharacteristics.Squally.name),
-                characteristics.valueNames().toSet()
-            )
+            assertContainsRooted(weather, concept(MeteorologyConcept.Weather.name) {
+                slot(CoreFields.Name, WeatherConcept.Shower.name)
+                slot(MeteorologyFields.WeatherCharacteristics, listOf(WeatherCharacteristics.Wintry.name, WeatherCharacteristics.Squally.name))
+            })
         }
         @Test
         fun `Alternative weather`() {
@@ -111,11 +109,13 @@ class MeteorolgyTest {
 
             assertEquals(1, textProcessor.workingMemory.concepts.size)
             val weather = textProcessor.workingMemory.concepts[0]
-            assertEquals(MeteorologyConcept.Weather.name, weather.name)
-            assertEquals(WeatherConcept.Rain.name, weather.valueName(CoreFields.Name))
-            assertEquals(GeneralConcepts.Location.name, weather.valueName(CoreFields.Location))
-            assertEquals(CardinalDirection.NorthWest.name, weather.value(CoreFields.Location)?.valueName(CoreFields.Name))
-            assertEquals(CardinalDirectionConcept.CardinalDirection.name, weather.value(CoreFields.Location)?.valueName(CoreFields.Kind))
+            assertContainsRooted(weather, concept(MeteorologyConcept.Weather.name) {
+                slot(CoreFields.Name, WeatherConcept.Rain.name)
+                slot(CoreFields.Location, GeneralConcepts.Location.name) {
+                    slot(CoreFields.Name, CardinalDirection.NorthWest.name)
+                    slot(CoreFields.Kind, CardinalDirectionConcept.CardinalDirection.name)
+                }
+            })
         }
         @Test
         fun `Weather specific to direction passive`() {
@@ -123,11 +123,13 @@ class MeteorolgyTest {
 
             assertEquals(1, textProcessor.workingMemory.concepts.size)
             val weather = textProcessor.workingMemory.concepts[0]
-            assertEquals(MeteorologyConcept.Weather.name, weather.name)
-            assertEquals(WeatherConcept.Rain.name, weather.valueName(CoreFields.Name))
-            assertEquals(GeneralConcepts.Location.name, weather.valueName(CoreFields.Location))
-            assertEquals(CardinalDirection.NorthWest.name, weather.value(CoreFields.Location)?.valueName(CoreFields.Name))
-            assertEquals(CardinalDirectionConcept.CardinalDirection.name, weather.value(CoreFields.Location)?.valueName(CoreFields.Kind))
+            assertContainsRooted(weather, concept(MeteorologyConcept.Weather.name) {
+                slot(CoreFields.Name, WeatherConcept.Rain.name)
+                slot(CoreFields.Location, GeneralConcepts.Location.name) {
+                    slot(CoreFields.Name, CardinalDirection.NorthWest.name)
+                    slot(CoreFields.Kind, CardinalDirectionConcept.CardinalDirection.name)
+                }
+            })
         }
         @Test
         fun `Weather with frequency before`() {
@@ -135,9 +137,10 @@ class MeteorolgyTest {
 
             assertEquals(1, textProcessor.workingMemory.concepts.size)
             val weather = textProcessor.workingMemory.concepts[0]
-            assertEquals(MeteorologyConcept.Weather.name, weather.name)
-            assertEquals(WeatherConcept.Rain.name, weather.valueName(CoreFields.Name))
-            assertEquals(ScaleConcepts.LessThanNormal.name, weather.valueName(FrequencyFields.Frequency))
+            assertContainsRooted(weather, concept(MeteorologyConcept.Weather.name) {
+                slot(CoreFields.Name, WeatherConcept.Rain.name)
+                slot(FrequencyFields.Frequency, ScaleConcepts.LessThanNormal.name)
+            })
         }
     }
 
@@ -149,8 +152,9 @@ class MeteorolgyTest {
 
             assertEquals(1, textProcessor.workingMemory.concepts.size)
             val wind = textProcessor.workingMemory.concepts[0]
-            assertEquals(MeteorologyConcept.Wind.name, wind.name)
-            assertEquals(WindConcepts.Gale.name, wind.valueName(CoreFields.Name))
+            assertContainsRooted(wind, concept(MeteorologyConcept.Wind.name) {
+                slot(CoreFields.Name, WindConcepts.Gale.name)
+            })
         }
         @Test
         fun `Wind scale modifier`() {
@@ -158,9 +162,10 @@ class MeteorolgyTest {
 
             assertEquals(1, textProcessor.workingMemory.concepts.size)
             val wind = textProcessor.workingMemory.concepts[0]
-            assertEquals(MeteorologyConcept.Wind.name, wind.name)
-            assertEquals(WindConcepts.Gale.name, wind.valueName(CoreFields.Name))
-            assertEquals(ScaleConcepts.GreaterThanNormal.name, wind.valueName(CoreFields.Scale))
+            assertContainsRooted(wind, concept(MeteorologyConcept.Wind.name) {
+                slot(CoreFields.Name, WindConcepts.Gale.name)
+                slot(CoreFields.Scale, ScaleConcepts.GreaterThanNormal.name)
+            })
         }
         @Test
         fun `Direction of wind`() {
@@ -168,9 +173,10 @@ class MeteorolgyTest {
 
             assertEquals(1, textProcessor.workingMemory.concepts.size)
             val wind = textProcessor.workingMemory.concepts[0]
-            assertEquals(MeteorologyConcept.Wind.name, wind.name)
-            assertEquals(WindConcepts.Gale.name, wind.valueName(CoreFields.Name))
-            assertEquals("North", wind.valueName(CardinalFields.Direction))
+            assertContainsRooted(wind, concept(MeteorologyConcept.Wind.name) {
+                slot(CoreFields.Name, WindConcepts.Gale.name)
+                slot(CardinalFields.Direction, CardinalDirection.North.name)
+            })
         }
     }
 }
