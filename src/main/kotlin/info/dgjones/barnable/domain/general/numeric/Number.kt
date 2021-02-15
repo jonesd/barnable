@@ -64,14 +64,34 @@ enum class NumberValues(val value: Int, val accumulateAsMultiple: Boolean = fals
     Thousand(1000, true),
     Million(1000000, true),
 
-    Dozen(12, true);
+    Dozen(12, true),
+    Bakers_Dozen(13, true),
+
+    Score(20, true),
+
+    /**
+     * "'long hundred' ... the number that was referred to as "hundred" in Germanic languages prior to the 15th century, which is now known as
+     * 120, one hundred and twenty, or six score"
+     * -- https://en.wikipedia.org/wiki/Long_hundred
+     */
+    Long_Hundred(LONG_HUNDRED_VALUE, true),
+    Great_Hundred(LONG_HUNDRED_VALUE, true),
+    Twelfty(LONG_HUNDRED_VALUE, true),
+    Long_Thousand(LONG_THOUSAND_VALUE, true),
+    Short_Hundred(SHORT_HUNDRED_VALUE, true);
 
     fun accumulate(current: Int): Int =
         if (this.accumulateAsMultiple) currentOrUnit(current) * this.value else current + this.value
 
     private fun currentOrUnit(current: Int): Int =
         if (current != 0 ) current else 1
+
+    fun getWords() = name.split("_").map { it.toLowerCase() }
 }
+
+private const val SHORT_HUNDRED_VALUE = 100;
+private const val LONG_HUNDRED_VALUE = 120;
+private const val LONG_THOUSAND_VALUE = 1200;
 
 fun buildGeneralNumberLexicon(lexicon: Lexicon) {
     buildNumberValueAnd(lexicon)
@@ -89,7 +109,7 @@ private fun buildNumberValueFromDigitsWord(lexicon: Lexicon) {
 
 private fun buildNumberValueWords(lexicon: Lexicon) {
     NumberValues.values().forEach {
-        lexicon.addMapping(NumberHandler(it.value, it.name))
+        lexicon.addMapping(NumberHandler(it))
     }
 }
 
@@ -128,11 +148,11 @@ class AndNumberElement: WordHandler(EntryWord("and")) {
 /**
  * Handle individual number element that will be collated together into the calculating the full number value.
  */
-class NumberHandler(var value: Int, val name: String): WordHandler(EntryWord(name.toLowerCase())) {
+class NumberHandler(var value: NumberValues): WordHandler(EntryWord(value.getWords()[0], value.getWords())) {
     override fun build(wordContext: WordContext): List<Demon> =
         lexicalConcept(wordContext, NumberConcept.Number.name) {
-            slot(NumberFields.Value, value.toString())
-            pushValueToInitialNumberElement(name)
+            slot(NumberFields.Value, value.value.toString())
+            pushValueToInitialNumberElement(value.name)
             copySlotValueToConcept(NumberFields.Value, defaultModifierTargetMatcher(), QuantityFields.Amount, wordContext)
         }.demons
 }
@@ -166,8 +186,8 @@ private fun LexicalConceptBuilder.pushValueToInitialNumberElement(name: String) 
     root.addDemon(demon)
 }
 
-/*
-Handle the scenario of "hundred and one" where number elements will be collected together for the total number value
+/**
+ * Handle numbers represented as digits. Used when no matching "word" has been registered.
  */
 class NumberDigitsUnregistered: WordHandler(EntryWord("")) {
     override fun build(wordContext: WordContext): List<Demon> =

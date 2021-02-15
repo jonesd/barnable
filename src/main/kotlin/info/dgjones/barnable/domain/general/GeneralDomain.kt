@@ -17,6 +17,7 @@
 
 package info.dgjones.barnable.domain.general
 
+import info.dgjones.barnable.domain.general.numeric.buildGeneralNumericLexicon
 import info.dgjones.barnable.grammar.buildEnglishGrammarLexicon
 import info.dgjones.barnable.parser.Lexicon
 
@@ -32,7 +33,7 @@ fun buildGeneralDomainLexicon(lexicon: Lexicon) {
     buildGeneralHonorificLexicon(lexicon)
     buildGeneralRoleThemeLexicon(lexicon)
     buildGeneralTimeLexicon(lexicon)
-    buildGeneralNumberLexicon(lexicon)
+    buildGeneralNumericLexicon(lexicon)
     buildGeneralQuantityLexicon(lexicon)
     buildGeneralColourLexicon(lexicon)
     buildGeneralIndustryLexicon(lexicon)

@@ -1,5 +1,5 @@
 /*
- * Copyright  2020 David G Jones
+ * Copyright  2021 David G Jones
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,24 @@
  *
  */
 
-package info.dgjones.barnable.domain.general
+package info.dgjones.barnable.domain.general.numeric
 
-import info.dgjones.barnable.concept.Concept
-import info.dgjones.barnable.concept.CoreFields
-import info.dgjones.barnable.concept.ScaleConcepts
-import info.dgjones.barnable.grammar.ConjunctionConcept
+import info.dgjones.barnable.concept.*
+import info.dgjones.barnable.domain.general.GeneralConcepts
+import info.dgjones.barnable.domain.general.NumberConcept
+import info.dgjones.barnable.domain.general.NumberFields
+import info.dgjones.barnable.domain.general.QuantityFields
 import info.dgjones.barnable.narrative.buildInDepthUnderstandingLexicon
 import info.dgjones.barnable.parser.runTextProcess
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+
+fun assertNumberEquals(actual: Concept, expectedValue: Int) {
+    assertContainsRooted(actual, concept(NumberConcept.Number.name) {
+        slot(NumberFields.Value, expectedValue.toString())
+    })
+}
 
 class NumberTest {
     val lexicon = buildInDepthUnderstandingLexicon()
@@ -38,8 +45,7 @@ class NumberTest {
 
             assertEquals(1, textProcessor.workingMemory.concepts.size)
             val number = textProcessor.workingMemory.concepts[0]
-            assertEquals(NumberConcept.Number.name, number.name)
-            assertEquals("1", number.valueName(NumberFields.Value))
+            assertNumberEquals(number, 1)
         }
     }
     @Nested
@@ -50,8 +56,7 @@ class NumberTest {
 
             assertEquals(1, textProcessor.workingMemory.concepts.size)
             val number = textProcessor.workingMemory.concepts[0]
-            assertEquals(NumberConcept.Number.name, number.name)
-            assertEquals("1", number.valueName(NumberFields.Value))
+            assertNumberEquals(number, 1)
         }
         @Test
         fun `Number with multiple digits`() {
@@ -59,8 +64,7 @@ class NumberTest {
 
             assertEquals(1, textProcessor.workingMemory.concepts.size)
             val number = textProcessor.workingMemory.concepts[0]
-            assertEquals(NumberConcept.Number.name, number.name)
-            assertEquals("1234", number.valueName(NumberFields.Value))
+            assertNumberEquals(number, 1234)
         }
         //FIXME support 1,234
     }
@@ -72,8 +76,7 @@ class NumberTest {
 
             assertEquals(1, textProcessor.workingMemory.concepts.size)
             val number = textProcessor.workingMemory.concepts[0]
-            assertEquals(NumberConcept.Number.name, number.name)
-            assertEquals("21", number.valueName(NumberFields.Value))
+            assertNumberEquals(number, 21)
         }
         @Test
         fun `Compose with hundred multiplier`() {
@@ -81,8 +84,7 @@ class NumberTest {
 
             assertEquals(1, textProcessor.workingMemory.concepts.size)
             val number = textProcessor.workingMemory.concepts[0]
-            assertEquals(NumberConcept.Number.name, number.name)
-            assertEquals("2100", number.valueName(NumberFields.Value))
+            assertNumberEquals(number, 2100)
         }
         @Test
         fun `Compose with dozen multiplier`() {
@@ -90,8 +92,7 @@ class NumberTest {
 
             assertEquals(1, textProcessor.workingMemory.concepts.size)
             val number = textProcessor.workingMemory.concepts[0]
-            assertEquals(NumberConcept.Number.name, number.name)
-            assertEquals("24", number.valueName(NumberFields.Value))
+            assertNumberEquals(number, 24)
         }
         @Test
         fun `Compose with multiple multipliers`() {
@@ -99,8 +100,7 @@ class NumberTest {
 
             assertEquals(1, textProcessor.workingMemory.concepts.size)
             val number = textProcessor.workingMemory.concepts[0]
-            assertEquals(NumberConcept.Number.name, number.name)
-            assertEquals("200000", number.valueName(NumberFields.Value))
+            assertNumberEquals(number, 200000)
         }
     }
     @Nested
@@ -111,8 +111,55 @@ class NumberTest {
 
             assertEquals(1, textProcessor.workingMemory.concepts.size)
             val number = textProcessor.workingMemory.concepts[0]
-            assertEquals(NumberConcept.Number.name, number.name)
-            assertEquals("120", number.valueName(NumberFields.Value))
+            assertNumberEquals(number, 120)
+        }
+    }
+
+    @Nested
+    inner class Score {
+        @Test
+        fun `multiple score`() {
+            val textProcessor = runTextProcess("six score", lexicon)
+
+            assertEquals(1, textProcessor.workingMemory.concepts.size)
+            val number = textProcessor.workingMemory.concepts[0]
+            assertNumberEquals(number, 120)
+        }
+    }
+
+    @Nested
+    inner class LongHundred {
+        @Test
+        fun `long hundred`() {
+            val textProcessor = runTextProcess("long hundred", lexicon)
+
+            assertEquals(1, textProcessor.workingMemory.concepts.size)
+            val number = textProcessor.workingMemory.concepts[0]
+            assertNumberEquals(number, 120)
+        }
+        @Test
+        fun `long thousand`() {
+            val textProcessor = runTextProcess("long thousand", lexicon)
+
+            assertEquals(1, textProcessor.workingMemory.concepts.size)
+            val number = textProcessor.workingMemory.concepts[0]
+            assertNumberEquals(number, 1200)
+        }
+        @Test
+        fun `short hundred`() {
+            val textProcessor = runTextProcess("short hundred", lexicon)
+
+            assertEquals(1, textProcessor.workingMemory.concepts.size)
+            val number = textProcessor.workingMemory.concepts[0]
+            assertNumberEquals(number, 100)
+        }
+        @Test
+        fun `can use long hundred as part of numeric expression`() {
+            val textProcessor = runTextProcess("two long hundreds and five", lexicon)
+
+            assertEquals(1, textProcessor.workingMemory.concepts.size)
+            val number = textProcessor.workingMemory.concepts[0]
+            assertNumberEquals(number, 245)
         }
     }
 
