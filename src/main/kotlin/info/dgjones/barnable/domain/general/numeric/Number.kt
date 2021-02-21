@@ -209,17 +209,19 @@ private fun LexicalConceptBuilder.pushValueToInitialNumberElement(name: String) 
  * Handle numbers represented as digits. Used when no matching "word" has been registered.
  */
 class NumberDigitsUnregistered: WordHandler(EntryWord("")) {
+    fun sanitizeNumberWord(text: String):String = text.filter { it != ',' }
+
     override fun build(wordContext: WordContext): List<Demon> =
         lexicalConcept(wordContext, NumberConcept.Number.name) {
-            slot(NumberFields.Value, wordContext.word)
-            pushValueToInitialNumberElement(wordContext.word)
+            slot(NumberFields.Value, sanitizeNumberWord(wordContext.word))
+            pushValueToInitialNumberElement(sanitizeNumberWord(wordContext.word))
             copySlotValueToConcept(NumberFields.Value, defaultModifierTargetMatcher(), QuantityFields.Amount, wordContext)
         }.demons
 
     override fun disambiguationDemons(wordContext: WordContext, disambiguationHandler: DisambiguationHandler): List<Demon> {
         return listOf(
             DisambiguateUsingSentenceWordRegex(
-                """-?\d+""".toRegex(),
+                """^-?([1-9][0-9]{0,2}(,[0-9]{3})*|[0-9]+)$""".toRegex(),
                 false,
                 wordContext,
                 disambiguationHandler
