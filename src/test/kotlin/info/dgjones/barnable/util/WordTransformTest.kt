@@ -46,4 +46,15 @@ class WordTransformTest {
             assertEquals("One-Two-Three", transformCamelCaseToHyphenSeparatedWords("OneTwoThree"))
         }
     }
+    @Nested
+    inner class TransformCamelCaseToList {
+
+        @Test
+        fun `Split with spaces`() {
+            // test
+            assertEquals(listOf("one"), transformCamelCaseToLowerCaseList("One"))
+            assertEquals(listOf("one", "two"), transformCamelCaseToLowerCaseList("oneTwo"))
+            assertEquals(listOf("one", "two", "three"), transformCamelCaseToLowerCaseList("OneTwoThree"))
+        }
+    }
 }

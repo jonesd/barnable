@@ -20,6 +20,9 @@ package info.dgjones.barnable.domain.general
 import info.dgjones.barnable.concept.*
 import info.dgjones.barnable.grammar.defaultModifierTargetMatcher
 import info.dgjones.barnable.parser.*
+import info.dgjones.barnable.util.transformCamelCaseToLowerCaseList
+import info.dgjones.barnable.util.transformCamelCaseToSeparatedWords
+import info.dgjones.barnable.util.transformCamelCaseToSpaceSeparatedWords
 
 enum class NumberConcept {
     Number,
@@ -74,19 +77,13 @@ enum class NumberValues(val value: Int, val accumulateAsMultiple: Boolean = fals
      * 120, one hundred and twenty, or six score"
      * -- https://en.wikipedia.org/wiki/Long_hundred
      */
-    Long_Hundred(LONG_HUNDRED_VALUE, true),
-    Great_Hundred(LONG_HUNDRED_VALUE, true),
+    LongHundred(LONG_HUNDRED_VALUE, true),
+    GreatHundred(LONG_HUNDRED_VALUE, true),
     Twelfty(LONG_HUNDRED_VALUE, true),
-    Long_Thousand(LONG_THOUSAND_VALUE, true),
-    Short_Hundred(SHORT_HUNDRED_VALUE, true);
+    LongThousand(LONG_THOUSAND_VALUE, true),
+    ShortHundred(SHORT_HUNDRED_VALUE, true);
 
-    fun accumulate(current: Int): Int =
-        if (this.accumulateAsMultiple) currentOrUnit(current) * this.value else current + this.value
-
-    private fun currentOrUnit(current: Int): Int =
-        if (current != 0 ) current else 1
-
-    fun getWords() = name.split("_").map { it.toLowerCase() }
+    val words = transformCamelCaseToLowerCaseList(name)
 }
 
 private const val SHORT_HUNDRED_VALUE = 100;
@@ -148,7 +145,7 @@ class AndNumberElement: WordHandler(EntryWord("and")) {
 /**
  * Handle individual number element that will be collated together into the calculating the full number value.
  */
-class NumberHandler(var value: NumberValues): WordHandler(EntryWord(value.getWords()[0], value.getWords())) {
+class NumberHandler(var value: NumberValues): WordHandler(EntryWord(value.words[0], value.words)) {
     override fun build(wordContext: WordContext): List<Demon> =
         lexicalConcept(wordContext, NumberConcept.Number.name) {
             slot(NumberFields.Value, value.value.toString())
@@ -165,8 +162,30 @@ private fun LexicalConceptBuilder.pushValueToInitialNumberElement(name: String) 
                 ignoreHolder()
             }
         }
+        fun calculateValue(word: String): Int {
+            return try {
+                NumberValues.valueOf(word).value
+            } catch (e: IllegalArgumentException) {
+                word.toInt()
+            }
+        }
+        fun accumulateAsMultiple(word: String): Boolean {
+            return try {
+                NumberValues.valueOf(word).accumulateAsMultiple
+            } catch (e: IllegalArgumentException) {
+                false
+            }
+        }
+        fun currentOrUnit(current: Int): Int =
+            if (current != 0 ) current else 1
+
+        fun accumulate(word: String, current: Int): Int {
+            val value = calculateValue(word)
+            return if (accumulateAsMultiple(word)) currentOrUnit(current) * value else current + value
+        }
+
         fun calculateFromCollectedValues(words: List<String>): Int {
-            return words.map { NumberValues.valueOf(it) }.fold( 0, {acc, next ->  next.accumulate(acc)})
+            return words.fold( 0, {acc, next ->  accumulate(next, acc)})
         }
 
         it.value?.let { firstNumberElement ->
@@ -193,12 +212,14 @@ class NumberDigitsUnregistered: WordHandler(EntryWord("")) {
     override fun build(wordContext: WordContext): List<Demon> =
         lexicalConcept(wordContext, NumberConcept.Number.name) {
             slot(NumberFields.Value, wordContext.word)
+            pushValueToInitialNumberElement(wordContext.word)
+            copySlotValueToConcept(NumberFields.Value, defaultModifierTargetMatcher(), QuantityFields.Amount, wordContext)
         }.demons
 
     override fun disambiguationDemons(wordContext: WordContext, disambiguationHandler: DisambiguationHandler): List<Demon> {
         return listOf(
             DisambiguateUsingSentenceWordRegex(
-                """\d+""".toRegex(),
+                """-?\d+""".toRegex(),
                 false,
                 wordContext,
                 disambiguationHandler

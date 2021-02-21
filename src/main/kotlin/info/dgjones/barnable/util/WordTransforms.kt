@@ -25,3 +25,8 @@ fun transformCamelCaseToHyphenSeparatedWords(camelCase: String): String =
 
 fun transformCamelCaseToSeparatedWords(camelCase: String, separator: String = ""): String =
     "(?<=[a-zA-Z])[A-Z]".toRegex().replace(camelCase) {"${separator}${it.value}"}
+
+private val camelRegex = "(?<=[a-zA-Z])[A-Z]".toRegex()
+
+fun transformCamelCaseToLowerCaseList(camelCase: String): List<String> =
+    transformCamelCaseToHyphenSeparatedWords(camelCase).split("-").map { it.toLowerCase() }

@@ -18,10 +18,7 @@
 package info.dgjones.barnable.domain.general.numeric
 
 import info.dgjones.barnable.concept.*
-import info.dgjones.barnable.domain.general.GeneralConcepts
-import info.dgjones.barnable.domain.general.NumberConcept
-import info.dgjones.barnable.domain.general.NumberFields
-import info.dgjones.barnable.domain.general.QuantityFields
+import info.dgjones.barnable.domain.general.*
 import info.dgjones.barnable.narrative.buildInDepthUnderstandingLexicon
 import info.dgjones.barnable.parser.runTextProcess
 import org.junit.jupiter.api.Assertions.*
@@ -36,6 +33,14 @@ fun assertNumberEquals(actual: Concept, expectedValue: Int) {
 
 class NumberTest {
     val lexicon = buildInDepthUnderstandingLexicon()
+
+    @Nested
+    inner class NumberValuesTest {
+        @Test
+        fun `split name into separate words`() {
+            assertEquals(NumberValues.LongHundred.words, listOf("long", "hundred"))
+        }
+    }
 
     @Nested
     inner class NumberWords {
@@ -65,6 +70,22 @@ class NumberTest {
             assertEquals(1, textProcessor.workingMemory.concepts.size)
             val number = textProcessor.workingMemory.concepts[0]
             assertNumberEquals(number, 1234)
+        }
+        @Test
+        fun `Negative number`() {
+            val textProcessor = runTextProcess("-1234", lexicon)
+
+            assertEquals(1, textProcessor.workingMemory.concepts.size)
+            val number = textProcessor.workingMemory.concepts[0]
+            assertNumberEquals(number, -1234)
+        }
+        @Test
+        fun `Mixing words and digits`() {
+            val textProcessor = runTextProcess("100 million", lexicon)
+
+            assertEquals(1, textProcessor.workingMemory.concepts.size)
+            val number = textProcessor.workingMemory.concepts[0]
+            assertNumberEquals(number, 100000000)
         }
         //FIXME support 1,234
     }
