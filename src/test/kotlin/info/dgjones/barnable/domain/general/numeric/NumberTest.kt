@@ -95,6 +95,14 @@ class NumberTest {
             val number = textProcessor.workingMemory.concepts[0]
             assertNumberEquals(number, 1234)
         }
+        @Test
+        fun `Number with period separated digits`() {
+            val textProcessor = runTextProcess("1.234", lexicon)
+
+            assertEquals(1, textProcessor.workingMemory.concepts.size)
+            val number = textProcessor.workingMemory.concepts[0]
+            assertNumberEquals(number, 1234)
+        }
     }
     @Nested
     inner class ComposeNumberWords {

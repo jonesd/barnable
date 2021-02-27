@@ -237,7 +237,7 @@ class WordCommaBoundary: WordHandler(EntryWord(",", noSuffix = true)) {
 }
 
 /*
-Handle the scenario of "rain or showers" forming a group of two persons
+Handle the scenario of "rain or showers" forming a group of two items of the same matching head
  */
 class WordOrBuildAlternatives: WordHandler(EntryWord("or")) {
     private val matchingHeads = groupMatchingHeadsForOr

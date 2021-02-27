@@ -56,7 +56,7 @@ class DisambiguationHandlerTest {
         disambiguationHandler.startDisambiguations()
         disambiguationHandler.disambiguationMatchCompleted(disambiguationDemon)
 
-        verify { wordHandler.build(wordContext)}
+        verify(exactly = 1) { wordHandler.build(wordContext)}
     }
 
     @Test
@@ -69,22 +69,30 @@ class DisambiguationHandlerTest {
         val wordHandler1 = mockk<WordHandler>(relaxed = true)
         val disambiguationDemon1 = mockk<Demon>(relaxed = true)
 
+        val wordHandler2 = mockk<WordHandler>(relaxed = true)
+        val disambiguationDemon2 = mockk<Demon>(relaxed = true)
+
         val agenda = mockk<Agenda>()
         every { agenda.withDemon(any(), any()) } returns Unit
 
         val disambiguationHandler = DisambiguationHandler(wordContext, listOf(
             LexicalItem(listOf(WordMorphology("test0")), wordHandler0),
-            LexicalItem(listOf(WordMorphology("test1")), wordHandler1)
+            LexicalItem(listOf(WordMorphology("test1")), wordHandler1),
+            LexicalItem(listOf(WordMorphology("test2")), wordHandler2)
         ), agenda)
         every { wordHandler0.disambiguationDemons(wordContext, disambiguationHandler) } returns listOf(disambiguationDemon0)
         every { wordHandler1.disambiguationDemons(wordContext, disambiguationHandler) } returns listOf(disambiguationDemon1)
+        every { wordHandler2.disambiguationDemons(wordContext, disambiguationHandler) } returns listOf(disambiguationDemon2)
 
         // Test
         disambiguationHandler.startDisambiguations()
-        disambiguationHandler.disambiguationMatchCompleted(disambiguationDemon1)
+        disambiguationHandler.disambiguationMatchFailed(disambiguationDemon0)
+        disambiguationHandler.disambiguationMatchFailed(disambiguationDemon1)
+        disambiguationHandler.disambiguationMatchCompleted(disambiguationDemon2)
 
         verify(exactly = 0) { wordHandler0.build(wordContext)}
-        verify { wordHandler1.build(wordContext)}
+        verify(exactly = 0) { wordHandler1.build(wordContext)}
+        verify(exactly = 1) { wordHandler2.build(wordContext)}
     }
 
 

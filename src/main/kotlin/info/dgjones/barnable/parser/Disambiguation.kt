@@ -60,7 +60,7 @@ class DisambiguateUsingMatch(val matcher: ConceptMatcher, val direction: SearchD
         }
     }
     override fun description(): String {
-        return "DisambiguateUsingMatch"
+        return "DisambiguateUsingMatch $matcher"
     }
 }
 
@@ -83,17 +83,14 @@ class DisambiguateUsingSentenceWordRegex(private val regex: Regex, highPriority:
  If all lexical options fail, then apply the fallbackOption when present.
  */
 class DisambiguationHandler(val wordContext: WordContext, private val lexicalOptions: List<LexicalItem>, private val agenda: Agenda) {
-    private var disambiguationsByWordHandler = mutableMapOf<LexicalItem, MutableList<Demon>>()
+    private var disambiguationsByWordHandler = mutableMapOf<LexicalItem, DisambiguationDemonRecord>()
     private var resolvedTo: LexicalItem? = null
     private val fallbackLexicalOption: LexicalItem? = lexicalOptions.firstOrNull { it.handler.isFallbackHandler() }
 
     fun startDisambiguations() {
-        lexicalOptions.forEach { lexicalItem ->
-            val wordHandler = lexicalItem.handler
-            val disambiguationDemons = wordHandler.disambiguationDemons(wordContext, this)
-            disambiguationsByWordHandler[lexicalItem] = disambiguationDemons.toMutableList()
-        }
-        val noDisambiguationNeeded = disambiguationsByWordHandler.keys.filter { disambiguationsByWordHandler[it]?.isEmpty() ?: true }
+        check(resolvedTo == null) { "Handler can only be run once" }
+        buildDisambiguationHandlers()
+        val noDisambiguationNeeded = disambiguationsByWordHandler.keys.filter { disambiguationsByWordHandler[it]?.outstandingDemons?.isEmpty() ?: true }
         when {
             noDisambiguationNeeded.size == 1  && fallbackLexicalOption == null -> {
                 resolveTo(noDisambiguationNeeded.first())
@@ -107,26 +104,45 @@ class DisambiguationHandler(val wordContext: WordContext, private val lexicalOpt
         }
     }
 
+    private fun buildDisambiguationHandlers() {
+        lexicalOptions.forEach { lexicalItem ->
+            val wordHandler = lexicalItem.handler
+            val disambiguationDemons = wordHandler.disambiguationDemons(wordContext, this)
+            addDisambiguationMapping(lexicalItem, disambiguationDemons)
+        }
+    }
+
+    private fun addDisambiguationMapping(lexicalItem: LexicalItem, disambiguationDemons: List<Demon>) {
+        check(!(lexicalItem.handler.isFallbackHandler() && disambiguationDemons.isNotEmpty())) {
+            "Fallback handler cannot need disambiguation: $lexicalItem"
+        }
+        disambiguationsByWordHandler[lexicalItem] = DisambiguationDemonRecord(lexicalItem, disambiguationDemons.toMutableList())
+    }
+
     private fun spawnDisambiguationDemons() {
-        disambiguationsByWordHandler.forEach { (wordHandler, disambiguationDemons) ->
-            spawnDemons(disambiguationDemons)
+        disambiguationsByWordHandler.forEach { (wordHandler, disambiguationRecord) ->
+            spawnDemons(disambiguationRecord.outstandingDemons)
         }
     }
 
     private fun resolveTo(lexicalItem: LexicalItem) {
         stopExtantDisambiguationDemons()
         if (disambiguationsByWordHandler.size > 1) {
-            println("Disambiguated ${lexicalItem.textFragment()} to ${lexicalItem.handler} - building Demons...")
+            println("Disambiguated ${lexicalItem.textFragment()} to ${lexicalItem.handler} - building word Demons...")
         }
         resolvedTo = lexicalItem
-        buildWordDemons(lexicalItem)
+        spawnResolvedWordDemons(lexicalItem)
     }
 
     private fun stopExtantDisambiguationDemons() {
-        disambiguationsByWordHandler.values.flatten().forEach { it.deactivate() }
+        extantDisambiguationDemons().forEach { it.deactivate() }
     }
 
-    private fun buildWordDemons(lexicalItem: LexicalItem){
+    private fun extantDisambiguationDemons() =
+        disambiguationsByWordHandler.values.map { it.outstandingDemons }.flatten()
+
+    // FIXME move this out of Disambiguation
+    private fun spawnResolvedWordDemons(lexicalItem: LexicalItem){
         val suffixDemons = buildSuffixDemons(lexicalItem)
         val wordDemons = lexicalItem.handler.build(wordContext)
         val allDemons = wordDemons + suffixDemons
@@ -147,40 +163,70 @@ class DisambiguationHandler(val wordContext: WordContext, private val lexicalOpt
     }
 
     /**
-     * Once all demons associated with a word handler are completed/met then resolve disambigation for this word handler
+     * Once all demons associated with a word handler are completed/met then resolve disambiguation for this word handler
      */
     fun disambiguationMatchCompleted(demon: Demon) {
         if (resolvedTo != null) {
             println("Ignored disambiguation complete for ${demon} as already complete")
             return
         }
-        disambiguationsByWordHandler.keys.firstOrNull() { disambiguationsByWordHandler[it]?.contains(demon)?:false}?.let { lexicalItem ->
-            disambiguationsByWordHandler[lexicalItem]?.let { itemDemons ->
-                demon.deactivate()
-                itemDemons.remove(demon)
-                if (itemDemons.isEmpty()) {
-                    resolveTo(lexicalItem)
-                }
+        println("Matched $demon")
+        processFinishedDemon(demon) { demonRecord ->
+            if (demonRecord.outstandingDemons.isEmpty()) {
+                println("Resolved $demonRecord")
+                resolveTo(demonRecord.lexicalItem)
             }
         }
     }
+
     fun disambiguationMatchFailed(demon: Demon) {
         if (resolvedTo != null) {
             println("Ignored disambiguation complete for ${demon} as already complete")
             return
         }
-        disambiguationsByWordHandler.keys.firstOrNull() { disambiguationsByWordHandler[it]?.contains(demon)?:false}?.let { lexicalItem ->
-            disambiguationsByWordHandler[lexicalItem]?.let { itemDemons ->
-                itemDemons.forEach { it.deactivate()}
-                itemDemons.remove(demon)
-                if (itemDemons.isEmpty()) {
-                    if (fallbackLexicalOption != null) {
-                        resolveTo(fallbackLexicalOption)
-                    } else {
-                        println("No fallbackLexicalOption as last disambiguation failed")
-                    }
+        println("Failed match $demon")
+        processFinishedDemon(demon) { demonRecord ->
+            demonRecord.abortOutstandingDemons()
+            if (!anyOutstandingDemons()) {
+                if (fallbackLexicalOption != null) {
+                    println("Resolve to fallbackhandler $fallbackLexicalOption")
+                    resolveTo(fallbackLexicalOption)
+                } else {
+                    println("No fallbackLexicalOption as last disambiguation failed")
                 }
             }
         }
+    }
+
+    private fun processFinishedDemon(demon: Demon, finished: (demonRecord: DisambiguationDemonRecord) -> Unit) {
+        val lexicalItem = disambiguationsByWordHandler.keys.firstOrNull() { disambiguationsByWordHandler[it]?.containsDemon(demon)?:false}
+        if (lexicalItem != null) {
+            val demonRecord = disambiguationsByWordHandler[lexicalItem]
+            if (demonRecord != null) {
+                demonRecord.deactivate(demon)
+                finished(demonRecord)
+            }
+        }
+    }
+
+    private fun anyOutstandingDemons() =
+        disambiguationsByWordHandler.any { it.value.outstandingDemons.isNotEmpty() }
+}
+
+data class DisambiguationDemonRecord(val lexicalItem: LexicalItem, val outstandingDemons: MutableList<Demon>) {
+    private val finishedDemons = mutableListOf<Demon>()
+
+    fun containsDemon(demon: Demon) = outstandingDemons.contains(demon) || finishedDemons.contains(demon)
+    fun deactivate(demon: Demon) {
+        if (outstandingDemons.contains(demon)) {
+            outstandingDemons.remove(demon)
+            finishedDemons.add(demon)
+            demon.deactivate()
+        } else {
+            println("Ignore DemonFinished for unexpected demon $demon")
+        }
+    }
+    fun abortOutstandingDemons() {
+        outstandingDemons.forEach { deactivate(it) }
     }
 }

@@ -101,7 +101,8 @@ private fun buildNumberValueAnd(lexicon: Lexicon) {
 }
 
 private fun buildNumberValueFromDigitsWord(lexicon: Lexicon) {
-    lexicon.addUnknownHandler(NumberDigitsUnregistered())
+    lexicon.addUnknownHandler(NumberDigitsUnregisteredPeriod())
+    lexicon.addUnknownHandler(NumberDigitsUnregisteredComma())
 }
 
 private fun buildNumberValueWords(lexicon: Lexicon) {
@@ -208,8 +209,8 @@ private fun LexicalConceptBuilder.pushValueToInitialNumberElement(name: String) 
 /**
  * Handle numbers represented as digits. Used when no matching "word" has been registered.
  */
-class NumberDigitsUnregistered: WordHandler(EntryWord("")) {
-    fun sanitizeNumberWord(text: String):String = text.filter { it != ',' }
+class NumberDigitsUnregisteredComma: WordHandler(EntryWord("")) {
+    private fun sanitizeNumberWord(text: String):String = text.filter { it != ','}
 
     override fun build(wordContext: WordContext): List<Demon> =
         lexicalConcept(wordContext, NumberConcept.Number.name) {
@@ -222,6 +223,27 @@ class NumberDigitsUnregistered: WordHandler(EntryWord("")) {
         return listOf(
             DisambiguateUsingSentenceWordRegex(
                 """^-?([1-9][0-9]{0,2}(,[0-9]{3})*|[0-9]+)$""".toRegex(),
+                false,
+                wordContext,
+                disambiguationHandler
+            )
+        )
+    }
+}
+class NumberDigitsUnregisteredPeriod: WordHandler(EntryWord("")) {
+    private fun sanitizeNumberWord(text: String):String = text.filter { it != '.'}
+
+    override fun build(wordContext: WordContext): List<Demon> =
+        lexicalConcept(wordContext, NumberConcept.Number.name) {
+            slot(NumberFields.Value, sanitizeNumberWord(wordContext.word))
+            pushValueToInitialNumberElement(sanitizeNumberWord(wordContext.word))
+            copySlotValueToConcept(NumberFields.Value, defaultModifierTargetMatcher(), QuantityFields.Amount, wordContext)
+        }.demons
+
+    override fun disambiguationDemons(wordContext: WordContext, disambiguationHandler: DisambiguationHandler): List<Demon> {
+        return listOf(
+            DisambiguateUsingSentenceWordRegex(
+                """^-?([1-9][0-9]{0,2}(\.[0-9]{3})*|[0-9]+)$""".toRegex(),
                 false,
                 wordContext,
                 disambiguationHandler
