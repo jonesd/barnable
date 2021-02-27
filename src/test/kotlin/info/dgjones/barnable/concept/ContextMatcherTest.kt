@@ -20,203 +20,293 @@ package info.dgjones.barnable.concept
 import info.dgjones.barnable.domain.general.*
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
-class MatchConceptByHeadTest {
-    @Test
-    fun `Can match by head name`() {
-        assertTrue(matchConceptByHead("testHead")(Concept("testHead")))
-    }
-    @Test
-    fun `Match by head needs full match`() {
-        assertFalse(matchConceptByHead("testHead")(Concept("otherHead")))
-    }
-    @Test
-    fun `Only matches on head`() {
-        assertFalse(matchConceptByHead("testHead")(Concept("otherHead").value("testHead", Concept("testHead"))))
-    }
-    @Test
-    fun `Fails for missing head`() {
-        assertFalse(matchConceptByHead("testHead")(null))
-    }
-}
+class ConceptMatcherTest {
+    @Nested
+    inner class MatchConceptByHeadTest {
+        @Test
+        fun `Can match by head name`() {
+            assertTrue(matchConceptByHead("testHead").matches(Concept("testHead")))
+        }
 
-class MatchConceptByHeadCollectionTest {
-    @Test
-    fun `Can match by head name`() {
-        assertTrue(matchConceptByHead(listOf("test1Head", "test2Head"))(Concept("test2Head")))
-    }
-    @Test
-    fun `Match by head needs full match`() {
-        assertFalse(matchConceptByHead(listOf("test1Head", "test2Head"))(Concept("otherHead")))
-    }
-    @Test
-    fun `Fails for missing head`() {
-        assertFalse(matchConceptByHead(listOf("test1Head", "test2Head"))(null))
-    }
-    @Test
-    fun `Fails for no specified heads`() {
-        assertFalse(matchConceptByHead(listOf())(Concept("testHead")))
-    }
-}
+        @Test
+        fun `Match by head needs full match`() {
+            assertFalse(matchConceptByHead("testHead").matches(Concept("otherHead")))
+        }
 
-class MatchConceptByKindTest {
-    @Test
-    fun `Can match by kind name`() {
-        assertTrue(matchConceptByKind("testKind")(Concept("head").value("kind", Concept("testKind"))))
-    }
-    @Test
-    fun `Match by kind needs full match`() {
-        assertFalse(matchConceptByHead("testKind")(Concept("head").value("kind", Concept("otherKind"))))
-    }
-    @Test
-    fun `Only matches on kind`() {
-        assertFalse(matchConceptByKind("testKind")(Concept("head").value("other", Concept("testKind"))))
-    }
-    @Test
-    fun `Fails for missing head`() {
-        assertFalse(matchConceptByKind("testHead")(null))
-    }
-}
+        @Test
+        fun `Only matches on head`() {
+            assertFalse(
+                matchConceptByHead("testHead").matches(
+                    Concept("otherHead").value(
+                        "testHead",
+                        Concept("testHead")
+                    )
+                )
+            )
+        }
 
-class MatchConceptByKindCollectionTest {
-    @Test
-    fun `Can match by kind name`() {
-        assertTrue(matchConceptByKind(listOf("testKind"))(Concept("head").value("kind", Concept("testKind"))))
+        @Test
+        fun `Fails for missing head`() {
+            assertFalse(matchConceptByHead("testHead").matches(null))
+        }
     }
-    @Test
-    fun `Match by kind needs full match`() {
-        assertFalse(matchConceptByHead(listOf("testKind"))(Concept("head").value("kind", Concept("otherKind"))))
-    }
-    @Test
-    fun `Only matches on kind`() {
-        assertFalse(matchConceptByKind(listOf("testKind"))(Concept("head").value("other", Concept("testKind"))))
-    }
-    @Test
-    fun `Fails for missing head`() {
-        assertFalse(matchConceptByKind(listOf("testHead"))(null))
-    }
-}
 
-class MatchConceptByValueNameTest {
-    @Test
-    fun `Can match by child value name`() {
-        assertTrue(matchConceptValueName("child", "childValue")(Concept("head").value("child", Concept("childValue"))))
-    }
-    @Test
-    fun `Match by kind needs full match`() {
-        assertFalse(matchConceptValueName("child", "childValue")(Concept("head").value("child", Concept("otherValue"))))
-    }
-    @Test
-    fun `Only matches on child`() {
-        assertFalse(matchConceptValueName("child", "childValue")(Concept("head").value("other", Concept("childValue"))))
-    }
-    @Test
-    fun `Fails for missing head`() {
-        assertFalse(matchConceptValueName("child", "childValue")(null))
-    }
-}
+    @Nested
+    inner class MatchConceptByHeadCollectionTest {
+        @Test
+        fun `Can match by head name`() {
+            assertTrue(matchConceptByHead(listOf("test1Head", "test2Head")).matches(Concept("test2Head")))
+        }
 
-class MatchAnyTest {
-    @Test
-    fun `Matches if all match`() {
-        assertTrue(matchAny(listOf(matchAlways(), matchAlways()))(Concept("anything")))
-    }
-    @Test
-    fun `Matches if at least one matches`() {
-        assertTrue(matchAny(listOf(matchAlways(), matchNever()))(Concept("anything")))
-    }
-    @Test
-    fun `Fails if none match`() {
-        assertFalse(matchAny(listOf(matchNever(), matchNever()))(Concept("anything")))
-    }
-}
+        @Test
+        fun `Match by head needs full match`() {
+            assertFalse(matchConceptByHead(listOf("test1Head", "test2Head")).matches(Concept("otherHead")))
+        }
 
-class MatchAllTest {
-    @Test
-    fun `Matches if all match`() {
-        assertTrue(matchAll(listOf(matchAlways(), matchAlways()))(Concept("anything")))
-    }
-    @Test
-    fun `Fails if at least one matches`() {
-        assertFalse(matchAll(listOf(matchAlways(), matchNever()))(Concept("anything")))
-    }
-    @Test
-    fun `Fails if none match`() {
-        assertFalse(matchAll(listOf(matchNever(), matchNever()))(Concept("anything")))
-    }
-}
+        @Test
+        fun `Fails for missing head`() {
+            assertFalse(matchConceptByHead(listOf("test1Head", "test2Head")).matches(null))
+        }
 
-class MatchAlwaysTest {
-    @Test
-    fun `Should always match`() {
-        assertTrue(matchAlways()(Concept("anything")))
+        @Test
+        fun `Fails for no specified heads`() {
+            assertFalse(matchConceptByHead(listOf()).matches(Concept("testHead")))
+        }
     }
-    @Test
-    fun `Matches even for null`() {
-        assertTrue(matchAlways()(null))
-    }
-}
 
-class MatchNeverTest {
-    @Test
-    fun `Never matches`() {
-        assertFalse(matchNever()(Concept("anything")))
-    }
-    @Test
-    fun `Not even for null`() {
-        assertFalse(matchNever()(null))
-    }
-}
+    @Nested
+    inner class MatchConceptByKindTest {
+        @Test
+        fun `Can match by kind name`() {
+            assertTrue(matchConceptByKind("testKind").matches(Concept("head").value("kind", Concept("testKind"))))
+        }
 
-class MatchConceptByHeadOrGroup {
-    @Test
-    fun `Matches Group instance head`() {
-        val humans = buildGroup(listOf(buildHuman("george"), buildHuman("fred")))
-        assertTrue(matchConceptByHeadOrGroup(HumanConcept.Human.name)(humans))
-    }
-    @Test
-    fun `MisMatches Group instance head`() {
-        val humans = buildGroup(listOf(buildHuman("george"), buildHuman("fred")))
-        assertFalse(matchConceptByHeadOrGroup(PhysicalObjectKind.PhysicalObject.name)(humans))
-    }
-    @Test
-    fun `Can match by head name`() {
-        assertTrue(matchConceptByHeadOrGroup("testHead")(Concept("testHead")))
-    }
-    @Test
-    fun `Match by head needs full match`() {
-        assertFalse(matchConceptByHeadOrGroup("testHead")(Concept("otherHead")))
-    }
-}
+        @Test
+        fun `Match by kind needs full match`() {
+            assertFalse(matchConceptByHead("testKind").matches(Concept("head").value("kind", Concept("otherKind"))))
+        }
 
-class MatchConceptByHasField {
-    @Test
-    fun `Matches when root has field with value`() {
-        val c = Concept("root")
-        c.value(CoreFields.Name, Concept("hasValue"))
+        @Test
+        fun `Only matches on kind`() {
+            assertFalse(matchConceptByKind("testKind").matches(Concept("head").value("other", Concept("testKind"))))
+        }
 
-        assertTrue(matchConceptHasSlotName(CoreFields.Name)(c))
+        @Test
+        fun `Fails for missing head`() {
+            assertFalse(matchConceptByKind("testHead").matches(null))
+        }
     }
-    @Test
-    fun `Does not match when root has field without value`() {
-        val c = Concept("root")
-        c.value(CoreFields.Name, null)
 
-        assertFalse(matchConceptHasSlotName(CoreFields.Name)(c))
+    @Nested
+    inner class MatchConceptByKindCollectionTest {
+        @Test
+        fun `Can match by kind name`() {
+            assertTrue(
+                matchConceptByKind(listOf("testKind")).matches(
+                    Concept("head").value(
+                        "kind",
+                        Concept("testKind")
+                    )
+                )
+            )
+        }
+
+        @Test
+        fun `Match by kind needs full match`() {
+            assertFalse(
+                matchConceptByHead(listOf("testKind")).matches(
+                    Concept("head").value(
+                        "kind",
+                        Concept("otherKind")
+                    )
+                )
+            )
+        }
+
+        @Test
+        fun `Only matches on kind`() {
+            assertFalse(
+                matchConceptByKind(listOf("testKind")).matches(
+                    Concept("head").value(
+                        "other",
+                        Concept("testKind")
+                    )
+                )
+            )
+        }
+
+        @Test
+        fun `Fails for missing head`() {
+            assertFalse(matchConceptByKind(listOf("testHead")).matches(null))
+        }
     }
-    @Test
-    fun `Matches when root has field with other name`() {
-        val c = Concept("root")
-        c.value(CoreFields.Event, Concept("hasValue"))
 
-        assertFalse(matchConceptHasSlotName(CoreFields.Name)(c))
+    @Nested
+    inner class MatchConceptByValueNameTest {
+        @Test
+        fun `Can match by child value name`() {
+            assertTrue(
+                matchConceptValueName("child", "childValue").matches(
+                    Concept("head").value(
+                        "child",
+                        Concept("childValue")
+                    )
+                )
+            )
+        }
+
+        @Test
+        fun `Match by kind needs full match`() {
+            assertFalse(
+                matchConceptValueName("child", "childValue").matches(
+                    Concept("head").value(
+                        "child",
+                        Concept("otherValue")
+                    )
+                )
+            )
+        }
+
+        @Test
+        fun `Only matches on child`() {
+            assertFalse(
+                matchConceptValueName("child", "childValue").matches(
+                    Concept("head").value(
+                        "other",
+                        Concept("childValue")
+                    )
+                )
+            )
+        }
+
+        @Test
+        fun `Fails for missing head`() {
+            assertFalse(matchConceptValueName("child", "childValue").matches(null))
+        }
     }
-}
 
-class MatchConceptNot {
-    @Test
-    fun `Should negate matcher result`() {
-        assertFalse(matchNot(matchAlways())(Concept("anything")))
+    @Nested
+    inner class MatchAnyTest {
+        @Test
+        fun `Matches if all match`() {
+            assertTrue(matchAny(listOf(matchAlways(), matchAlways())).matches(Concept("anything")))
+        }
+
+        @Test
+        fun `Matches if at least one matches`() {
+            assertTrue(matchAny(listOf(matchAlways(), matchNever())).matches(Concept("anything")))
+        }
+
+        @Test
+        fun `Fails if none match`() {
+            assertFalse(matchAny(listOf(matchNever(), matchNever())).matches(Concept("anything")))
+        }
+    }
+
+    @Nested
+    inner class MatchAllTest {
+        @Test
+        fun `Matches if all match`() {
+            assertTrue(matchAll(listOf(matchAlways(), matchAlways())).matches(Concept("anything")))
+        }
+
+        @Test
+        fun `Fails if at least one matches`() {
+            assertFalse(matchAll(listOf(matchAlways(), matchNever())).matches(Concept("anything")))
+        }
+
+        @Test
+        fun `Fails if none match`() {
+            assertFalse(matchAll(listOf(matchNever(), matchNever())).matches(Concept("anything")))
+        }
+    }
+
+    @Nested
+    inner class MatchAlwaysTest {
+        @Test
+        fun `Should always match`() {
+            assertTrue(matchAlways().matches(Concept("anything")))
+        }
+
+        @Test
+        fun `Matches even for null`() {
+            assertTrue(matchAlways().matches(null))
+        }
+    }
+
+    @Nested
+    inner class MatchNeverTest {
+        @Test
+        fun `Never matches`() {
+            assertFalse(matchNever().matches(Concept("anything")))
+        }
+
+        @Test
+        fun `Not even for null`() {
+            assertFalse(matchNever().matches(null))
+        }
+    }
+
+    @Nested
+    inner class MatchConceptByHeadOrGroup {
+        @Test
+        fun `Matches Group instance head`() {
+            val humans = buildGroup(listOf(buildHuman("george"), buildHuman("fred")))
+            assertTrue(matchConceptByHeadOrGroup(HumanConcept.Human.name).matches(humans))
+        }
+
+        @Test
+        fun `MisMatches Group instance head`() {
+            val humans = buildGroup(listOf(buildHuman("george"), buildHuman("fred")))
+            assertFalse(matchConceptByHeadOrGroup(PhysicalObjectKind.PhysicalObject.name).matches(humans))
+        }
+
+        @Test
+        fun `Can match by head name`() {
+            assertTrue(matchConceptByHeadOrGroup("testHead").matches(Concept("testHead")))
+        }
+
+        @Test
+        fun `Match by head needs full match`() {
+            assertFalse(matchConceptByHeadOrGroup("testHead").matches(Concept("otherHead")))
+        }
+    }
+
+    @Nested
+    inner class MatchConceptByHasField {
+        @Test
+        fun `Matches when root has field with value`() {
+            val c = Concept("root")
+            c.value(CoreFields.Name, Concept("hasValue"))
+
+            assertTrue(matchConceptHasSlotName(CoreFields.Name).matches(c))
+        }
+
+        @Test
+        fun `Does not match when root has field without value`() {
+            val c = Concept("root")
+            c.value(CoreFields.Name, null)
+
+            assertFalse(matchConceptHasSlotName(CoreFields.Name).matches(c))
+        }
+
+        @Test
+        fun `Matches when root has field with other name`() {
+            val c = Concept("root")
+            c.value(CoreFields.Event, Concept("hasValue"))
+
+            assertFalse(matchConceptHasSlotName(CoreFields.Name).matches(c))
+        }
+    }
+
+    @Nested
+    inner class MatchConceptNot {
+        @Test
+        fun `Should negate matcher result`() {
+            assertFalse(matchNot(matchAlways()).matches(Concept("anything")))
+        }
     }
 }

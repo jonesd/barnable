@@ -20,7 +20,10 @@ package info.dgjones.barnable.concept
 import info.dgjones.barnable.domain.general.GroupFields
 import info.dgjones.barnable.grammar.Case
 
-typealias ConceptMatcher = (Concept?) -> Boolean
+interface ConceptMatcher {
+    fun matches(concept: Concept?): Boolean
+}
+//typealias ConceptMatcher = (Concept?) -> Boolean
 
 fun matchGroupInstanceType(kind: String): ConceptMatcher {
     return matchConceptValueName(GroupFields.ElementsType, kind)
@@ -29,11 +32,27 @@ fun matchGroupInstanceType(kinds: Collection<String>): ConceptMatcher {
     return matchConceptValueName(GroupFields.ElementsType.fieldName, kinds)
 }
 fun matchConceptByHead(kind: String): ConceptMatcher {
-    return { c -> c?.name == kind }
+    return object: ConceptMatcher {
+        override fun matches(c: Concept?): Boolean {
+            return c?.name == kind
+        }
+
+        override fun toString(): String {
+            return "(c.name == $kind)"
+        }
+    }
 }
 
 fun matchConceptByHead(kinds: Collection<String>): ConceptMatcher {
-    return { c -> kinds.contains(c?.name)}
+    return object: ConceptMatcher {
+        override fun matches(c: Concept?): Boolean {
+            return kinds.contains(c?.name)
+        }
+
+        override fun toString(): String {
+            return "(c.name oneOf $kinds)"
+        }
+    }
 }
 
 fun matchConceptByHeadOrGroup(kind: String): ConceptMatcher {
@@ -49,7 +68,15 @@ fun matchConceptByKind(kind: String): ConceptMatcher {
 }
 
 fun matchConceptByKind(kinds: Collection<String>): ConceptMatcher {
-    return { c -> kinds.contains(c?.valueName("kind")) }
+    return object: ConceptMatcher {
+        override fun matches(c: Concept?): Boolean {
+            return  kinds.contains(c?.valueName("kind"))
+        }
+
+        override fun toString(): String {
+            return "(c.kind oneOf $kinds)"
+        }
+    }
 }
 
 fun matchCase(match: Case): ConceptMatcher {
@@ -57,42 +84,124 @@ fun matchCase(match: Case): ConceptMatcher {
 }
 
 fun matchUnresolvedVariables(): ConceptMatcher {
-    return { c -> c?.isVariable() == true}
+    return object: ConceptMatcher {
+        override fun matches(c: Concept?): Boolean {
+            return c?.isVariable() == true
+        }
+
+        override fun toString(): String {
+            return "(c.isVariable() == true)"
+        }
+    }
 }
 
 fun matchConceptHasSlotName(slot: Fields): ConceptMatcher {
-    return { c -> c?.value(slot) != null }
+    return object: ConceptMatcher {
+        override fun matches(c: Concept?): Boolean {
+            return c?.value(slot) != null
+        }
+
+        override fun toString(): String {
+            return "(c.${slot.fieldName} != null)"
+        }
+    }
 }
 fun matchConceptValueName(slot: Fields, match: String): ConceptMatcher {
-    return { c -> c?.valueName(slot) == match }
+    return object: ConceptMatcher {
+        override fun matches(c: Concept?): Boolean {
+            return c?.valueName(slot) == match
+        }
+
+        override fun toString(): String {
+            return "(c.${slot.fieldName} == $match))"
+        }
+    }
 }
 
 fun matchConceptValueName(slot: String, match: String): ConceptMatcher {
-    return { c -> c?.valueName(slot) == match }
+    return object: ConceptMatcher {
+        override fun matches(c: Concept?): Boolean {
+            return c?.valueName(slot) == match
+        }
+
+        override fun toString(): String {
+            return "(c.${slot} == $match))"
+        }
+    }
 }
 
 fun matchConceptValueName(slot: String, matches: Collection<String>): ConceptMatcher {
-    return { c -> matches.contains(c?.valueName(slot)) }
+    return object: ConceptMatcher {
+        override fun matches(c: Concept?): Boolean {
+            return matches.contains(c?.valueName(slot))
+        }
+
+        override fun toString(): String {
+            return "(c.${slot} anyOf $matches)"
+        }
+    }
 }
 
 fun matchAny(matchers: List<ConceptMatcher>): ConceptMatcher {
-    return { c -> matchers.any { it(c) }}
+    return object: ConceptMatcher {
+        override fun matches(c: Concept?): Boolean {
+            return matchers.any { it.matches(c) }
+        }
+
+        override fun toString(): String {
+            val m = matchers.map { it.toString() }.joinToString("|")
+            return "(anyOf $m))"
+        }
+    }
 }
 
 fun matchAll(matchers: List<ConceptMatcher>): ConceptMatcher {
-    return { c -> matchers.all { it(c) }}
+    return object: ConceptMatcher {
+        override fun matches(c: Concept?): Boolean {
+            return matchers.all { it.matches(c) }
+        }
+
+        override fun toString(): String {
+            val m = matchers.map { it.toString() }.joinToString("|")
+            return "(allOf $m)"
+        }
+    }
 }
 
 fun matchNot(matcher: ConceptMatcher): ConceptMatcher {
-    return { c -> !matcher(c)}
+    return object: ConceptMatcher {
+        override fun matches(c: Concept?): Boolean {
+            return !matcher.matches(c)
+        }
+
+        override fun toString(): String {
+            return "(!${matcher.toString()})"
+        }
+    }
 }
 
 fun matchNever(): ConceptMatcher {
-    return { _ -> false}
+    return object: ConceptMatcher {
+        override fun matches(c: Concept?): Boolean {
+            return false
+        }
+
+        override fun toString(): String {
+            return "false"
+        }
+    }
 }
 
 fun matchAlways(): ConceptMatcher {
-    return { _ -> true}
+    return object: ConceptMatcher {
+        override fun matches(c: Concept?): Boolean {
+            return true
+        }
+
+        override fun toString(): String {
+            return "true"
+        }
+    }
 }
 
 class ConceptMatcherBuilder {

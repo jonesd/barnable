@@ -84,7 +84,7 @@ data class Concept(var name: String) {
     }
 
     private fun findCollect(matcher: ConceptMatcher, matched: MutableList<Concept>) {
-        if (matcher(this)) {
+        if (matcher.matches(this)) {
             matched.add(this)
         } else {
             slots.forEach { it.value.value?.findCollect(matcher, matched)}
@@ -214,7 +214,7 @@ data class Slot(val name: String, var value: Concept? = null) {
 
     fun replaceSlotValues(matcher: ConceptMatcher, replace: String?) {
         // FIXME review "recursive" references
-        if (matcher(value)) {
+        if (matcher.matches(value)) {
             value = if (replace != null) Concept(replace) else null
         } else {
             value?.replaceSlotValues(matcher, replace)

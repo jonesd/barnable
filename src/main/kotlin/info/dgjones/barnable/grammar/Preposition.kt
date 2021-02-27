@@ -51,7 +51,15 @@ fun withPreposition(concept: Concept, preposition: Preposition) {
 
 fun matchPrepIn(preps: Collection<Preposition>): ConceptMatcher {
     val prepNames = preps.map { it.name }
-    return { c -> prepNames.contains(c?.valueName(CoreFields.Is)) }
+    return object: ConceptMatcher {
+        override fun matches(c: Concept?): Boolean {
+            return prepNames.contains(c?.valueName(CoreFields.Is))
+        }
+
+        override fun toString(): String {
+            return "(c.is oneOf ($prepNames))"
+        }
+    }
 }
 
 /**

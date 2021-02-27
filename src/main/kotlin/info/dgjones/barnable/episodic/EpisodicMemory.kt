@@ -64,7 +64,7 @@ class EpisodicMemory {
     }
 
     fun search(matcher: ConceptMatcher): EpisodicConcept? {
-        val found = concepts.firstOrNull { matcher(it) }
+        val found = concepts.firstOrNull { matcher.matches(it) }
         if (found != null) {
             recentUseOf(found)
         }
@@ -106,7 +106,7 @@ class EpisodicMemory {
     // FIXME support multiple Mops of the same type!
     fun findExistingEpisodicMop(concept: Concept?): EpisodicConcept? {
         concept?.name?.let { conceptHead ->
-            return mops.values.firstOrNull(matchConceptByHead(conceptHead))
+            return mops.values.firstOrNull { matchConceptByHead(conceptHead).matches(it) }
         }
         return null
     }
@@ -190,7 +190,7 @@ class EpisodicMemory {
 
     private fun findEpisodicCharacter(human: Concept): EpisodicConcept? {
         val matcher = characterMatcher(human)
-        return characters.values.firstOrNull {matcher(it)}
+        return characters.values.firstOrNull { matcher.matches(it)}
     }
 
     fun setCurrentEvent(event: Concept, mainEvent: Boolean = false) {

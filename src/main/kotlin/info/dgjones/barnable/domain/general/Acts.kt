@@ -94,7 +94,7 @@ class ExpectActor(wordContext: WordContext, val action: (ConceptHolder) -> Unit)
             actorMatcher
         ))
         searchContext(matcher, matchNever(), direction = SearchDirection.Before, wordContext = wordContext) {
-            if (actorMatcher(it.value)) {
+            if (actorMatcher.matches(it.value)) {
                 action(it)
                 active = false
             } else if (it.value?.valueName(GrammarFields.Voice) == Voice.Passive.name) {
@@ -119,10 +119,10 @@ class ExpectThing(val thingMatcher: ConceptMatcher = matchConceptByHead(GeneralC
             thingMatcher
         ))
         searchContext(matcher, matchNever(), direction = SearchDirection.After, wordContext = wordContext) {
-            if (thingMatcher(it.value)) {
+            if (thingMatcher.matches(it.value)) {
                 action(it)
                 active = false
-            } else if (byMatcher(it.value)) {
+            } else if (byMatcher.matches(it.value)) {
                 searchContext(thingMatcher, matchNever(), direction = SearchDirection.Before, wordContext = wordContext) { thing ->
                     action(thing)
                     active = false

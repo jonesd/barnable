@@ -57,11 +57,11 @@ fun searchContext(matcher: ConceptMatcher, abortSearch: ConceptMatcher = matchNe
         }
         val defHolder = wordContext.context.defHolderAtWordIndex(index)
         val value = defHolder.value
-        if (abortSearch(value)) {
+        if (abortSearch.matches(value)) {
             searchAborted = true
             return null
         }
-        return if (matcher(value)) defHolder else null
+        return if (matcher.matches(value)) defHolder else null
     }
 
     fun wordIterator(): IntProgression {
