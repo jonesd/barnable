@@ -30,6 +30,7 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
+    implementation("com.github.ajalt.clikt:clikt:3.1.0")
     testImplementation("org.junit.jupiter:junit-jupiter:5.6.2")
     testImplementation("io.mockk:mockk:1.10.3-jdk8")
 }
