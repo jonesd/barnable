@@ -23,16 +23,17 @@ import info.dgjones.barnable.grammar.Case
 interface ConceptMatcher {
     fun matches(concept: Concept?): Boolean
 }
-//typealias ConceptMatcher = (Concept?) -> Boolean
 
 fun matchGroupInstanceType(kind: String): ConceptMatcher {
     return matchConceptValueName(GroupFields.ElementsType, kind)
 }
+
 fun matchGroupInstanceType(kinds: Collection<String>): ConceptMatcher {
     return matchConceptValueName(GroupFields.ElementsType.fieldName, kinds)
 }
+
 fun matchConceptByHead(kind: String): ConceptMatcher {
-    return object: ConceptMatcher {
+    return object : ConceptMatcher {
         override fun matches(c: Concept?): Boolean {
             return c?.name == kind
         }
@@ -44,13 +45,13 @@ fun matchConceptByHead(kind: String): ConceptMatcher {
 }
 
 fun matchConceptByHead(kinds: Collection<String>): ConceptMatcher {
-    return object: ConceptMatcher {
+    return object : ConceptMatcher {
         override fun matches(c: Concept?): Boolean {
             return kinds.contains(c?.name)
         }
 
         override fun toString(): String {
-            return "(c.name oneOf $kinds)"
+            return "(c.name anyOf $kinds)"
         }
     }
 }
@@ -68,13 +69,13 @@ fun matchConceptByKind(kind: String): ConceptMatcher {
 }
 
 fun matchConceptByKind(kinds: Collection<String>): ConceptMatcher {
-    return object: ConceptMatcher {
+    return object : ConceptMatcher {
         override fun matches(c: Concept?): Boolean {
-            return  kinds.contains(c?.valueName("kind"))
+            return kinds.contains(c?.valueName("kind"))
         }
 
         override fun toString(): String {
-            return "(c.kind oneOf $kinds)"
+            return "(c.kind anyOf $kinds)"
         }
     }
 }
@@ -84,7 +85,7 @@ fun matchCase(match: Case): ConceptMatcher {
 }
 
 fun matchUnresolvedVariables(): ConceptMatcher {
-    return object: ConceptMatcher {
+    return object : ConceptMatcher {
         override fun matches(c: Concept?): Boolean {
             return c?.isVariable() == true
         }
@@ -96,7 +97,7 @@ fun matchUnresolvedVariables(): ConceptMatcher {
 }
 
 fun matchConceptHasSlotName(slot: Fields): ConceptMatcher {
-    return object: ConceptMatcher {
+    return object : ConceptMatcher {
         override fun matches(c: Concept?): Boolean {
             return c?.value(slot) != null
         }
@@ -106,20 +107,21 @@ fun matchConceptHasSlotName(slot: Fields): ConceptMatcher {
         }
     }
 }
+
 fun matchConceptValueName(slot: Fields, match: String): ConceptMatcher {
-    return object: ConceptMatcher {
+    return object : ConceptMatcher {
         override fun matches(c: Concept?): Boolean {
             return c?.valueName(slot) == match
         }
 
         override fun toString(): String {
-            return "(c.${slot.fieldName} == $match))"
+            return "(c.${slot.fieldName} == $match)"
         }
     }
 }
 
 fun matchConceptValueName(slot: String, match: String): ConceptMatcher {
-    return object: ConceptMatcher {
+    return object : ConceptMatcher {
         override fun matches(c: Concept?): Boolean {
             return c?.valueName(slot) == match
         }
@@ -131,7 +133,7 @@ fun matchConceptValueName(slot: String, match: String): ConceptMatcher {
 }
 
 fun matchConceptValueName(slot: String, matches: Collection<String>): ConceptMatcher {
-    return object: ConceptMatcher {
+    return object : ConceptMatcher {
         override fun matches(c: Concept?): Boolean {
             return matches.contains(c?.valueName(slot))
         }
@@ -143,7 +145,7 @@ fun matchConceptValueName(slot: String, matches: Collection<String>): ConceptMat
 }
 
 fun matchAny(matchers: List<ConceptMatcher>): ConceptMatcher {
-    return object: ConceptMatcher {
+    return object : ConceptMatcher {
         override fun matches(c: Concept?): Boolean {
             return matchers.any { it.matches(c) }
         }
@@ -156,20 +158,20 @@ fun matchAny(matchers: List<ConceptMatcher>): ConceptMatcher {
 }
 
 fun matchAll(matchers: List<ConceptMatcher>): ConceptMatcher {
-    return object: ConceptMatcher {
+    return object : ConceptMatcher {
         override fun matches(c: Concept?): Boolean {
             return matchers.all { it.matches(c) }
         }
 
         override fun toString(): String {
-            val m = matchers.map { it.toString() }.joinToString("|")
+            val m = matchers.map { it.toString() }.joinToString("&")
             return "(allOf $m)"
         }
     }
 }
 
 fun matchNot(matcher: ConceptMatcher): ConceptMatcher {
-    return object: ConceptMatcher {
+    return object : ConceptMatcher {
         override fun matches(c: Concept?): Boolean {
             return !matcher.matches(c)
         }
@@ -181,7 +183,7 @@ fun matchNot(matcher: ConceptMatcher): ConceptMatcher {
 }
 
 fun matchNever(): ConceptMatcher {
-    return object: ConceptMatcher {
+    return object : ConceptMatcher {
         override fun matches(c: Concept?): Boolean {
             return false
         }
@@ -193,7 +195,7 @@ fun matchNever(): ConceptMatcher {
 }
 
 fun matchAlways(): ConceptMatcher {
-    return object: ConceptMatcher {
+    return object : ConceptMatcher {
         override fun matches(c: Concept?): Boolean {
             return true
         }
@@ -210,12 +212,14 @@ class ConceptMatcherBuilder {
         matchers.add(matcher)
         return this
     }
+
     fun matchSetField(valueName: Fields, match: String?): ConceptMatcherBuilder {
         if (match != null && isConceptValueResolved(match)) {
             matchers.add(matchConceptValueName(valueName, match))
         }
         return this
     }
+
     fun matchAll(): ConceptMatcher {
         return matchAll(matchers)
     }

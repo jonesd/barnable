@@ -57,7 +57,7 @@ fun matchPrepIn(preps: Collection<Preposition>): ConceptMatcher {
         }
 
         override fun toString(): String {
-            return "(c.is oneOf ($prepNames))"
+            return "(c.is anyOf $prepNames)"
         }
     }
 }
