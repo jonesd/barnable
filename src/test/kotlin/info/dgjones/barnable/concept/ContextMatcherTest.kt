@@ -18,8 +18,7 @@
 package info.dgjones.barnable.concept
 
 import info.dgjones.barnable.domain.general.*
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -28,7 +27,14 @@ class ConceptMatcherTest {
     inner class MatchConceptByHeadTest {
         @Test
         fun `Can match by head name`() {
-            assertTrue(matchConceptByHead("testHead").matches(Concept("testHead")))
+            val matchConceptByHead = matchConceptByHead("testHead")
+            assertTrue(matchConceptByHead.matches(Concept("testHead")))
+        }
+
+        @Test
+        fun `Should print matcher`() {
+            val matchConceptByHead = matchConceptByHead("testHead")
+            assertEquals("(c.name == testHead)", matchConceptByHead.toString())
         }
 
         @Test
@@ -58,7 +64,13 @@ class ConceptMatcherTest {
     inner class MatchConceptByHeadCollectionTest {
         @Test
         fun `Can match by head name`() {
-            assertTrue(matchConceptByHead(listOf("test1Head", "test2Head")).matches(Concept("test2Head")))
+            val matchConceptByHead = matchConceptByHead(listOf("test1Head", "test2Head"))
+            assertTrue(matchConceptByHead.matches(Concept("test2Head")))
+        }
+        @Test
+        fun `Should print matcher`() {
+            val matchConceptByHead = matchConceptByHead(listOf("test1Head", "test2Head"))
+            assertEquals("(c.name anyOf [test1Head, test2Head])", matchConceptByHead.toString())
         }
 
         @Test
@@ -81,7 +93,13 @@ class ConceptMatcherTest {
     inner class MatchConceptByKindTest {
         @Test
         fun `Can match by kind name`() {
-            assertTrue(matchConceptByKind("testKind").matches(Concept("head").value("kind", Concept("testKind"))))
+            val matchConceptByKind = matchConceptByKind("testKind")
+            assertTrue(matchConceptByKind.matches(Concept("head").value("kind", Concept("testKind"))))
+        }
+        @Test
+        fun `Should print matcher`() {
+            val matchConceptByKind = matchConceptByKind("testKind")
+            assertEquals("(c.kind == testKind)", matchConceptByKind.toString())
         }
 
         @Test
@@ -104,14 +122,20 @@ class ConceptMatcherTest {
     inner class MatchConceptByKindCollectionTest {
         @Test
         fun `Can match by kind name`() {
+            val matchConceptByKind = matchConceptByKind(listOf("testKind"))
             assertTrue(
-                matchConceptByKind(listOf("testKind")).matches(
+                matchConceptByKind.matches(
                     Concept("head").value(
                         "kind",
                         Concept("testKind")
                     )
                 )
             )
+        }
+        @Test
+        fun `Should print matcher`() {
+            val matchConceptByKind = matchConceptByKind(listOf("testKind"))
+            assertEquals("(c.kind anyOf [testKind])", matchConceptByKind.toString())
         }
 
         @Test
@@ -148,14 +172,20 @@ class ConceptMatcherTest {
     inner class MatchConceptByValueNameTest {
         @Test
         fun `Can match by child value name`() {
+            val matchConceptValueName = matchConceptValueName("child", "childValue")
             assertTrue(
-                matchConceptValueName("child", "childValue").matches(
+                matchConceptValueName.matches(
                     Concept("head").value(
                         "child",
                         Concept("childValue")
                     )
                 )
             )
+        }
+        @Test
+        fun `Should print matcher`() {
+            val matchConceptValueName = matchConceptValueName("child", "childValue")
+            assertEquals("(c.child == childValue)", matchConceptValueName.toString())
         }
 
         @Test
@@ -192,7 +222,13 @@ class ConceptMatcherTest {
     inner class MatchAnyTest {
         @Test
         fun `Matches if all match`() {
-            assertTrue(matchAny(listOf(matchAlways(), matchAlways())).matches(Concept("anything")))
+            val matchAny = matchAny(listOf(matchAlways(), matchAlways()))
+            assertTrue(matchAny.matches(Concept("anything")))
+        }
+        @Test
+        fun `Should print matcher`() {
+            val matchAny = matchAny(listOf(matchAlways(), matchAlways()))
+            assertEquals("(anyOf true|true)", matchAny.toString())
         }
 
         @Test
@@ -210,7 +246,13 @@ class ConceptMatcherTest {
     inner class MatchAllTest {
         @Test
         fun `Matches if all match`() {
-            assertTrue(matchAll(listOf(matchAlways(), matchAlways())).matches(Concept("anything")))
+            val matchAll = matchAll(listOf(matchAlways(), matchAlways()))
+            assertTrue(matchAll.matches(Concept("anything")))
+        }
+        @Test
+        fun `Should print matcher`() {
+            val matchAll = matchAll(listOf(matchAlways(), matchAlways()))
+            assertEquals("(allOf true&true)", matchAll.toString())
         }
 
         @Test
@@ -228,7 +270,13 @@ class ConceptMatcherTest {
     inner class MatchAlwaysTest {
         @Test
         fun `Should always match`() {
-            assertTrue(matchAlways().matches(Concept("anything")))
+            val matchAlways = matchAlways()
+            assertTrue(matchAlways.matches(Concept("anything")))
+        }
+        @Test
+        fun `Should print matcher`() {
+            val matchAlways = matchAlways()
+            assertEquals("true", matchAlways.toString())
         }
 
         @Test
@@ -241,7 +289,13 @@ class ConceptMatcherTest {
     inner class MatchNeverTest {
         @Test
         fun `Never matches`() {
-            assertFalse(matchNever().matches(Concept("anything")))
+            val matchNever = matchNever()
+            assertFalse(matchNever.matches(Concept("anything")))
+        }
+        @Test
+        fun `Should print matcher`() {
+            val matchNever = matchNever()
+            assertEquals("false", matchNever.toString())
         }
 
         @Test
@@ -255,7 +309,14 @@ class ConceptMatcherTest {
         @Test
         fun `Matches Group instance head`() {
             val humans = buildGroup(listOf(buildHuman("george"), buildHuman("fred")))
-            assertTrue(matchConceptByHeadOrGroup(HumanConcept.Human.name).matches(humans))
+            val matchConceptByHeadOrGroup = matchConceptByHeadOrGroup(HumanConcept.Human.name)
+            assertTrue(matchConceptByHeadOrGroup.matches(humans))
+        }
+
+        @Test
+        fun `Should print matcher`() {
+            val matchConceptByHeadOrGroup = matchConceptByHeadOrGroup(HumanConcept.Human.name)
+            assertEquals("(anyOf (c.name == Human)|(c.elementsType == Human))", matchConceptByHeadOrGroup.toString())
         }
 
         @Test
@@ -277,12 +338,18 @@ class ConceptMatcherTest {
 
     @Nested
     inner class MatchConceptByHasField {
+
         @Test
         fun `Matches when root has field with value`() {
             val c = Concept("root")
             c.value(CoreFields.Name, Concept("hasValue"))
 
             assertTrue(matchConceptHasSlotName(CoreFields.Name).matches(c))
+        }
+
+        @Test
+        fun `Should print matcher`() {
+            assertEquals("(c.name != null)", matchConceptHasSlotName(CoreFields.Name).toString())
         }
 
         @Test
@@ -307,6 +374,11 @@ class ConceptMatcherTest {
         @Test
         fun `Should negate matcher result`() {
             assertFalse(matchNot(matchAlways()).matches(Concept("anything")))
+        }
+
+        @Test
+        fun `Should print matcher`() {
+            assertEquals("(!true)", matchNot(matchAlways()).toString())
         }
     }
 }

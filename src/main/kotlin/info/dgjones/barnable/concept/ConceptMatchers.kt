@@ -127,7 +127,7 @@ fun matchConceptValueName(slot: String, match: String): ConceptMatcher {
         }
 
         override fun toString(): String {
-            return "(c.${slot} == $match))"
+            return "(c.${slot} == $match)"
         }
     }
 }
@@ -152,7 +152,7 @@ fun matchAny(matchers: List<ConceptMatcher>): ConceptMatcher {
 
         override fun toString(): String {
             val m = matchers.map { it.toString() }.joinToString("|")
-            return "(anyOf $m))"
+            return "(anyOf $m)"
         }
     }
 }
