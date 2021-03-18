@@ -22,10 +22,15 @@ import info.dgjones.barnable.domain.general.*
 import info.dgjones.barnable.grammar.*
 import info.dgjones.barnable.parser.*
 
+
 fun buildInDepthUnderstandingLexicon(): Lexicon {
     val lexicon = Lexicon()
-    buildGeneralDomainLexicon(lexicon)
+    buildInDepthUnderstandingLexicon(lexicon)
+    return lexicon
+}
 
+fun buildInDepthUnderstandingLexicon(lexicon: Lexicon) {
+    buildGeneralDomainLexicon(lexicon)
     buildNarrativeRelationshipLexicon(lexicon)
 
     lexicon.addMapping(WordPickUp())
@@ -60,8 +65,6 @@ fun buildInDepthUnderstandingLexicon(): Lexicon {
 
     // FIXME only for QA
     lexicon.addMapping(WordWho())
-
-    return lexicon
 }
 
 enum class BodyParts {
@@ -123,7 +126,7 @@ class WordDrop: WordHandler(EntryWord("drop")) {
             expectActor(variableName = "actor")
             expectThing(variableName = "thing")
             varReference(ActFields.From.fieldName, "actor")
-            expectPrep(ActFields.To.fieldName, preps = setOf(Preposition.In, Preposition.Into, Preposition.On), matcher = matchConceptByHead(setOf(
+            expectPrep(ActFields.To.fieldName, preps = setOf(Preposition.In, Preposition.Into, Preposition.On, Preposition.Upon), matcher = matchConceptByHead(setOf(
                 GeneralConcepts.Human.name, GeneralConcepts.PhysicalObject.name))
             )
             slot(ActFields.Instrument.fieldName, Acts.PROPEL.name) {

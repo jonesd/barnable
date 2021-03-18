@@ -36,6 +36,7 @@ enum class Preposition {
     Into,
     On,
     To,
+    Upon,
     With
 }
 
@@ -83,6 +84,8 @@ fun buildGrammarPropositionLexicon(lexicon: Lexicon) {
     // FIXME InDepth p304 "with" also needs to "determine social activity"
     lexicon.addMapping(PrepositionWord(Preposition.With, setOf(GeneralConcepts.Human.name)))
     lexicon.addMapping(PrepositionWord(Preposition.In, setOf(GeneralConcepts.PhysicalObject.name, GeneralConcepts.Setting.name)))
+    lexicon.addMapping(PrepositionWord(Preposition.On, setOf(GeneralConcepts.PhysicalObject.name, GeneralConcepts.Setting.name)))
+    lexicon.addMapping(PrepositionWord(Preposition.Upon, setOf(GeneralConcepts.PhysicalObject.name, GeneralConcepts.Setting.name)))
     lexicon.addMapping(PrepositionWord(Preposition.By, setOf(GeneralConcepts.Human.name, GeneralConcepts.Setting.name)))
 }
 
