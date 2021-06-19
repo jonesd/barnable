@@ -17,16 +17,17 @@
 
 package info.dgjones.barnable.domain.general
 
-import info.dgjones.barnable.concept.Fields
-import info.dgjones.barnable.concept.ScaleConcepts
-import info.dgjones.barnable.concept.lexicalConcept
-import info.dgjones.barnable.concept.matchConceptByKind
+import info.dgjones.barnable.concept.*
 import info.dgjones.barnable.grammar.addModifierMappings
 import info.dgjones.barnable.grammar.defaultModifierTargetMatcher
 import info.dgjones.barnable.parser.*
 
 fun buildGeneralPlayingCardLexicon(lexicon: Lexicon) {
-
+    lexicon.addMapping(WordPlayingCardOfSuit())
+    CardSuit.values().forEach { lexicon.addMapping(WordCardSuit(it)) }
+    CardNamedRank.values().forEach {  rank ->
+        lexicon.addMapping(WordCardRank(rank))
+    }
 }
 
 enum class PlayingCardConcept {
@@ -46,34 +47,47 @@ enum class CardSuit(val title: String) {
     Club("club")
 }
 
-enum class CardRank(val words: List<String>, val rankValue: Int) {
-    Ace(listOf("ace", "1", "one"), 1),
-    Two(listOf("two", "2"), 2),
-    Three(listOf("three", "3"), 3),
-    Four(listOf("four", "4"), 4),
-    Five(listOf("five", "5"), 5),
-    Six(listOf("six", "6"), 6),
-    Seven(listOf("seven", "7"), 7),
-    Eight(listOf("eight", "8"), 8),
-    Nine(listOf("nine", "9"), 9),
-    Ten(listOf("ten", "10"), 10),
-    Jack(listOf("jack"), 11),
-    Queen(listOf("queen"), 12),
-    King(listOf("king"), 13),
+private fun cardSuitNames(): List<String> {
+    return CardSuit.values().map { it.title }
+}
+
+enum class CardNamedRank(val word: String, val rankValue: Int) {
+    Ace("ace", 1),
+    Jack("jack", 11),
+    Queen("queen", 12),
+    King("king", 13)
+}
+
+private fun cardNamedRankNames(): List<String> {
+    return CardNamedRank.values().map { it.word }
+}
+
+class WordCardSuit(val cardSuit: CardSuit) : WordHandler(EntryWord(cardSuit.title)) {
+    override fun build(wordContext: WordContext): List<Demon> =
+        lexicalConcept(wordContext, PlayingCardConcept.Suit.name) {
+            slot(CoreFields.Name, cardSuit.name)
+        }.demons
+}
+
+class WordCardRank(val rank: CardNamedRank) : WordHandler(EntryWord(rank.word)) {
+    override fun build(wordContext: WordContext): List<Demon> =
+        lexicalConcept(wordContext, PlayingCardConcept.Rank.name) {
+            slot(CoreFields.Name, rank.name)
+            slot(NumberFields.Value, rank.rankValue.toString())
+        }.demons
 }
 
 class WordPlayingCardOfSuit : WordHandler(EntryWord("of")) {
     override fun build(wordContext: WordContext): List<Demon> =
         lexicalConcept(wordContext, PlayingCardConcept.PlayingCard.name) {
-            // FIXME also support "a measure of ..." = default to 1 unit
-            expectHead(PlayingCardFields.Rank.fieldName, headValue = NumberConcept.Number.name, direction = SearchDirection.Before)
-            slot(QuantityFields.Unit, QuantityConcept.Measure.name)
-            expectConcept(PlayingCardFields.Suit.fieldName, matcher = matchConceptByKind(listOf(PhysicalObjectKind.Liquid.name, PhysicalObjectKind.Food.name)))
+            expectHead(PlayingCardFields.Rank.fieldName, headValues = listOf(NumberConcept.Number.name, PlayingCardConcept.Rank.name), direction = SearchDirection.Before)
+            expectConcept(PlayingCardFields.Suit.fieldName, matcher = matchConceptByHead(listOf(PlayingCardConcept.Suit.name)))
         }.demons
 
     override fun disambiguationDemons(wordContext: WordContext, disambiguationHandler: DisambiguationHandler): List<Demon> {
         return listOf(
-            DisambiguateUsingWord("of", matchConceptByKind(listOf(PhysicalObjectKind.Food.name, CardSuit.Liquid.name)), SearchDirection.After, false, wordContext, disambiguationHandler)
+            DisambiguateUsingMatch(matchConceptByHead(listOf(NumberConcept.Number.name, PlayingCardConcept.Rank.name)), SearchDirection.Before, null, false, wordContext, disambiguationHandler = disambiguationHandler),
+            DisambiguateUsingMatch(matchConceptByHead(PlayingCardConcept.Suit.name), SearchDirection.After, null, false, wordContext, disambiguationHandler)
         )
     }
 }

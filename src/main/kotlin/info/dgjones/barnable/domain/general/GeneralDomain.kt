@@ -42,6 +42,7 @@ fun buildGeneralDomainLexicon(lexicon: Lexicon) {
     buildGeneralFrequencyLexicon(lexicon)
     buildGeneralAgeLexicon(lexicon)
     buildGeneralWeightLexicon(lexicon)
+    buildGeneralPlayingCardLexicon(lexicon)
 }
 
 enum class GeneralConcepts {

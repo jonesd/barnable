@@ -17,7 +17,14 @@
 
 package info.dgjones.barnable.domain.cardgames
 
+import info.dgjones.barnable.concept.CoreFields
+import info.dgjones.barnable.concept.ScaleConcepts
+import info.dgjones.barnable.concept.assertContainsRooted
+import info.dgjones.barnable.concept.concept
 import info.dgjones.barnable.domain.cardgames.game.GameSnipSnapSnorum
+import info.dgjones.barnable.domain.general.FrequencyFields
+import info.dgjones.barnable.domain.general.MeteorologyConcept
+import info.dgjones.barnable.domain.general.WeatherConcept
 import info.dgjones.barnable.parser.Lexicon
 import info.dgjones.barnable.parser.runTextProcess
 import org.junit.jupiter.api.Assertions
@@ -34,13 +41,29 @@ class CardGameDomainTest {
         return lexicon
     }
 
-    @Nested
-    inner class DuplicateResolved {
-        @Test
-        fun `Run Game Builder`() {
-            val textProcessor = runTextProcess(GameSnipSnapSnorum().source.content, lexicon)
+//    @Nested
+//    inner class DuplicateResolved {
+//        @Test
+//        fun `Run Game Builder`() {
+//            val textProcessor = runTextProcess(GameSnipSnapSnorum().source.content, lexicon)
+//
+//            Assertions.assertEquals(1, textProcessor.workingMemory.concepts.size)
+//        }
+//    }
 
-            Assertions.assertEquals(1, textProcessor.workingMemory.concepts.size)
-        }
-    }
+//    @Nested
+//    inner class CardReferences {
+//        @Test
+//        fun `Run Game Builder`() {
+//            val textProcessor = runTextProcess("ace of clubs", lexicon)
+//
+//            Assertions.assertEquals(1, textProcessor.workingMemory.concepts.size)
+//            val card = textProcessor.workingMemory.concepts[0]
+//            assertContainsRooted(weather, concept(Pl.Weather.name) {
+//                slot(CoreFields.Name, WeatherConcept.Rain.name)
+//                slot(FrequencyFields.Frequency, ScaleConcepts.LessThanNormal.name)
+//            })
+//            Assertions.assertEquals(1, textProcessor.workingMemory.concepts.size)
+//        }
+//    }
 }

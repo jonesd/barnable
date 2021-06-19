@@ -43,7 +43,7 @@ class CardGameDomain : Domain {
     }
 }
 
-enum class CardObjects(override val title: String, override val kind: PhysicalObjectKind = PhysicalObjectKind.Liquid):
+enum class CardObjects(override val title: String, override val kind: PhysicalObjectKind = PhysicalObjectKind.GameObject):
     PhysicalObjectDefinitions {
     Deck("deck"),
     Pack("pack"),

@@ -33,10 +33,12 @@ See: InDepth p180
  */
 open class DisambiguationDemon(private val disambiguationHandler: DisambiguationHandler, highPriority: Boolean = false, wordContext: WordContext): Demon(wordContext, highPriority) {
     fun disambiguationCompleted() {
+        println("Disambiguation matched: $this")
         disambiguationHandler.disambiguationMatchCompleted(this)
         active = false
     }
     fun disambiguationFailed() {
+        println("Disambiguation no-match: $this")
         disambiguationHandler.disambiguationMatchFailed(this)
         active = false
     }
@@ -49,7 +51,7 @@ class DisambiguateUsingWord(val word: String, val matcher: ConceptMatcher, val d
         }
     }
     override fun description(): String {
-        return "DisambiguateUsingWord word=$word"
+        return "DisambiguateUsingWord previousWord=$word"
     }
 }
 
