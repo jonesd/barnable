@@ -19,63 +19,27 @@ package info.dgjones.barnable.domain.cardgames.game
 
 import info.dgjones.barnable.domain.cardgames.model.*
 
-class GameGoFish(private val numberOfPlayers: Int = 7) : GameRunner {
-    private val players = mutableListOf<CardPlayer>()
+class CardGameGoFish(numberOfPlayers: Int = 7) : CardGameRunner(numberOfPlayers) {
+
     private val ocean = CardHolder("ocean")
-    private var turnNumber = 1
-    private var doesCurrentPlayerHaveAnotherTurn = false
 
-    override fun runGame() {
-        createPlayers()
-        val deck = CardHolder("deck", createDeckCards())
-        dealCards(deck)
-        var currentPlayer = players[0]
-        runSpecialBehavioursAtAnytime()
-
-        while (!isGameFinished()) {
-            dump("Start Turn", currentPlayer)
-            runPlayerTurn(currentPlayer)
-            runSpecialBehavioursAtAnytime()
-
-            currentPlayer = nextTurn(currentPlayer)
-        }
-        printWinner()
-    }
-
-    private fun nextTurn(currentPlayer: CardPlayer): CardPlayer {
-        var currentPlayer1 = currentPlayer
-        turnNumber += 1
-        if (!doesCurrentPlayerHaveAnotherTurn) {
-            currentPlayer1 = nextPlayer(currentPlayer1)
-        }
-        doesCurrentPlayerHaveAnotherTurn = false
-        return currentPlayer1
-    }
-
-    private fun runPlayerTurn(currentPlayer: CardPlayer) {
+    override fun runPlayerTurn(currentPlayer: CardPlayer) {
         requestCardsOfMatchingRank(currentPlayer)
     }
 
-    private fun runSpecialBehavioursAtAnytime() {
+    override fun runSpecialBehavioursAtAnytime() {
         collectAnyBooks()
     }
 
-    private fun createDeckCards() = CardDeckBuilder().withStandardDeck().shuffle().build()
+    override fun isGameFinished() = !isAnyCardsInHand()
 
-    private fun createPlayers() {
-        repeat(numberOfPlayers) {
-            players.add(CardPlayer("Player $it"))
-        }
-    }
-
-    private fun isGameFinished() = !isAnyCardsInHand()
-
-    private fun dealCards(deck: CardHolder) {
+    override fun dealCards(deck: CardHolder) {
         val numberOfCards = dealNumberOfCardsPerPlayer()
         FixedDeal().dealCardsToPlayerHand(numberOfCards, deck, players, ocean)
     }
 
-    private fun dealNumberOfCardsPerPlayer() = if (numberOfPlayers <= 3) 7 else 5
+    private fun dealNumberOfCardsPerPlayer() =
+        if (numberOfPlayers <= 3) 7 else 5
 
     private fun requestCardsOfMatchingRank(currentPlayer: CardPlayer) {
         val otherPlayer = selectAnotherPlayer(currentPlayer)
@@ -137,23 +101,17 @@ class GameGoFish(private val numberOfPlayers: Int = 7) : GameRunner {
         }
     }
 
-    private fun nextPlayer(currentPlayer: CardPlayer): CardPlayer {
-        val nextPlayerIndex = (players.indexOf(currentPlayer) + 1) % players.size
-        return players[nextPlayerIndex]
-    }
+
 
     private fun isAnyCardsInHand() =
         players.any { !it.hand.isEmpty() }
 
-    private fun dump(state: String, currentPlayer: CardPlayer?) {
+    override fun dump(state: String, currentPlayer: CardPlayer?) {
         println("$turnNumber $state ******************")
         println("ocean=$ocean")
         players.forEach { println("${if (it == currentPlayer) "ACTIVE" else ""} $it") }
     }
 
-    private fun printWinner() {
-        players.forEach {
-            println("${it.name} score: ${it.presentations.cardHolders.size}")
-        }
-    }
+    override fun playerScore(it: CardPlayer) =
+        it.presentations.cardHolders.size
 }

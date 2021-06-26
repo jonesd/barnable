@@ -17,12 +17,12 @@
 
 package info.dgjones.barnable.domain.cardgames.games
 
-import info.dgjones.barnable.domain.cardgames.game.GameMustaMaija
+import info.dgjones.barnable.domain.cardgames.game.CardGameMustaMaija
 import org.junit.jupiter.api.Test
 
 class GameMustaMaijaTest {
     @Test
     fun runGame() {
-        GameMustaMaija().runGame()
+        CardGameMustaMaija(3).runGame()
     }
 }
