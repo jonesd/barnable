@@ -50,6 +50,7 @@ abstract class CardGameRunner(val numberOfPlayers: Int = 1) {
         while (!isGameFinished()) {
             dump("Start Turn", currentPlayer1)
             runPlayerTurn(currentPlayer1)
+            endOfPlayerTurn(currentPlayer1)
             runSpecialBehavioursAtAnytime()
 
             val nextPlayer = nextTurn(currentPlayer1)
@@ -151,6 +152,10 @@ abstract class CardGameRunner(val numberOfPlayers: Int = 1) {
     }
 
     abstract fun playerScore(it: CardPlayer): Int
+
+    open fun endOfPlayerTurn(currentPlayer: CardPlayer) {
+        // nothing by default
+    }
 }
 
 open class CardGamePlayerStrategy(open val player: CardPlayer, open val game: CardGameRunner)

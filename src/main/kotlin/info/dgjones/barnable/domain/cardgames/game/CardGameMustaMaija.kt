@@ -50,7 +50,6 @@ class CardGameMustaMaija(numberOfPlayers: Int, val handSize: Int = 5) : CardGame
         strategies.first { it.player == player } as MustaMaijaBasicStrategy
 
     fun playTrick(attacker: CardPlayer, defender: CardPlayer, ledCards: List<PlayingCard>) {
-        require(ledCards.size <= defender.hand.size()) {"Attacker ${attacker.name} must not play more cards than defender ${defender.name}"}
         val attackPairs = ledCards.map { MustaMaijaAttackDefendPair(it, trumpSuit) }
         strategyFor(defender).defendAgainst(attacker, attackPairs)
     }
@@ -77,16 +76,18 @@ class CardGameMustaMaija(numberOfPlayers: Int, val handSize: Int = 5) : CardGame
         defender.hand.transfer(discardDefender, discard)
         println("Transfer ${pickupDefender} from ${attacker.name} to ${defender.name} ${defender.hand}")
         attacker.hand.transfer(pickupDefender, defender.hand)
+        replenishHandFromStock(defender)
     }
 
-    fun replenishHandFromStock(currentPlayer: CardPlayer): List<PlayingCard> {
-        val shortCards = handSize - currentPlayer.hand.size()
-        return if (shortCards > 0) {
-            val transferred = stock.transferFirst(shortCards, currentPlayer.hand)
-            println("$currentPlayer picks up ${transferred.size} cards from ${stock.name}")
-            transferred
-        } else {
-            listOf<PlayingCard>()
+    fun replenishHandFromStock(player: CardPlayer) {
+        val shortCards = handSize - player.hand.size()
+        if (shortCards > 0) {
+            if (stock.isEmpty()) {
+                println("Failed to replenish ${player.name} as ${stock.name} is empty")
+            } else {
+                val transferred = stock.transferFirst(shortCards, player.hand)
+                println("Replenish $player hand by picking up ${transferred.size} cards from ${stock.name}")
+            }
         }
     }
 
@@ -112,7 +113,7 @@ class CardGameMustaMaija(numberOfPlayers: Int, val handSize: Int = 5) : CardGame
     private fun dealNumberOfCardsPerPlayer() = 5
 
     override fun isGameFinished(): Boolean {
-        return isOnlyOnePlayerHoldingCards() && stock.isEmpty()
+        return players.filter { it.out }.size == players.size - 1
     }
 
     private fun isOnlyOnePlayerHoldingCards() =
@@ -128,6 +129,13 @@ class CardGameMustaMaija(numberOfPlayers: Int, val handSize: Int = 5) : CardGame
         println("trumps=${trumpSuit.symbol}")
         println("stock=${stock.cards()}")
         println("discard=${discard.cards()}")
+    }
+
+    override fun endOfPlayerTurn(currentPlayer: CardPlayer) {
+        super.endOfPlayerTurn(currentPlayer)
+        if (currentPlayer.hand.isEmpty() && stock.isEmpty()) {
+            currentPlayer.out = true
+        }
     }
 }
 
@@ -170,16 +178,15 @@ class MustaMaijaAttackDefendPair(val led: PlayingCard, val trump: PlayingCardSui
 
 class MustaMaijaBasicStrategy(player: CardPlayer, override val game: CardGameMustaMaija): CardGamePlayerStrategy(player, game) {
     fun playTurn(defender: CardPlayer, defenderCards: Int) {
-        if (player.hand.size() < game.handSize && !game.isStockEmpty()) {
-            game.replenishHandFromStock(player)
-        } else if (defenderCards > 0) {
-            playAvailableCardsAgainst(defender, defenderCards)
-        }
+        playAvailableCardsAgainst(defender)
     }
-    fun playAvailableCardsAgainst(defender: CardPlayer, defenderCards: Int) {
-        val cards = minOf(player.hand.size(), defenderCards)
-        val attacking = player.hand.cards().subList(0, cards)
-        game.playTrick(player, defender, attacking)
+    fun playAvailableCardsAgainst(defender: CardPlayer) {
+        if (!player.hand.isEmpty()) {
+            val card = player.hand.cards().first()
+            val cards = player.hand.cards().filter { it.suit == card.suit }
+            game.playTrick(player, defender, cards)
+        }
+        game.replenishHandFromStock(player)
     }
 
     fun defendAgainst(attacker: CardPlayer, attackPairs: List<MustaMaijaAttackDefendPair>) {
