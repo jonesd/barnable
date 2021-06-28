@@ -24,6 +24,8 @@ class GameGoFishTest {
 
     @Test
     fun runGame() {
-        CardGameGoFish().runGame()
+        val game = CardGameGoFish()
+        game.initGame()
+        game.runGame()
     }
 }

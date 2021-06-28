@@ -17,9 +17,10 @@
 
 package info.dgjones.barnable.domain.cardgames.model
 
-data class CardPlayer(val name: String,
-                      val hand: CardHolder = CardHolder("hand"),
-    val presentations: PlayerPresentationHolder = PlayerPresentationHolder()) {
+data class CardPlayer(
+        val name: String,
+        val hand: CardHolder = CardHolder("hand"),
+        val presentations: PlayerPresentationHolder = PlayerPresentationHolder()) {
     var out: Boolean = false
 }
 
@@ -37,6 +38,16 @@ data class PlayingCard(val rank: PlayingCardRank, val suit: PlayingCardSuit) {
     fun code(): String {
         return "${rank.code}${suit.symbol}"
     }
+}
+
+val aceHighComparator = Comparator { a: PlayingCardRank, b: PlayingCardRank ->
+    val aValue = if (a == RankAce) 14 else a.value
+    val bValue = if (b == RankAce) 14 else b.value
+    aValue.compareTo(bValue)
+}
+
+val aceLowComparator = Comparator { a: PlayingCardRank, b: PlayingCardRank ->
+    a.value.compareTo(b.value)
 }
 
 val SuitClub = PlayingCardSuit("Club", '\u2663'.toString())
@@ -97,6 +108,10 @@ data class CardHolder(val name: String, private val cards: MutableList<PlayingCa
             destination.add(playingCard)
         }
     }
+    fun transfer(playingCards: List<PlayingCard>, destination: CardHolder) {
+        playingCards.forEach { transfer(it, destination) }
+    }
+
     fun add(card: PlayingCard) {
         cards.add(card)
     }

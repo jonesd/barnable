@@ -18,11 +18,49 @@
 package info.dgjones.barnable.domain.cardgames.games
 
 import info.dgjones.barnable.domain.cardgames.game.CardGameMustaMaija
+import info.dgjones.barnable.domain.cardgames.game.compareAttackDefend
+import info.dgjones.barnable.domain.cardgames.game.mustamaijaCard
+import info.dgjones.barnable.domain.cardgames.model.*
+import org.junit.jupiter.api.Assertions
+
 import org.junit.jupiter.api.Test
 
 class GameMustaMaijaTest {
     @Test
     fun runGame() {
-        CardGameMustaMaija(3).runGame()
+        val game = CardGameMustaMaija(3)
+        game.initGame()
+        game.runGame()
+    }
+}
+
+class MustaMaijaAttackDefendPairTest {
+
+    @Test
+    fun leadingWithMustamaijaAlwaysWins() {
+        Assertions.assertTrue(compareAttackDefend(mustamaijaCard, PlayingCard(RankKing, SuitHeart), SuitHeart))
+    }
+    @Test
+    fun defendingWithMustamaijaAlwaysLoses() {
+        Assertions.assertTrue(compareAttackDefend(PlayingCard(RankKing, SuitDiamond), mustamaijaCard, SuitHeart))
+    }
+    @Test
+    fun higherRankSameSuitWins() {
+        Assertions.assertTrue(compareAttackDefend(PlayingCard(Rank10, SuitDiamond), PlayingCard(Rank9, SuitDiamond), SuitHeart))
+        Assertions.assertFalse(compareAttackDefend(PlayingCard(Rank9, SuitDiamond), PlayingCard(Rank10, SuitDiamond), SuitHeart))
+    }
+    @Test
+    fun sameRankSameSuitConsideredAttackerWin() {
+        Assertions.assertTrue(compareAttackDefend(PlayingCard(Rank10, SuitDiamond), PlayingCard(Rank10, SuitDiamond), SuitHeart))
+    }
+    @Test
+    fun lowerTrumpBeatsNonTrump() {
+        Assertions.assertTrue(compareAttackDefend(PlayingCard(Rank2, SuitDiamond), PlayingCard(RankKing, SuitHeart), SuitDiamond))
+        Assertions.assertFalse(compareAttackDefend(PlayingCard(RankKing, SuitHeart), PlayingCard(Rank2, SuitDiamond), SuitDiamond))
+    }
+    @Test
+    fun higherValueBeatsLowerValue() {
+        Assertions.assertTrue(compareAttackDefend(PlayingCard(RankKing, SuitDiamond), PlayingCard(RankQueen, SuitHeart), SuitClub))
+        Assertions.assertFalse(compareAttackDefend(PlayingCard(RankQueen, SuitHeart), PlayingCard(RankKing, SuitDiamond), SuitClub))
     }
 }
