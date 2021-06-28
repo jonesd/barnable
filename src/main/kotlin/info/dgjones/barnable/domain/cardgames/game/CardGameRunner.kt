@@ -58,7 +58,7 @@ abstract class CardGameRunner(val numberOfPlayers: Int = 1) {
         var currentPlayer1 = currentPlayer
         turnNumber += 1
         if (!doesCurrentPlayerHaveAnotherTurn) {
-            currentPlayer1 = nextPlayer(currentPlayer1)
+            currentPlayer1 = nextActivePlayer(currentPlayer1)
         }
         doesCurrentPlayerHaveAnotherTurn = false
         return currentPlayer1
@@ -75,14 +75,21 @@ abstract class CardGameRunner(val numberOfPlayers: Int = 1) {
         }
     }
 
-    open fun nextPlayer(currentPlayer: CardPlayer): CardPlayer {
+    open fun nextActivePlayer(currentPlayer: CardPlayer): CardPlayer? {
+        do
+        val previousPlayer = currentPlayer
+        val nextPlayer = nextPlayerAroundTable(previousPlayer)
+        if (nextPlayer.out)
         return nextPlayerAroundTable(currentPlayer)
     }
 
     private fun nextPlayerAroundTable(currentPlayer: CardPlayer): CardPlayer {
-        val nextPlayerIndex = (players.indexOf(currentPlayer) + 1) % players.size
+        val nextPlayerIndex = nextPlayerIndex(currentPlayer)
         return players[nextPlayerIndex]
     }
+
+    private fun nextPlayerIndex(player: CardPlayer) =
+        (players.indexOf(player) + 1) % players.size
 
     protected open fun createDeckCards() = CardDeckBuilder().withStandardDeck().shuffle().build()
     abstract fun dealCards(deck: CardHolder)

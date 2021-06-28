@@ -15,12 +15,11 @@
  *
  */
 
-package info.dgjones.barnable.domain.general
+package info.dgjones.barnable.domain.cardgames
 
 import info.dgjones.barnable.concept.*
-import info.dgjones.barnable.domain.cardgames.CardGameDomain
+import info.dgjones.barnable.domain.general.*
 import info.dgjones.barnable.narrative.buildInDepthUnderstandingLexicon
-import info.dgjones.barnable.parser.Lexicon
 import info.dgjones.barnable.parser.runTextProcess
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test

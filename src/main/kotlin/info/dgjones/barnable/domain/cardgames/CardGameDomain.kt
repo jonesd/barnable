@@ -20,8 +20,6 @@ package info.dgjones.barnable.domain.cardgames
 import info.dgjones.barnable.concept.*
 import info.dgjones.barnable.domain.general.*
 import info.dgjones.barnable.domain.shippingforecast.Domain
-import info.dgjones.barnable.grammar.Preposition
-import info.dgjones.barnable.grammar.expectPrep
 import info.dgjones.barnable.narrative.buildInDepthUnderstandingLexicon
 import info.dgjones.barnable.parser.*
 import info.dgjones.barnable.util.SourceMaterial

@@ -20,6 +20,7 @@ package info.dgjones.barnable.domain.cardgames.model
 data class CardPlayer(val name: String,
                       val hand: CardHolder = CardHolder("hand"),
     val presentations: PlayerPresentationHolder = PlayerPresentationHolder()) {
+    var out: Boolean = false
 }
 
 class CardGameModel(val name: String, val deal: CardDeal) {
@@ -78,12 +79,15 @@ class CardDeckBuilder() {
 }
 
 data class CardHolder(val name: String, private val cards: MutableList<PlayingCard> = mutableListOf<PlayingCard>(), val faceUp: Boolean = false) {
-    fun transferFirst(numberOfCards: Int, destination: CardHolder) {
+    fun transferFirst(numberOfCards: Int, destination: CardHolder): List<PlayingCard> {
+        val transferred = mutableListOf<PlayingCard>()
         repeat(numberOfCards) {
             cards.removeFirstOrNull()?.let {
                 destination.add(it)
+                transferred.add(it)
             }
         }
+        return transferred.toList()
     }
     fun transferAll(destination: CardHolder) {
         transferFirst(cards.size, destination)
@@ -99,6 +103,7 @@ data class CardHolder(val name: String, private val cards: MutableList<PlayingCa
     fun cards() = cards.toList()
     fun firstOrNull() = cards.firstOrNull()
     fun isEmpty() = cards.isEmpty()
+    fun size() = cards.size
 }
 
 data class PlayerPresentationHolder(val cardHolders: MutableList<CardHolder> = mutableListOf()) {
@@ -121,4 +126,8 @@ class FixedDeal(): CardDeal {
             source.transferAll(it)
         }
     }
+}
+
+enum class CardGameType() {
+    Shedding
 }
