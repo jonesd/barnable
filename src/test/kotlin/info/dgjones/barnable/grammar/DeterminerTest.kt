@@ -15,33 +15,27 @@
  *
  */
 
-package info.dgjones.barnable.domain.cardgames.model
+package info.dgjones.barnable.grammar
 
 import info.dgjones.barnable.concept.CoreFields
-import info.dgjones.barnable.domain.cardgames.CardGameDomain
-import info.dgjones.barnable.domain.general.CardinalDirectionConcept
-import info.dgjones.barnable.domain.general.CardinalFields
+import info.dgjones.barnable.domain.general.ColourFields
+import info.dgjones.barnable.domain.general.PhysicalObjectKind
 import info.dgjones.barnable.narrative.buildInDepthUnderstandingLexicon
-import info.dgjones.barnable.parser.Lexicon
 import info.dgjones.barnable.parser.runTextProcess
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
-class GoFishModelTest {
-    val lexicon = buildLexicon()
-
-    private fun buildLexicon(): Lexicon {
-        val lexicon = Lexicon()
-        CardGameDomain().buildDomainLexicon(lexicon)
-        return lexicon
-    }
+class DeterminerTest {
+    val lexicon = buildInDepthUnderstandingLexicon()
 
     @Test
-    fun `Five cards are dealt from a standard 52-card deck to each player`() {
-        val textProcessor = runTextProcess("Five cards are dealt from a standard 52-card deck to each player", lexicon)
+    fun `Determiner modifier for every`() {
+        val textProcessor = runTextProcess("every book", lexicon)
 
         Assertions.assertEquals(1, textProcessor.workingMemory.concepts.size)
-
+        val concept = textProcessor.workingMemory.concepts.first()
+        Assertions.assertEquals(PhysicalObjectKind.PhysicalObject.name, concept.valueName(CoreFields.Kind))
+        Assertions.assertEquals("book", concept.valueName(CoreFields.Name))
+        Assertions.assertEquals("every", concept.valueName(DeterminerFields.Determiner))
     }
-
 }

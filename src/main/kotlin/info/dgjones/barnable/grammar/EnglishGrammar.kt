@@ -61,6 +61,7 @@ fun buildEnglishGrammarLexicon(lexicon: Lexicon) {
     buildGrammarPronounLexicon(lexicon)
     buildGrammarPropositionLexicon(lexicon)
     buildGrammarPunctuationLexicon(lexicon)
+    buildGrammarDeterminerLexicon(lexicon)
 
     lexicon.addMapping(WordHave())
     lexicon.addMapping(WordIgnore(EntryWord("a").and("an")))
