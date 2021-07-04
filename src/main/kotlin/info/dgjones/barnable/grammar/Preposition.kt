@@ -32,6 +32,7 @@ enum class PrepositionConcept {
 
 enum class Preposition {
     By,
+    From,
     In,
     Into,
     On,
@@ -87,6 +88,8 @@ fun buildGrammarPropositionLexicon(lexicon: Lexicon) {
     lexicon.addMapping(PrepositionWord(Preposition.On, setOf(GeneralConcepts.PhysicalObject.name, GeneralConcepts.Setting.name)))
     lexicon.addMapping(PrepositionWord(Preposition.Upon, setOf(GeneralConcepts.PhysicalObject.name, GeneralConcepts.Setting.name)))
     lexicon.addMapping(PrepositionWord(Preposition.By, setOf(GeneralConcepts.Human.name, GeneralConcepts.Setting.name)))
+    lexicon.addMapping(PrepositionWord(Preposition.From, setOf(GeneralConcepts.PhysicalObject.name, GeneralConcepts.Human.name, GeneralConcepts.Setting.name)))
+
 }
 
 /*

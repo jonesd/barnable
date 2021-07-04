@@ -41,7 +41,7 @@ class CardGameDomain : Domain {
     override fun addToLexicon(lexicon: Lexicon) {
         CardObjects.values().forEach { lexicon.addMapping(PhysicalObjectWord(it)) }
         CardPlayer.values().forEach { lexicon.addMapping(PlayerHandler(it)) }
-        lexicon.addMapping(WordDeal())
+        lexicon.addMapping(WordDealObject())
         addDeckModifiers(lexicon)
     }
 
@@ -128,11 +128,13 @@ class WordEach: WordHandler(EntryWord("each")) {
         }.demons
 }
 
-class WordDeal: WordHandler(EntryWord("deal").and("dealt")) {
+// Five cards are dealt by the dealer to each player
+// the cards are dealt to each player
+class WordDealObject: WordHandler(EntryWord("deal").past("dealt")) {
     override fun build(wordContext: WordContext): List<Demon> =
         lexicalConcept(wordContext, Acts.ATRANS.name) {
             expectActor(variableName = "actor")
-            expectThing()
+            expectThing(direction = SearchDirection.Before)
             varReference(ActFields.From.fieldName, "actor")
             expectHead(ActFields.To.fieldName, headValue = GeneralConcepts.Human.name)
 
