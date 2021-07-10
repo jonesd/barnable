@@ -10,5 +10,6 @@ compile:
   stage: compile
   script:
     - echo "Do we run anything?"
-    - ./gradlew assemble
+    - ls -lR
+    - ./gradlew test
   
