@@ -1,0 +1,43 @@
+image: openjdk:11-jdk
+
+stages:
+  - test
+#  - package
+
+before_script:
+  #  - echo `pwd` # debug
+  #  - echo "$CI_BUILD_NAME, $CI_BUILD_REF_NAME $CI_BUILD_STAGE" # debug
+  - export GRADLE_USER_HOME=`pwd`/.gradle
+
+#ktlint:
+#  stage: test
+#  script:
+#    - ./gradlew ktlint
+#  artifacts:
+#    paths:
+#      - build/ktlint.xml
+#    expire_in: 1 day
+#  allow_failure: true
+
+test:
+  stage: test
+  script:
+    - ./gradlew test --info
+  artifacts:
+    paths:
+      - test.log
+    expire_in: 1 day
+    reports:
+      junit: build/test-results/test/**/TEST-*.xml
+
+generate-jar:
+  stage: package
+  script:
+    - ./gradlew jar
+  artifacts:
+    paths:
+      - build/libs/*.jar
+    expire_in: 1 day
+
+after_script:
+  - echo "End CI"
