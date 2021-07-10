@@ -9,5 +9,6 @@ before_script:
 compile:
   stage: compile
   script:
+    - echo "Do we run anything?"
     - ./gradlew assemble
   
