@@ -57,10 +57,10 @@ fun LexicalConceptBuilder.expectActor(slotName: Fields = ActFields.Actor, variab
 }
 
 fun LexicalConceptBuilder.expectThing(slotName: Fields = ActFields.Thing, variableName: String? = null, matcher: ConceptMatcher = matchConceptByHeadOrGroup(
-    GeneralConcepts.PhysicalObject.name)) {
+    GeneralConcepts.PhysicalObject.name), direction: SearchDirection = SearchDirection.After) {
     val variable = root.createVariable(slotName, variableName)
     concept.with(variable.slot())
-    val demon = ExpectThing(matcher, root.wordContext) {
+    val demon = ExpectThing(matcher, root.wordContext, initialDirection = direction) {
         root.completeVariable(variable, it, this.episodicConcept)
     }
     root.addDemon(demon)
@@ -110,7 +110,7 @@ class ExpectActor(wordContext: WordContext, val action: (ConceptHolder) -> Unit)
     }
 }
 
-class ExpectThing(val thingMatcher: ConceptMatcher = matchConceptByHead(GeneralConcepts.PhysicalObject.name), wordContext: WordContext, val action: (ConceptHolder) -> Unit): Demon(wordContext) {
+class ExpectThing(val thingMatcher: ConceptMatcher = matchConceptByHead(GeneralConcepts.PhysicalObject.name), wordContext: WordContext, val initialDirection: SearchDirection = SearchDirection.After, val action: (ConceptHolder) -> Unit): Demon(wordContext) {
     override fun run() {
         val byMatcher = matchPrepIn(listOf(Preposition.By))
         val matcher = matchAny(listOf(
@@ -118,12 +118,12 @@ class ExpectThing(val thingMatcher: ConceptMatcher = matchConceptByHead(GeneralC
             byMatcher,
             thingMatcher
         ))
-        searchContext(matcher, matchNever(), direction = SearchDirection.After, wordContext = wordContext) {
+        searchContext(matcher, matchNever(), direction = initialDirection, wordContext = wordContext) {
             if (thingMatcher.matches(it.value)) {
                 action(it)
                 active = false
             } else if (byMatcher.matches(it.value)) {
-                searchContext(thingMatcher, matchNever(), direction = SearchDirection.Before, wordContext = wordContext) { thing ->
+                searchContext(thingMatcher, matchNever(), direction = initialDirection.invert(), wordContext = wordContext) { thing ->
                     action(thing)
                     active = false
                 }

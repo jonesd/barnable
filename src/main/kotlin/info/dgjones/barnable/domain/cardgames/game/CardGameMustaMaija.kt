@@ -18,6 +18,7 @@
 package info.dgjones.barnable.domain.cardgames.game
 
 import info.dgjones.barnable.domain.cardgames.model.*
+import info.dgjones.barnable.domain.cardgames.model.aceHighComparator;
 
 /**
  * Musta Maija (Black Mary) is a Finnish card game.
@@ -25,6 +26,7 @@ import info.dgjones.barnable.domain.cardgames.model.*
  */
 class CardGameMustaMaija(numberOfPlayers: Int, val handSize: Int = 5) : CardGameRunner(numberOfPlayers) {
     private val stock = CardHolder("stock", faceUp = false)
+    private val discard = CardHolder("discard", faceUp = false)
     private var trumpSuit: PlayingCardSuit = SuitSpade
 
     override fun runPlayerTurn(currentPlayer: CardPlayer) {
@@ -32,24 +34,60 @@ class CardGameMustaMaija(numberOfPlayers: Int, val handSize: Int = 5) : CardGame
             // player is out
             return
         }
-        val transferred = replenishHandFromStock(currentPlayer)
-        if (transferred.isEmpty()) {
-            playAvailableCards(currentPlayer)
+        val defender = nextActivePlayer(currentPlayer)
+        if (defender != null) {
+            strategyFor(currentPlayer).playTurn(defender, defender.hand.size())
+        } else {
+            println("No defender against player ${currentPlayer.name}")
         }
     }
 
-    private fun playAvailableCards(currentPlayer: CardPlayer) {
-        val defender = activePlayerToLeft(currentPlayer)
+    override fun createStrategy(index: Int, cardPlayer: CardPlayer): CardGamePlayerStrategy {
+        return MustaMaijaBasicStrategy(cardPlayer, this)
     }
 
-    private fun replenishHandFromStock(currentPlayer: CardPlayer): List<PlayingCard> {
-        val shortCards = handSize - currentPlayer.hand.size()
+    private fun strategyFor(player: CardPlayer) =
+        strategies.first { it.player == player } as MustaMaijaBasicStrategy
+
+    fun playTrick(attacker: CardPlayer, defender: CardPlayer, ledCards: List<PlayingCard>) {
+        val attackPairs = ledCards.map { MustaMaijaAttackDefendPair(it, trumpSuit) }
+        strategyFor(defender).defendAgainst(attacker, attackPairs)
+    }
+
+    fun defenderResponse(attacker: CardPlayer, defender: CardPlayer, pairs: List<MustaMaijaAttackDefendPair>) {
+        val discardAttacker = mutableListOf<PlayingCard>()
+        val discardDefender = mutableListOf<PlayingCard>()
+        val pickupDefender = mutableListOf<PlayingCard>()
+        pairs.forEach { pair ->
+            if (pair.isAttackerVictorious()) {
+                println("Attacker ${attacker.name} ${pair.led} beats ${defender.name} ${pair.defend}")
+                pickupDefender.add(pair.led)
+            } else {
+                println("Attacker ${attacker.name} ${pair.led} loses ${defender.name} ${pair.defend}")
+                discardAttacker.add(pair.led)
+            }
+            pair.defend?.let {
+                discardDefender.add(it)
+            }
+        }
+        println("Transfer ${discardAttacker} from ${attacker.name} to $discard")
+        attacker.hand.transfer(discardAttacker, discard)
+        println("Transfer ${discardDefender} from ${defender.name} to $discard")
+        defender.hand.transfer(discardDefender, discard)
+        println("Transfer ${pickupDefender} from ${attacker.name} to ${defender.name} ${defender.hand}")
+        attacker.hand.transfer(pickupDefender, defender.hand)
+        replenishHandFromStock(defender)
+    }
+
+    fun replenishHandFromStock(player: CardPlayer) {
+        val shortCards = handSize - player.hand.size()
         if (shortCards > 0) {
-            val transferred = stock.transferFirst(shortCards, currentPlayer.hand)
-            println("$currentPlayer picks up ${transferred.size} cards from ${stock.name}")
-            return transferred
-        } else {
-            return listOf<PlayingCard>()
+            if (stock.isEmpty()) {
+                println("Failed to replenish ${player.name} as ${stock.name} is empty")
+            } else {
+                val transferred = stock.transferFirst(shortCards, player.hand)
+                println("Replenish $player hand by picking up ${transferred.size} cards from ${stock.name}")
+            }
         }
     }
 
@@ -58,7 +96,8 @@ class CardGameMustaMaija(numberOfPlayers: Int, val handSize: Int = 5) : CardGame
         FixedDeal().dealCardsToPlayerHand(numberOfCards, deck, players, stock)
     }
 
-    override fun runAdditionalSetup() {
+    override fun runBeforeFirstTurn() {
+        super.runBeforeFirstTurn()
         turnUpTopCardOfDeckAsTrumpSuit()
     }
 
@@ -66,6 +105,7 @@ class CardGameMustaMaija(numberOfPlayers: Int, val handSize: Int = 5) : CardGame
         val transferred = stock.transferFirst(1, stock)
         if (transferred.isNotEmpty()) {
             // FIXME should leave trump face up at bottom of stock
+                //FIXME ignore spades?
             trumpSuit = transferred.first().suit
         }
     }
@@ -73,17 +113,92 @@ class CardGameMustaMaija(numberOfPlayers: Int, val handSize: Int = 5) : CardGame
     private fun dealNumberOfCardsPerPlayer() = 5
 
     override fun isGameFinished(): Boolean {
-        return isOnlyOnePlayerHoldingCards() && stock.isEmpty()
+        return players.filter { it.out }.size == players.size - 1
     }
 
     private fun isOnlyOnePlayerHoldingCards() =
         players.filter { !it.hand.isEmpty() }.size == 1
 
-    override fun playerScore(it: CardPlayer): Int {
-        TODO("Not yet implemented")
+    override fun playerScore(player: CardPlayer) =
+        if (player.out) 1 else 0
+
+    fun isStockEmpty() = stock.isEmpty()
+
+    override fun dump(state: String, currentPlayer: CardPlayer?) {
+        super.dump(state, currentPlayer)
+        println("trumps=${trumpSuit.symbol}")
+        println("stock=${stock.cards()}")
+        println("discard=${discard.cards()}")
+    }
+
+    override fun endOfPlayerTurn(currentPlayer: CardPlayer) {
+        super.endOfPlayerTurn(currentPlayer)
+        if (currentPlayer.hand.isEmpty() && stock.isEmpty()) {
+            currentPlayer.out = true
+        }
     }
 }
 
-class MustaMaijaStrategy() {
+val mustamaijaCard = PlayingCard(RankQueen, SuitSpade)
+
+fun compareAttackDefend(led: PlayingCard, defend: PlayingCard?, trump: PlayingCardSuit): Boolean {
+    val pair = MustaMaijaAttackDefendPair(led, trump)
+    pair.defend = defend
+    return pair.isAttackerVictorious()
+}
+
+class MustaMaijaAttackDefendPair(val led: PlayingCard, val trump: PlayingCardSuit) {
+    var defend: PlayingCard? = null
+
+    fun isAttackerVictorious(): Boolean {
+        defend?.let { defend ->
+            if (led == mustamaijaCard) {
+                return true
+            }
+            if (defend == mustamaijaCard) {
+                return true
+            }
+            if (isTrump(led) && !isTrump(defend)) {
+                return true
+            }
+            if (isTrump(defend) && !isTrump(led)) {
+                return false;
+            }
+            return isHigherRank(led, defend)
+        }
+        return true
+    }
+
+    private fun isHigherRank(a: PlayingCard, b: PlayingCard) =
+        aceHighComparator.compare(a.rank, b.rank) >= 0
+
+    private fun isTrump(card: PlayingCard) =
+        card.suit == trump
+}
+
+class MustaMaijaBasicStrategy(player: CardPlayer, override val game: CardGameMustaMaija): CardGamePlayerStrategy(player, game) {
+    fun playTurn(defender: CardPlayer, defenderCards: Int) {
+        playAvailableCardsAgainst(defender)
+    }
+    fun playAvailableCardsAgainst(defender: CardPlayer) {
+        if (!player.hand.isEmpty()) {
+            val card = player.hand.cards().first()
+            val cards = player.hand.cards().filter { it.suit == card.suit }
+            game.playTrick(player, defender, cards)
+        }
+        game.replenishHandFromStock(player)
+    }
+
+    fun defendAgainst(attacker: CardPlayer, attackPairs: List<MustaMaijaAttackDefendPair>) {
+        val available = player.hand.cards().toMutableList()
+        attackPairs.forEach { pair ->
+            val card = available.firstOrNull { defend -> !compareAttackDefend(pair.led, defend, pair.trump)}
+            card?.let {
+                pair.defend = card
+                available.remove(card)
+            }
+        }
+        game.defenderResponse(attacker, player, attackPairs)
+    }
 
 }

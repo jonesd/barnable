@@ -38,6 +38,6 @@ class GameSnipSnapSnorumTest {
     fun `Run Game Builder`() {
         val textProcessor = runTextProcess(GameSnipSnapSnorum().source.content, lexicon)
 
-        Assertions.assertEquals(22, textProcessor.workingMemory.concepts.size)
+        Assertions.assertEquals(20, textProcessor.workingMemory.concepts.size)
     }
 }

@@ -25,9 +25,14 @@ abstract class CardGameRunner(val numberOfPlayers: Int = 1) {
     val players = mutableListOf<CardPlayer>()
     var turnNumber = 1
     var doesCurrentPlayerHaveAnotherTurn = false
+    val strategies = mutableListOf<CardGamePlayerStrategy>()
+
+    fun initGame() {
+        createPlayers()
+    }
 
     fun runGame() {
-        createPlayers()
+        check(players.isNotEmpty()) {"Game must have 1 or more players" }
         val deck = CardHolder("deck", createDeckCards())
         runAdditionalSetup()
         dealCards(deck)
@@ -36,14 +41,25 @@ abstract class CardGameRunner(val numberOfPlayers: Int = 1) {
 
         runSpecialBehavioursAtAnytime()
 
+        runGameLoop(currentPlayer)
+        printWinner()
+    }
+
+    private fun runGameLoop(currentPlayer: CardPlayer) {
+        var currentPlayer1 = currentPlayer
         while (!isGameFinished()) {
-            dump("Start Turn", currentPlayer)
-            runPlayerTurn(currentPlayer)
+            dump("Start Turn", currentPlayer1)
+            runPlayerTurn(currentPlayer1)
+            endOfPlayerTurn(currentPlayer1)
             runSpecialBehavioursAtAnytime()
 
-            currentPlayer = nextTurn(currentPlayer)
+            val nextPlayer = nextTurn(currentPlayer1)
+            if (nextPlayer == null) {
+                break
+            } else {
+                currentPlayer1 = nextPlayer
+            }
         }
-        printWinner()
     }
 
     open fun runAdditionalSetup() {
@@ -54,33 +70,55 @@ abstract class CardGameRunner(val numberOfPlayers: Int = 1) {
         // nothing by default
     }
 
-    fun nextTurn(currentPlayer: CardPlayer): CardPlayer {
-        var currentPlayer1 = currentPlayer
+    fun nextTurn(currentPlayer: CardPlayer): CardPlayer? {
+        var nextPlayer: CardPlayer? = currentPlayer
         turnNumber += 1
         if (!doesCurrentPlayerHaveAnotherTurn) {
-            currentPlayer1 = nextActivePlayer(currentPlayer1)
+            nextPlayer = nextActivePlayer(currentPlayer)
         }
         doesCurrentPlayerHaveAnotherTurn = false
-        return currentPlayer1
+        if (shouldAbortGame()) {
+            println("Aborted game...")
+            return null
+        }
+        return nextPlayer
     }
 
-    protected abstract fun runPlayerTurn(currentPlayer: CardPlayer)
+    protected open fun shouldAbortGame() =
+        turnNumber > 2000
+
+    abstract fun runPlayerTurn(currentPlayer: CardPlayer)
+
     protected open fun runSpecialBehavioursAtAnytime() {
         // do nothing by default
     }
 
-    protected fun createPlayers() {
+    private fun createPlayers() {
         repeat(numberOfPlayers) {
-            players.add(CardPlayer("Player $it"))
+            val cardPlayer = createCardPlayer(it)
+            players.add(cardPlayer)
+            strategies.add(createStrategy(it, cardPlayer))
         }
     }
 
+    open fun createStrategy(index: Int, cardPlayer: CardPlayer): CardGamePlayerStrategy {
+        return CardGamePlayerStrategy(cardPlayer, this)
+    }
+
+    open fun createCardPlayer(it: Int) =
+        CardPlayer("Player $it")
+
     open fun nextActivePlayer(currentPlayer: CardPlayer): CardPlayer? {
-        do
-        val previousPlayer = currentPlayer
-        val nextPlayer = nextPlayerAroundTable(previousPlayer)
-        if (nextPlayer.out)
-        return nextPlayerAroundTable(currentPlayer)
+        // FIXME
+        var previousPlayer = currentPlayer
+        do {
+            previousPlayer = nextPlayerAroundTable(previousPlayer)
+            if (previousPlayer == currentPlayer) {
+                return null
+            } else if (previousPlayer != null && !previousPlayer.out) {
+                return previousPlayer
+            }
+        } while (true)
     }
 
     private fun nextPlayerAroundTable(currentPlayer: CardPlayer): CardPlayer {
@@ -109,10 +147,15 @@ abstract class CardGameRunner(val numberOfPlayers: Int = 1) {
 
     fun printWinner() {
         players.forEach {
-            println("${it.name} score: ${playerScore(it)}")
+            println("Player ${it.name} score: ${playerScore(it)}")
         }
     }
 
     abstract fun playerScore(it: CardPlayer): Int
+
+    open fun endOfPlayerTurn(currentPlayer: CardPlayer) {
+        // nothing by default
+    }
 }
 
+open class CardGamePlayerStrategy(open val player: CardPlayer, open val game: CardGameRunner)

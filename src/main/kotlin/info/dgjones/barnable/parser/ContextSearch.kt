@@ -23,7 +23,10 @@ import kotlin.math.abs
 
 enum class SearchDirection {
     After,
-    Before
+    Before;
+
+    fun invert(): SearchDirection =
+        if (this == After) Before else After
 }
 
 /*

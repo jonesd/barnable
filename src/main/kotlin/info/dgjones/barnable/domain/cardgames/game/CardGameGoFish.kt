@@ -20,8 +20,11 @@ package info.dgjones.barnable.domain.cardgames.game
 import info.dgjones.barnable.domain.cardgames.model.*
 
 class CardGameGoFish(numberOfPlayers: Int = 7) : CardGameRunner(numberOfPlayers) {
-
     private val ocean = CardHolder("ocean")
+
+    override fun createStrategy(index: Int, cardPlayer: CardPlayer): CardGamePlayerStrategy {
+        return GoFishBasicStrategy(cardPlayer, this)
+    }
 
     override fun runPlayerTurn(currentPlayer: CardPlayer) {
         requestCardsOfMatchingRank(currentPlayer)
@@ -41,8 +44,15 @@ class CardGameGoFish(numberOfPlayers: Int = 7) : CardGameRunner(numberOfPlayers)
     private fun dealNumberOfCardsPerPlayer() =
         if (numberOfPlayers <= 3) 7 else 5
 
+    private fun strategyFor(player: CardPlayer) =
+        strategies.first { it.player == player } as GoFishBasicStrategy
+
     private fun requestCardsOfMatchingRank(currentPlayer: CardPlayer) {
-        val otherPlayer = selectAnotherPlayer(currentPlayer)
+        if (!currentPlayer.hand.isEmpty()) {
+            strategyFor(currentPlayer).selectPlayerToRequestCards()
+        } else {
+            println("${currentPlayer.name} does not have any cards and so cannot request cards from another player")
+        }/*
         if (!currentPlayer.hand.isEmpty()) {
             currentPlayer.hand.cards().randomOrNull()?.let { exemplar ->
                 println("${currentPlayer.name} asks ${otherPlayer.name} whether they have any cards of rank ${exemplar.rank.code}")
@@ -55,6 +65,20 @@ class CardGameGoFish(numberOfPlayers: Int = 7) : CardGameRunner(numberOfPlayers)
                     transferMatchingCardsToPlayerAsking(matchingCards, otherPlayer, currentPlayer)
                 }
             }
+        }*/
+    }
+
+    fun requestCardsOfMatchingRank(currentPlayer: CardPlayer, requestsFrom: CardPlayer, exemplar: PlayingCard) {
+        require(currentPlayer.hand.cards().contains(exemplar)) {"Cannot make a request for card of rank when not holding an example"}
+
+        println("${currentPlayer.name} asks ${requestsFrom.name} whether they have any cards of rank ${exemplar.rank.code}")
+        val matchingCards = cardsMatchingRank(requestsFrom.hand.cards(), exemplar.rank)
+        if (matchingCards.isEmpty()) {
+            println("${requestsFrom.name} says GO FISH!")
+            goFishForCardFromOcean(currentPlayer, exemplar)
+        } else {
+            println("${requestsFrom.name} hands ${matchingCards.size} cards to ${currentPlayer.name}")
+            transferMatchingCardsToPlayerAsking(matchingCards, requestsFrom, currentPlayer)
         }
     }
 
@@ -66,14 +90,14 @@ class CardGameGoFish(numberOfPlayers: Int = 7) : CardGameRunner(numberOfPlayers)
         matchingCards.forEach { otherPlayer.hand.transfer(it, currentPlayer.hand) }
     }
 
-    private fun pickUpFromOcean(
+    private fun goFishForCardFromOcean(
         currentPlayer: CardPlayer,
-        exemplar: PlayingCard
+        requestedCard: PlayingCard
     ) {
         ocean.firstOrNull()?.let { found ->
             ocean.transfer(found, currentPlayer.hand)
-            if (found.rank == exemplar.rank) {
-                println("Player ${currentPlayer.name} found matching card $found - they have another turn")
+            if (found.rank == requestedCard.rank) {
+                println("Player ${currentPlayer.name} found $found with matching rank ${requestedCard.rank} - they have another turn")
                 doesCurrentPlayerHaveAnotherTurn = true
             } else {
                 println("Player ${currentPlayer.name} picks up card from ocean")
@@ -83,9 +107,6 @@ class CardGameGoFish(numberOfPlayers: Int = 7) : CardGameRunner(numberOfPlayers)
 
     private fun cardsMatchingRank(cards: List<PlayingCard>, rank: PlayingCardRank) =
         cards.filter { it.rank == rank }
-
-    private fun selectAnotherPlayer(currentPlayer: CardPlayer) =
-        players.filter { it !== currentPlayer }.random()
 
     private fun collectAnyBooks() {
         players.forEach { player ->
@@ -101,8 +122,6 @@ class CardGameGoFish(numberOfPlayers: Int = 7) : CardGameRunner(numberOfPlayers)
         }
     }
 
-
-
     private fun isAnyCardsInHand() =
         players.any { !it.hand.isEmpty() }
 
@@ -114,4 +133,13 @@ class CardGameGoFish(numberOfPlayers: Int = 7) : CardGameRunner(numberOfPlayers)
 
     override fun playerScore(it: CardPlayer) =
         it.presentations.cardHolders.size
+}
+
+class GoFishBasicStrategy(player: CardPlayer, override val game: CardGameGoFish): CardGamePlayerStrategy(player, game) {
+    fun selectPlayerToRequestCards() {
+        val requestFrom = game.players.filter { it !== player }.random()
+        player.hand.cards().randomOrNull()?.let { exemplar ->
+            game.requestCardsOfMatchingRank(player, requestFrom, exemplar)
+        }
+    }
 }

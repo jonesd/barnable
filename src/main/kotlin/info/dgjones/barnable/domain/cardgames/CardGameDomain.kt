@@ -20,6 +20,8 @@ package info.dgjones.barnable.domain.cardgames
 import info.dgjones.barnable.concept.*
 import info.dgjones.barnable.domain.general.*
 import info.dgjones.barnable.domain.shippingforecast.Domain
+import info.dgjones.barnable.grammar.ModifierWord
+import info.dgjones.barnable.grammar.MultipleModifierWord
 import info.dgjones.barnable.narrative.buildInDepthUnderstandingLexicon
 import info.dgjones.barnable.parser.*
 import info.dgjones.barnable.util.SourceMaterial
@@ -35,9 +37,31 @@ class CardGameDomain : Domain {
         //FIXME buildGeneralDomainLexicon(lexicon)
         addToLexicon(lexicon)
     }
+
     override fun addToLexicon(lexicon: Lexicon) {
         CardObjects.values().forEach { lexicon.addMapping(PhysicalObjectWord(it)) }
         CardPlayer.values().forEach { lexicon.addMapping(PlayerHandler(it)) }
+        lexicon.addMapping(WordDealObject())
+        addDeckModifiers(lexicon)
+    }
+
+    private fun addDeckModifiers(lexicon: Lexicon) {
+        val deckMatcher = matchAll(
+            listOf(
+                matchConceptByKind(PhysicalObjectKind.GameObject.name),
+                matchConceptValueName(CoreFields.Name, "deck")
+            )
+        )
+        DeckModifiers.values().forEach {
+            lexicon.addMapping(
+                MultipleModifierWord(
+                    it.title,
+                    CardGameFields.DeckCategory,
+                    it.name,
+                    deckMatcher
+                )
+            )
+        }
     }
 }
 
@@ -68,12 +92,54 @@ enum class CardPlayer {
     val words = transformCamelCaseToLowerCaseList(name)
 }
 
+enum class DeckModifiers(val title: String) {
+    Standard("standard"),
+    FiftyTwoCard("52-card")
+}
+
+enum class CardGameFields(override val fieldName: String): Fields {
+    DeckCategory("deckCategory")
+}
+
 class PlayerHandler(private val cardPlayer: CardPlayer) : WordHandler(EntryWord(cardPlayer.words[0], cardPlayer.words)) {
+    override fun build(wordContext: WordContext): List<Demon> =
+        // FIXME how do we also mark this as a CardPlayer?
+        lexicalConcept(wordContext, HumanConcept.Human.name) {
+            slot(CoreFields.Name, cardPlayer.name)
+        }.demons
+}
+
+class DealHandler(private val cardPlayer: CardPlayer) : WordHandler(EntryWord(cardPlayer.words[0], cardPlayer.words)) {
     override fun build(wordContext: WordContext): List<Demon> =
         lexicalConcept(wordContext, CardGameConcept.Player.name) {
             slot(CoreFields.Name, cardPlayer.name)
         }.demons
 }
 
+class WordEach: WordHandler(EntryWord("each")) {
+    override fun build(wordContext: WordContext): List<Demon> =
+        lexicalConcept(wordContext, Acts.ATRANS.name) {
+            expectActor(variableName = "actor")
+            expectThing()
+            varReference(ActFields.From.fieldName, "actor")
+            expectHead(ActFields.To.fieldName, headValue = GeneralConcepts.Human.name)
+
+            slot(CoreFields.Kind, GeneralConcepts.Act.name)
+        }.demons
+}
+
+// Five cards are dealt by the dealer to each player
+// the cards are dealt to each player
+class WordDealObject: WordHandler(EntryWord("deal").past("dealt")) {
+    override fun build(wordContext: WordContext): List<Demon> =
+        lexicalConcept(wordContext, Acts.ATRANS.name) {
+            expectActor(variableName = "actor")
+            expectThing(direction = SearchDirection.Before)
+            varReference(ActFields.From.fieldName, "actor")
+            expectHead(ActFields.To.fieldName, headValue = GeneralConcepts.Human.name)
+
+            slot(CoreFields.Kind, GeneralConcepts.Act.name)
+        }.demons
+}
 
 
