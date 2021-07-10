@@ -30,14 +30,14 @@ test:
     reports:
       junit: build/test-results/test/**/TEST-*.xml
 
-generate-jar:
-  stage: package
-  script:
-    - ./gradlew jar
-  artifacts:
-    paths:
-      - build/libs/*.jar
-    expire_in: 1 day
+#generate-jar:
+#  stage: package
+#  script:
+#    - ./gradlew jar
+#  artifacts:
+#    paths:
+#      - build/libs/*.jar
+#    expire_in: 1 day
 
 after_script:
   - echo "End CI"
