@@ -1,22 +1,27 @@
+# You can override the included template(s) by including variable overrides
+# SAST customization: https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
+# Secret Detection customization: https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings
+# Note that environment variables can be set in several places
+# See https://docs.gitlab.com/ee/ci/variables/#cicd-variable-precedence
 image: openjdk:11-jdk
-
 stages:
-  - compile
-  - test
-
+- compile
+- test
 before_script:
-  - export GRADLE_USER_HOME=`pwd`/.gradle
-
+- export GRADLE_USER_HOME=`pwd`/.gradle
 compile:
   stage: compile
   script:
-    - ./gradlew build
-
+  - "./gradlew build"
 test:
   stage: test
   script:
-    - ./gradlew test
+  - "./gradlew test"
   artifacts:
     when: always
     reports:
       junit: build/test-results/test/**/TEST-*.xml
+sast:
+  stage: test
+include:
+- template: Security/SAST.gitlab-ci.yml
