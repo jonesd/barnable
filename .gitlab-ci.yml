@@ -2,6 +2,7 @@ image: openjdk:11-jdk
 
 stages:
   - compile
+  - test
 
 before_script:
   - export GRADLE_USER_HOME=`pwd`/.gradle
@@ -9,7 +10,13 @@ before_script:
 compile:
   stage: compile
   script:
-    - echo "Do we run anything?"
-    - ls -lR
+    - ./gradlew build
+
+test:
+  stage: test
+  script:
     - ./gradlew test
-  
+  artifacts:
+    when: always
+    reports:
+      junit: build/test-results/test/**/TEST-*.xml
