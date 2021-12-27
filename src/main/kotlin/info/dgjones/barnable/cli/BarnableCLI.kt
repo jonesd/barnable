@@ -21,19 +21,39 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.output.TermUi
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.arguments.default
+import info.dgjones.barnable.parser.buildTextModel
 import info.dgjones.barnable.parser.runTextProcess
+import info.dgjones.barnable.qa.QuestionProcessor
 
 class BarnableCLI : CliktCommand() {
-    val text: String? by argument(help="Input text to process").default("")
+    val text: String? by argument(help = "Input text to process").default("")
 
     override fun run() {
-        echo("Welcome to Barnable!")
+        showWelcomeMessage()
 
         processInput(textToProcess())
     }
 
+    private fun showWelcomeMessage() {
+        echo("Welcome to Barnable!")
+        echo("====================")
+        echo("")
+        echo("This is a primitive english text reader.")
+        echo("")
+    }
+
     fun processInput(input: String) {
-        runTextProcess(input)
+        val textProcessor = runTextProcess(input)
+        val qa = QuestionProcessor(textProcessor)
+        while (true) {
+            echo("\n\n\n")
+            echo("Question: $input")
+            echo("Ask a who question:")
+            val result = qa.question(buildTextModel(textToProcess()))
+            echo("\n\n")
+            echo("Question: $input")
+            echo("Answer: ${result.answer}")
+        }
     }
 
     private fun textToProcess(): String {

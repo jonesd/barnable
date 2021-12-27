@@ -18,6 +18,7 @@
 plugins {
     kotlin("jvm") version "1.4.31"
 //    id("org.jetbrains.dokka") version "1.4.21"
+    application
 }
 
 group = "info.dgjones.barnable"
@@ -48,4 +49,6 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
-
+application {
+    mainClassName = "info.dgjones.barnable.cli.BarnableCLI"
+}
