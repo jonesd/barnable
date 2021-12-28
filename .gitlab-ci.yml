@@ -9,27 +9,30 @@ stages:
 - test
 before_script:
 - export GRADLE_USER_HOME=`pwd`/.gradle
+include:
+  - template: Security/Secret-Detection.gitlab-ci.yml
+  - template: Security/SAST.gitlab-ci.yml
+
 compile:
   stage: compile
   needs: []
   script:
   - "./gradlew build"
+
 test:
   stage: test
-  needs: []
+  needs: ["compile"]
   script:
   - "./gradlew test"
   artifacts:
     when: always
     reports:
       junit: build/test-results/test/**/TEST-*.xml
-# sast:
-  # stage: test
-# include:
-# - template: Security/SAST.gitlab-ci.yml
-include:
-- template: Security/Secret-Detection.gitlab-ci.yml
-- template: Security/SAST.gitlab-ci.yml
-sast:
+
+spotbugs-sast:
   stage: test
-  needs: []
+  needs: ["compile"]
+
+secret_detection:
+  stage: test
+  needs: [ "compile" ]
